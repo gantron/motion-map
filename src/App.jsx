@@ -416,6 +416,16 @@ function App() {
                       : 'bg-slate-700 border-slate-600 opacity-30'
                   } transition-all`}
                 >
+                  {/* Artwork background image */}
+                  {hasContent && currentData[code].posterUrl && (
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{
+                        backgroundImage: `url(${currentData[code].posterUrl})`,
+                      }}
+                    />
+                  )}
+                  {/* Gradient overlay when no artwork or for contrast */}
                   {hasContent && !isHovered && (
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-600/40" />
                   )}
