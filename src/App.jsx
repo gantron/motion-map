@@ -11,6 +11,7 @@ function App() {
   const [viewMode, setViewMode] = useState('map');
   const [zoomLevel, setZoomLevel] = useState('world');
   const [selectedRegion, setSelectedRegion] = useState(null);
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const videoRefs = useRef({});
 
   const demoData = {
@@ -195,6 +196,16 @@ function App() {
     }
   }, [hoveredState]);
 
+  // Handle window resize for responsive grid
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleItemClick = (code) => {
     if (zoomLevel === 'world' && currentData[code]) {
       if (demoData.countries[code]) {
@@ -230,14 +241,32 @@ function App() {
   };
 
   const getGridDimensions = () => {
-    if (Object.keys(currentGrid).length === 0) {
-      return { width: 800, height: 600, cellSize: 120, gap: 8 };
+    // Responsive cell sizes based on screen width
+    const screenWidth = window.innerWidth;
+    let cellSize, gap;
+    
+    if (screenWidth < 640) {
+      // Mobile: smaller boxes
+      cellSize = 50;
+      gap = 4;
+    } else if (screenWidth < 1024) {
+      // Tablet: medium boxes
+      cellSize = 80;
+      gap = 6;
+    } else {
+      // Desktop: larger boxes
+      cellSize = 100;
+      gap = 8;
     }
+    
+    if (Object.keys(currentGrid).length === 0) {
+      return { width: 800, height: 600, cellSize, gap };
+    }
+    
     const positions = Object.values(currentGrid);
     const maxRow = Math.max(...positions.map(p => p[0]));
     const maxCol = Math.max(...positions.map(p => p[1]));
-    const cellSize = 120; // Increased from 60 to 120 for better visibility
-    const gap = 8; // Increased gap for better spacing
+    
     return {
       width: (maxCol + 1) * (cellSize + gap),
       height: (maxRow + 1) * (cellSize + gap),
@@ -376,9 +405,13 @@ function App() {
                   )}
                   <div className="absolute inset-0 flex items-center justify-center p-2">
                     <span
-                      className={`font-bold text-white drop-shadow-lg text-center ${
-                        isHovered ? 'text-xl' : 'text-lg'
-                      } transition-all`}
+                      className={`font-bold text-white drop-shadow-lg text-center transition-all ${
+                        cellSize < 60 
+                          ? (isHovered ? 'text-xs' : 'text-[10px]')
+                          : cellSize < 90
+                          ? (isHovered ? 'text-base' : 'text-sm')
+                          : (isHovered ? 'text-xl' : 'text-lg')
+                      }`}
                     >
                       {code}
                     </span>
