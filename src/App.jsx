@@ -3,6 +3,7 @@ import {
   X, Calendar, Globe, Instagram, ChevronLeft, ChevronRight,
   Map, Grid, Home
 } from './Icons';
+import { loadData, getAvailableMonths } from './dataLoader';
 
 function App() {
   const [hoveredState, setHoveredState] = useState(null);
@@ -12,8 +13,11 @@ function App() {
   const [zoomLevel, setZoomLevel] = useState('world');
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [sheetData, setSheetData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const videoRefs = useRef({});
 
+  // Fallback demo data (used if Google Sheets not configured)
   const demoData = {
     world: {
       '2026-01': {
@@ -115,6 +119,16 @@ function App() {
     }
   };
 
+  // Load data from Google Sheets on mount
+  useEffect(() => {
+    loadData().then(data => {
+      // Check if we got real data or empty data
+      const hasData = Object.keys(data.world).length > 0 || Object.keys(data.countries).length > 0;
+      setSheetData(hasData ? data : demoData);
+      setIsLoading(false);
+    });
+  }, []);
+
   const worldGrid = {
     'Canada': [0, 3],
     'Russia': [0, 7],
@@ -166,12 +180,15 @@ function App() {
     return grid;
   };
 
-  const monthsArchive = [{ month: 'January', year: 2026 }];
+  // Use loaded data or show loading state
+  const activeData = sheetData || demoData;
+  const monthsArchive = sheetData ? getAvailableMonths(sheetData) : [{ month: 'January', year: 2026, key: '2026-01' }];
   const currentMonth = monthsArchive[currentMonthIndex];
+  const currentMonthKey = currentMonth?.key || '2026-01';
   
   const currentData = zoomLevel === 'world'
-    ? (demoData.world['2026-01'] || {})
-    : (demoData.countries[selectedRegion]?.['2026-01'] || {});
+    ? (activeData.world[currentMonthKey] || {})
+    : (activeData.countries[selectedRegion]?.[currentMonthKey] || {});
 
   const getCurrentGrid = () => {
     if (zoomLevel === 'world') {
@@ -208,7 +225,7 @@ function App() {
 
   const handleItemClick = (code) => {
     if (zoomLevel === 'world' && currentData[code]) {
-      if (demoData.countries[code]) {
+      if (activeData.countries[code]) {
         setSelectedRegion(code);
         setZoomLevel('country');
         setCurrentMonthIndex(0);
@@ -276,6 +293,19 @@ function App() {
   };
 
   const { width: gridWidth, height: gridHeight, cellSize, gap } = getGridDimensions();
+
+  // Show loading indicator while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">🎬</div>
+          <div className="text-white text-xl font-bold mb-2">Motion-Map</div>
+          <div className="text-slate-400">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col overflow-hidden">
@@ -362,7 +392,12 @@ function App() {
                   zIndex: isHovered ? 10 : 1,
                   cursor: hasContent ? 'pointer' : 'default'
                 }}
-                onMouseEnter={() => hasContent && setHoveredState(code)}
+                onMouseEnter={() => {
+                  // Only show hover on non-touch devices
+                  if (hasContent && !('ontouchstart' in window)) {
+                    setHoveredState(code);
+                  }
+                }}
                 onMouseLeave={() => setHoveredState(null)}
                 onClick={() => handleItemClick(code)}
               >
@@ -381,25 +416,6 @@ function App() {
                       : 'bg-slate-700 border-slate-600 opacity-30'
                   } transition-all`}
                 >
-                  {hasContent && !currentData[code].videoUrl && (
-                    <div className={`absolute inset-0 ${isHovered ? 'opacity-100' : 'opacity-0'} transition-opacity`}>
-                      <div
-                        className="absolute inset-0 bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500"
-                        style={{
-                          animation: isHovered ? 'gradientShift 3s ease infinite' : 'none',
-                          backgroundSize: '200% 200%'
-                        }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div
-                          className="text-white"
-                          style={{ animation: isHovered ? 'pulse 2s ease-in-out infinite' : 'none' }}
-                        >
-                          <div className="text-2xl">▶</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   {hasContent && !isHovered && (
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-600/40" />
                   )}
@@ -440,7 +456,7 @@ function App() {
             >
               <div className="p-4">
                 <div className="text-xs text-slate-400 mb-1 uppercase">
-                  {zoomLevel === 'world' && demoData.countries[hoveredState] ? 'Click to Explore' : 'Now Playing'}
+                  {zoomLevel === 'world' && activeData.countries[hoveredState] ? 'Click to Explore' : 'Now Playing'}
                 </div>
                 <div className="text-lg font-bold text-white mb-1">{currentData[hoveredState].name}</div>
                 <div className="text-sm text-slate-300 mb-3">
@@ -453,7 +469,7 @@ function App() {
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-slate-400 text-center">
-                  {zoomLevel === 'world' && demoData.countries[hoveredState] ? 'Click to explore' : 'Click for details'}
+                  {zoomLevel === 'world' && activeData.countries[hoveredState] ? 'Click to explore' : 'Click for details'}
                 </div>
               </div>
             </div>
