@@ -231,13 +231,13 @@ function App() {
 
   const getGridDimensions = () => {
     if (Object.keys(currentGrid).length === 0) {
-      return { width: 800, height: 600, cellSize: 60, gap: 4 };
+      return { width: 800, height: 600, cellSize: 120, gap: 8 };
     }
     const positions = Object.values(currentGrid);
     const maxRow = Math.max(...positions.map(p => p[0]));
     const maxCol = Math.max(...positions.map(p => p[1]));
-    const cellSize = 60;
-    const gap = 4;
+    const cellSize = 120; // Increased from 60 to 120 for better visibility
+    const gap = 8; // Increased gap for better spacing
     return {
       width: (maxCol + 1) * (cellSize + gap),
       height: (maxRow + 1) * (cellSize + gap),
@@ -329,7 +329,7 @@ function App() {
                   top: `${y}px`,
                   width: `${cellSize}px`,
                   height: `${cellSize}px`,
-                  transform: isHovered ? 'translateY(-8px) scale(1.05)' : 'translateY(0)',
+                  transform: isHovered ? 'translateY(-12px) scale(1.15)' : 'translateY(0)',
                   zIndex: isHovered ? 10 : 1,
                   cursor: hasContent ? 'pointer' : 'default'
                 }}
@@ -374,10 +374,10 @@ function App() {
                   {hasContent && !isHovered && (
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-600/40" />
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center p-1">
+                  <div className="absolute inset-0 flex items-center justify-center p-2">
                     <span
                       className={`font-bold text-white drop-shadow-lg text-center ${
-                        isHovered ? 'text-sm' : 'text-xs'
+                        isHovered ? 'text-xl' : 'text-lg'
                       } transition-all`}
                     >
                       {code}
