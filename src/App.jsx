@@ -371,8 +371,8 @@ function App() {
       </div>
 
       {/* Main Grid */}
-      <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
-        <div className="relative" style={{ width: gridWidth, height: gridHeight }}>
+      <div className="flex-1 flex items-start justify-start p-8 overflow-auto">
+        <div className="relative mx-auto" style={{ width: gridWidth, height: gridHeight }}>
           {Object.entries(currentGrid).map(([code, [row, col]]) => {
             const isHovered = hoveredState === code;
             const hasContent = !!currentData[code];
