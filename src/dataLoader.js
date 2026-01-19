@@ -2,8 +2,8 @@
 // This file handles loading data from Google Sheets
 
 const SHEET_URLS = {
-  world: https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1980238028&single=true&output=csv',
-  USA: https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=264097165&single=true&output=csv',
+  world: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1980238028&single=true&output=csv',
+  USA:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=264097165&single=true&output=csv',
 };
 
 // Parse CSV text into array of objects
