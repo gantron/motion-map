@@ -3,7 +3,7 @@
 
 const SHEET_URLS = {
   world: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1980238028&single=true&output=csv',
-  USA:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=264097165&single=true&output=csv',
+  USA: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=264097165&single=true&output=csv',
 };
 
 // Parse CSV text into array of objects
@@ -83,7 +83,7 @@ export async function loadData() {
     };
     
     // Load world data
-    if (SHEET_URLS.world && SHEET_URLS.world !== https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pubhtml) {
+    if (SHEET_URLS.world) {
       const response = await fetch(SHEET_URLS.world);
       const text = await response.text();
       const rows = parseCSV(text);
@@ -92,7 +92,7 @@ export async function loadData() {
     
     // Load country-specific data (USA, etc.)
     for (const [country, url] of Object.entries(SHEET_URLS)) {
-      if (country !== 'world' && url && !url.includes('YOUR_')) {
+      if (country !== 'world' && url) {
         const response = await fetch(url);
         const text = await response.text();
         const rows = parseCSV(text);
