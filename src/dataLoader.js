@@ -2,11 +2,11 @@
 // This file handles loading data from Google Sheets
 
 const SHEET_URLS = {
-  world: 'YOUR_WORLD_SHEET_URL_HERE', // Replace with your published CSV URL
-  USA: 'YOUR_USA_SHEET_URL_HERE',     // Replace with your USA sheet CSV URL (optional)
+  world: https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pubhtml, // Replace with your published CSV URL
+  USA: https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pubhtml,     // Replace with your USA sheet CSV URL (optional)
   // Add more countries as needed:
-  // Japan: 'YOUR_JAPAN_SHEET_URL_HERE',
-  // UK: 'YOUR_UK_SHEET_URL_HERE',
+  // Japan: https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pubhtml,
+  // UK: https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pubhtml,
 };
 
 // Parse CSV text into array of objects
@@ -86,7 +86,7 @@ export async function loadData() {
     };
     
     // Load world data
-    if (SHEET_URLS.world && SHEET_URLS.world !== 'YOUR_WORLD_SHEET_URL_HERE') {
+    if (SHEET_URLS.world && SHEET_URLS.world !== https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pubhtml) {
       const response = await fetch(SHEET_URLS.world);
       const text = await response.text();
       const rows = parseCSV(text);
