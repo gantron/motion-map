@@ -445,7 +445,7 @@ function App() {
                   {/* Small label in bottom-right on hover */}
                   {isHovered && (
                     <div className="absolute bottom-2 right-2">
-                      <span className="text-xs font-bold text-white drop-shadow-lg bg-black/30 px-2 py-1 rounded">
+                      <span className="text-xs font-bold text-white drop-shadow-lg">
                         {code}
                       </span>
                     </div>
@@ -466,8 +466,8 @@ function App() {
               className="fixed bg-slate-800 border border-slate-600 rounded-xl shadow-2xl overflow-hidden z-50"
               style={{
                 left: '50%',
-                bottom: '80px',
-                transform: 'translateX(-50%)',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
                 width: '400px',
                 maxWidth: '90vw'
               }}
@@ -480,12 +480,33 @@ function App() {
                 <div className="text-sm text-slate-300 mb-3">
                   {zoomLevel === 'world' ? hoveredState : (stateNames[hoveredState] || hoveredState)}
                 </div>
-                <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="text-2xl mb-2">🎬</div>
-                    <div className="text-xs opacity-70">Video preview</div>
+                
+                {/* Video or Poster */}
+                {currentData[hoveredState].videoUrl ? (
+                  <video 
+                    className="w-full aspect-video rounded-lg"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    poster={currentData[hoveredState].posterUrl || ''}
+                  >
+                    <source src={currentData[hoveredState].videoUrl} type="video/mp4" />
+                  </video>
+                ) : currentData[hoveredState].posterUrl ? (
+                  <img 
+                    src={currentData[hoveredState].posterUrl} 
+                    alt={currentData[hoveredState].name}
+                    className="w-full aspect-video rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <div className="text-2xl mb-2">🎬</div>
+                      <div className="text-xs opacity-70">No preview</div>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="mt-3 text-xs text-slate-400 text-center">
                   {zoomLevel === 'world' && activeData.countries[hoveredState] ? 'Click to explore' : 'Click for details'}
                 </div>
@@ -534,12 +555,30 @@ function App() {
               <h2 className="text-3xl font-bold text-white">{selectedArtist.name}</h2>
             </div>
             <div className="p-6">
-              <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl mb-6 flex items-center justify-center">
-                <div className="text-white text-center">
-                  <div className="text-4xl mb-3">🎨</div>
-                  <div className="text-lg font-medium">Motion Design</div>
+              {/* Video or Poster in Modal */}
+              {selectedArtist.videoUrl ? (
+                <video 
+                  className="w-full aspect-video rounded-xl mb-6"
+                  controls
+                  poster={selectedArtist.posterUrl || ''}
+                >
+                  <source src={selectedArtist.videoUrl} type="video/mp4" />
+                </video>
+              ) : selectedArtist.posterUrl ? (
+                <img 
+                  src={selectedArtist.posterUrl} 
+                  alt={selectedArtist.name}
+                  className="w-full aspect-video rounded-xl mb-6 object-cover"
+                />
+              ) : (
+                <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl mb-6 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <div className="text-4xl mb-3">🎨</div>
+                    <div className="text-lg font-medium">Motion Design</div>
+                  </div>
                 </div>
-              </div>
+              )}
+              
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-400 uppercase mb-2">About</h3>
