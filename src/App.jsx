@@ -429,11 +429,9 @@ function App() {
                   {hasContent && !isHovered && (
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-600/40" />
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center p-2">
+                  <div className={`absolute inset-0 flex items-center justify-center p-2 transition-all ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
                     <span
-                      className={`font-bold text-white drop-shadow-lg text-center transition-all ${
-                        isHovered ? 'opacity-0' : 'opacity-100'
-                      } ${
+                      className={`font-bold text-white drop-shadow-lg text-center ${
                         cellSize < 60 
                           ? 'text-[10px]'
                           : cellSize < 90
@@ -444,6 +442,14 @@ function App() {
                       {code}
                     </span>
                   </div>
+                  {/* Small label in bottom-right on hover */}
+                  {isHovered && (
+                    <div className="absolute bottom-2 right-2">
+                      <span className="text-xs font-bold text-white drop-shadow-lg bg-black/30 px-2 py-1 rounded">
+                        {code}
+                      </span>
+                    </div>
+                  )}
                   {isHovered && hasContent && (
                     <div className="absolute top-1 right-1">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
