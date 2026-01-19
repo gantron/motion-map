@@ -17,6 +17,41 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const videoRefs = useRef({});
 
+  // Helper function to get embed URL for video platforms
+  const getVideoEmbedInfo = (url) => {
+    if (!url) return null;
+
+    // YouTube
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const youtubeMatch = url.match(youtubeRegex);
+    if (youtubeMatch) {
+      return {
+        type: 'youtube',
+        embedUrl: `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${youtubeMatch[1]}`
+      };
+    }
+
+    // Vimeo
+    const vimeoRegex = /(?:vimeo\.com\/)(?:.*\/)?(\d+)/;
+    const vimeoMatch = url.match(vimeoRegex);
+    if (vimeoMatch) {
+      return {
+        type: 'vimeo',
+        embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&muted=1&loop=1&background=1`
+      };
+    }
+
+    // Direct video file (mp4, webm, etc.)
+    if (url.match(/\.(mp4|webm|ogg)$/i)) {
+      return {
+        type: 'direct',
+        embedUrl: url
+      };
+    }
+
+    return null;
+  };
+
   // Fallback demo data (used if Google Sheets not configured)
   const demoData = {
     world: {
@@ -482,31 +517,55 @@ function App() {
                 </div>
                 
                 {/* Video or Poster */}
-                {currentData[hoveredState].videoUrl ? (
-                  <video 
-                    className="w-full aspect-video rounded-lg"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    poster={currentData[hoveredState].posterUrl || ''}
-                  >
-                    <source src={currentData[hoveredState].videoUrl} type="video/mp4" />
-                  </video>
-                ) : currentData[hoveredState].posterUrl ? (
-                  <img 
-                    src={currentData[hoveredState].posterUrl} 
-                    alt={currentData[hoveredState].name}
-                    className="w-full aspect-video rounded-lg object-cover"
-                  />
-                ) : (
-                  <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <div className="text-white text-center">
-                      <div className="text-2xl mb-2">🎬</div>
-                      <div className="text-xs opacity-70">No preview</div>
+                {(() => {
+                  const videoInfo = getVideoEmbedInfo(currentData[hoveredState].videoUrl);
+                  
+                  if (videoInfo) {
+                    if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
+                      return (
+                        <iframe
+                          className="w-full aspect-video rounded-lg"
+                          src={videoInfo.embedUrl}
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen
+                        />
+                      );
+                    } else if (videoInfo.type === 'direct') {
+                      return (
+                        <video 
+                          className="w-full aspect-video rounded-lg"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          poster={currentData[hoveredState].posterUrl || ''}
+                        >
+                          <source src={videoInfo.embedUrl} type="video/mp4" />
+                        </video>
+                      );
+                    }
+                  }
+                  
+                  // Fallback to poster or gradient
+                  if (currentData[hoveredState].posterUrl) {
+                    return (
+                      <img 
+                        src={currentData[hoveredState].posterUrl} 
+                        alt={currentData[hoveredState].name}
+                        className="w-full aspect-video rounded-lg object-cover"
+                      />
+                    );
+                  }
+                  
+                  return (
+                    <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <div className="text-2xl mb-2">🎬</div>
+                        <div className="text-xs opacity-70">No preview</div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 <div className="mt-3 text-xs text-slate-400 text-center">
                   {zoomLevel === 'world' && activeData.countries[hoveredState] ? 'Click to explore' : 'Click for details'}
                 </div>
@@ -556,28 +615,65 @@ function App() {
             </div>
             <div className="p-6">
               {/* Video or Poster in Modal */}
-              {selectedArtist.videoUrl ? (
-                <video 
-                  className="w-full aspect-video rounded-xl mb-6"
-                  controls
-                  poster={selectedArtist.posterUrl || ''}
-                >
-                  <source src={selectedArtist.videoUrl} type="video/mp4" />
-                </video>
-              ) : selectedArtist.posterUrl ? (
-                <img 
-                  src={selectedArtist.posterUrl} 
-                  alt={selectedArtist.name}
-                  className="w-full aspect-video rounded-xl mb-6 object-cover"
-                />
-              ) : (
-                <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl mb-6 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="text-4xl mb-3">🎨</div>
-                    <div className="text-lg font-medium">Motion Design</div>
+              {(() => {
+                const videoInfo = getVideoEmbedInfo(selectedArtist.videoUrl);
+                
+                if (videoInfo) {
+                  if (videoInfo.type === 'youtube') {
+                    // YouTube with controls (no autoplay in modal)
+                    const youtubeId = selectedArtist.videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)[1];
+                    return (
+                      <iframe
+                        className="w-full aspect-video rounded-xl mb-6"
+                        src={`https://www.youtube.com/embed/${youtubeId}`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    );
+                  } else if (videoInfo.type === 'vimeo') {
+                    // Vimeo with controls (no autoplay in modal)
+                    const vimeoId = selectedArtist.videoUrl.match(/(?:vimeo\.com\/)(?:.*\/)?(\d+)/)[1];
+                    return (
+                      <iframe
+                        className="w-full aspect-video rounded-xl mb-6"
+                        src={`https://player.vimeo.com/video/${vimeoId}`}
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                      />
+                    );
+                  } else if (videoInfo.type === 'direct') {
+                    return (
+                      <video 
+                        className="w-full aspect-video rounded-xl mb-6"
+                        controls
+                        poster={selectedArtist.posterUrl || ''}
+                      >
+                        <source src={videoInfo.embedUrl} type="video/mp4" />
+                      </video>
+                    );
+                  }
+                }
+                
+                // Fallback to poster or gradient
+                if (selectedArtist.posterUrl) {
+                  return (
+                    <img 
+                      src={selectedArtist.posterUrl} 
+                      alt={selectedArtist.name}
+                      className="w-full aspect-video rounded-xl mb-6 object-cover"
+                    />
+                  );
+                }
+                
+                return (
+                  <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl mb-6 flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <div className="text-4xl mb-3">🎨</div>
+                      <div className="text-lg font-medium">Motion Design</div>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
               
               <div className="space-y-4">
                 <div>
