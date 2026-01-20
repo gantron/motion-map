@@ -3,7 +3,23 @@
 
 const SHEET_URLS = {
   world: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1980238028&single=true&output=csv',
-  USA: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=264097165&single=true&output=csv',
+  
+  // Country-level sheets (states/regions within country)
+  countries: {
+    USA: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=264097165&single=true&output=csv',
+    // Add more countries as needed:
+    // Japan: 'YOUR_JAPAN_SHEET_URL',
+    // UK: 'YOUR_UK_SHEET_URL',
+  },
+  
+  // State-level sheets (cities within state/region)
+  states: {
+    'USA-NC': 'YOUR_NC_SHEET_URL', // Format: cities in North Carolina
+    'USA-CA': 'YOUR_CA_SHEET_URL', // Format: cities in California
+    // Add more states as needed:
+    // 'USA-NY': 'YOUR_NY_SHEET_URL',
+    // 'Japan-Tokyo': 'YOUR_TOKYO_SHEET_URL',
+  }
 };
 
 // Parse CSV text into array of objects
@@ -22,12 +38,22 @@ function parseCSV(text) {
 }
 
 // Convert sheet data to the app's data structure
-function transformSheetData(rows, isWorldView = true) {
+// level: 'world', 'country', or 'state'
+function transformSheetData(rows, level = 'world') {
   const dataByMonth = {};
   
   rows.forEach(row => {
     const month = row.Month; // Format: 2026-01
-    const code = isWorldView ? row.Country : row.State;
+    let code;
+    
+    // Determine the code based on level
+    if (level === 'world') {
+      code = row.Country;
+    } else if (level === 'country') {
+      code = row.State || row.Region || row.Prefecture;
+    } else if (level === 'state') {
+      code = row.City;
+    }
     
     if (!month || !code) return;
     
@@ -37,9 +63,10 @@ function transformSheetData(rows, isWorldView = true) {
     
     dataByMonth[month][code] = {
       name: row.Name,
-      country: isWorldView ? row.Country : 'USA',
-      state: isWorldView ? undefined : row.State,
-      region: isWorldView ? getRegion(row.Country) : undefined,
+      country: row.Country || undefined,
+      state: row.State || row.Region || row.Prefecture || undefined,
+      city: row.City || undefined,
+      region: level === 'world' ? getRegion(row.Country) : undefined,
       bio: row.Bio,
       website: row.Website,
       instagram: row.Instagram,
@@ -79,7 +106,8 @@ export async function loadData() {
   try {
     const data = {
       world: {},
-      countries: {}
+      countries: {},
+      states: {}
     };
     
     // Load world data
@@ -87,16 +115,30 @@ export async function loadData() {
       const response = await fetch(SHEET_URLS.world);
       const text = await response.text();
       const rows = parseCSV(text);
-      data.world = transformSheetData(rows, true);
+      data.world = transformSheetData(rows, 'world');
     }
     
-    // Load country-specific data (USA, etc.)
-    for (const [country, url] of Object.entries(SHEET_URLS)) {
-      if (country !== 'world' && url) {
-        const response = await fetch(url);
-        const text = await response.text();
-        const rows = parseCSV(text);
-        data.countries[country] = transformSheetData(rows, false);
+    // Load country-specific data (USA → states, Japan → regions, etc.)
+    if (SHEET_URLS.countries) {
+      for (const [country, url] of Object.entries(SHEET_URLS.countries)) {
+        if (url) {
+          const response = await fetch(url);
+          const text = await response.text();
+          const rows = parseCSV(text);
+          data.countries[country] = transformSheetData(rows, 'country');
+        }
+      }
+    }
+    
+    // Load state-specific data (NC → cities, CA → cities, etc.)
+    if (SHEET_URLS.states) {
+      for (const [stateKey, url] of Object.entries(SHEET_URLS.states)) {
+        if (url && !url.includes('YOUR_')) {
+          const response = await fetch(url);
+          const text = await response.text();
+          const rows = parseCSV(text);
+          data.states[stateKey] = transformSheetData(rows, 'state');
+        }
       }
     }
     
