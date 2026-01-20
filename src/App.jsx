@@ -167,41 +167,41 @@ function App() {
   // World grid with multiple boxes per country (roughly geographical)
   const worldGridBase = {
     // North America
-    'Canada': { start: [0, 2], boxes: 3 },
-    'USA': { start: [1, 2], boxes: 4 },
-    'Mexico': { start: [2, 3], boxes: 2 },
+    'Canada': { start: [0, 1], boxes: 3 },
+    'USA': { start: [1, 1], boxes: 4 },
+    'Mexico': { start: [3, 2], boxes: 2 },
     
     // South America
-    'Brazil': { start: [4, 3], boxes: 3 },
-    'Argentina': { start: [5, 3], boxes: 2 },
+    'Brazil': { start: [5, 2], boxes: 3 },
+    'Argentina': { start: [7, 2], boxes: 2 },
     
     // Europe
-    'UK': { start: [1, 6], boxes: 2 },
-    'France': { start: [2, 6], boxes: 2 },
-    'Germany': { start: [1, 7], boxes: 2 },
-    'Spain': { start: [2, 7], boxes: 2 },
-    'Italy': { start: [2, 8], boxes: 2 },
+    'UK': { start: [1, 7], boxes: 2 },
+    'France': { start: [2, 7], boxes: 2 },
+    'Germany': { start: [1, 9], boxes: 2 },
+    'Spain': { start: [3, 7], boxes: 2 },
+    'Italy': { start: [3, 9], boxes: 2 },
     
     // Africa
-    'Nigeria': { start: [3, 6], boxes: 2 },
-    'South Africa': { start: [5, 7], boxes: 2 },
-    'Egypt': { start: [2, 8], boxes: 2 },
+    'Nigeria': { start: [4, 8], boxes: 2 },
+    'Egypt': { start: [3, 10], boxes: 2 },
+    'South Africa': { start: [7, 8], boxes: 2 },
     
     // Middle East
-    'UAE': { start: [3, 8], boxes: 2 },
+    'UAE': { start: [4, 11], boxes: 2 },
     
     // Asia
-    'Russia': { start: [0, 8], boxes: 4 },
-    'China': { start: [1, 10], boxes: 3 },
-    'Japan': { start: [1, 12], boxes: 3 },
-    'Korea': { start: [1, 13], boxes: 2 },
-    'India': { start: [3, 10], boxes: 3 },
-    'Thailand': { start: [4, 11], boxes: 2 },
-    'Singapore': { start: [4, 12], boxes: 1 },
+    'Russia': { start: [0, 11], boxes: 4 },
+    'China': { start: [2, 13], boxes: 3 },
+    'Japan': { start: [1, 16], boxes: 3 },
+    'Korea': { start: [2, 16], boxes: 2 },
+    'India': { start: [4, 13], boxes: 3 },
+    'Thailand': { start: [5, 15], boxes: 2 },
+    'Singapore': { start: [6, 15], boxes: 1 },
     
     // Oceania
-    'Australia': { start: [5, 12], boxes: 3 },
-    'New Zealand': { start: [6, 13], boxes: 1 }
+    'Australia': { start: [7, 16], boxes: 3 },
+    'New Zealand': { start: [8, 17], boxes: 1 }
   };
 
   // Generate actual world grid positions
@@ -267,6 +267,20 @@ function App() {
     : (activeData.countries[selectedRegion]?.[currentMonthKey] || {});
 
   const getCurrentGrid = () => {
+    if (viewMode === 'archive') {
+      // Archive mode: show all artists from all months
+      const allArtists = [];
+      const allData = zoomLevel === 'world' ? activeData.world : (activeData.countries[selectedRegion] || {});
+      
+      Object.entries(allData).forEach(([month, artists]) => {
+        Object.keys(artists).forEach(code => {
+          allArtists.push(`${code}-${month}`);
+        });
+      });
+      
+      return generateGridLayout(allArtists);
+    }
+    
     if (zoomLevel === 'world') {
       return viewMode === 'grid' ? generateGridLayout(Object.keys(worldGrid)) : worldGrid;
     } else if (selectedRegion === 'USA') {
@@ -279,19 +293,34 @@ function App() {
 
   // Map grid boxes to data (handles multi-box countries like USA-1, USA-2, etc.)
   const currentData = {};
-  Object.keys(currentGrid).forEach(gridKey => {
-    // Extract country name from gridKey (e.g., "USA-1" -> "USA")
-    const countryMatch = gridKey.match(/^(.+?)-\d+$/);
-    const country = countryMatch ? countryMatch[1] : gridKey;
+  
+  if (viewMode === 'archive') {
+    // In archive mode, map month-specific data
+    const allData = zoomLevel === 'world' ? activeData.world : (activeData.countries[selectedRegion] || {});
     
-    // If we have data for this country, assign it to the grid box
-    if (rawData[country]) {
-      // For multi-box countries, we might have multiple entries
-      // For now, just use the same data for all boxes
-      // TODO: Later we can support ranked entries (USA-1 = rank 1 artist, etc.)
-      currentData[gridKey] = rawData[country];
-    }
-  });
+    Object.keys(currentGrid).forEach(gridKey => {
+      // gridKey format: "USA-2026-01"
+      const match = gridKey.match(/^(.+?)-(\d{4}-\d{2})$/);
+      if (match) {
+        const [, code, month] = match;
+        if (allData[month] && allData[month][code]) {
+          currentData[gridKey] = { ...allData[month][code], month };
+        }
+      }
+    });
+  } else {
+    // Normal mode
+    Object.keys(currentGrid).forEach(gridKey => {
+      // Extract country name from gridKey (e.g., "USA-1" -> "USA")
+      const countryMatch = gridKey.match(/^(.+?)-\d+$/);
+      const country = countryMatch ? countryMatch[1] : gridKey;
+      
+      // If we have data for this country, assign it to the grid box
+      if (rawData[country]) {
+        currentData[gridKey] = rawData[country];
+      }
+    });
+  }
 
   useEffect(() => {
     Object.values(videoRefs.current).forEach(v => {
@@ -458,6 +487,7 @@ function App() {
                 className={`p-2 rounded transition-colors ${
                   viewMode === 'map' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
+                title="Map View"
               >
                 <Map />
               </button>
@@ -466,8 +496,23 @@ function App() {
                 className={`p-2 rounded transition-colors ${
                   viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
+                title="Grid View"
               >
                 <Grid />
+              </button>
+              <button
+                onClick={() => setViewMode('archive')}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === 'archive' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Archive - All Artists"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                </svg>
               </button>
             </div>
             <button
@@ -551,24 +596,28 @@ function App() {
                   {hasContent && !isHovered && (
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-600/40" />
                   )}
-                  <div className={`absolute inset-0 flex items-center justify-center p-2 transition-all ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
-                    <span
-                      className={`font-bold text-white drop-shadow-lg text-center ${
-                        cellSize < 60 
-                          ? 'text-[10px]'
-                          : cellSize < 90
-                          ? 'text-sm'
-                          : 'text-lg'
-                      }`}
-                    >
-                      {code}
-                    </span>
-                  </div>
+                  {/* Center label - only show on non-world views or when not hovered */}
+                  {zoomLevel !== 'world' && (
+                    <div className={`absolute inset-0 flex items-center justify-center p-2 transition-all ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
+                      <span
+                        className={`font-bold text-white drop-shadow-lg text-center ${
+                          cellSize < 60 
+                            ? 'text-[10px]'
+                            : cellSize < 90
+                            ? 'text-sm'
+                            : 'text-lg'
+                        }`}
+                      >
+                        {code}
+                      </span>
+                    </div>
+                  )}
                   {/* Small label in bottom-right on hover */}
                   {isHovered && (
                     <div className="absolute bottom-2 right-2">
                       <span className="text-xs font-bold text-white drop-shadow-lg">
-                        {code}
+                        {/* Strip rank number from display (e.g., "USA-1" -> "USA") */}
+                        {code.replace(/-\d+$/, '')}
                       </span>
                     </div>
                   )}
