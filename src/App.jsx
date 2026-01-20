@@ -164,23 +164,64 @@ function App() {
     });
   }, []);
 
-  const worldGrid = {
-    'Canada': [0, 3],
-    'Russia': [0, 7],
-    'USA': [1, 3],
-    'Europe': [1, 6],
-    'China': [1, 8],
-    'Japan': [1, 9],
-    'Korea': [1, 10],
-    'Mexico': [2, 3],
-    'Middle East': [2, 6],
-    'India': [2, 8],
-    'Central America': [3, 3],
-    'Africa': [3, 5],
-    'Southeast Asia': [3, 8],
-    'South America': [4, 3],
-    'Australia': [5, 9]
+  // World grid with multiple boxes per country (roughly geographical)
+  const worldGridBase = {
+    // North America
+    'Canada': { start: [0, 2], boxes: 3 },
+    'USA': { start: [1, 2], boxes: 4 },
+    'Mexico': { start: [2, 3], boxes: 2 },
+    
+    // South America
+    'Brazil': { start: [4, 3], boxes: 3 },
+    'Argentina': { start: [5, 3], boxes: 2 },
+    
+    // Europe
+    'UK': { start: [1, 6], boxes: 2 },
+    'France': { start: [2, 6], boxes: 2 },
+    'Germany': { start: [1, 7], boxes: 2 },
+    'Spain': { start: [2, 7], boxes: 2 },
+    'Italy': { start: [2, 8], boxes: 2 },
+    
+    // Africa
+    'Nigeria': { start: [3, 6], boxes: 2 },
+    'South Africa': { start: [5, 7], boxes: 2 },
+    'Egypt': { start: [2, 8], boxes: 2 },
+    
+    // Middle East
+    'UAE': { start: [3, 8], boxes: 2 },
+    
+    // Asia
+    'Russia': { start: [0, 8], boxes: 4 },
+    'China': { start: [1, 10], boxes: 3 },
+    'Japan': { start: [1, 12], boxes: 3 },
+    'Korea': { start: [1, 13], boxes: 2 },
+    'India': { start: [3, 10], boxes: 3 },
+    'Thailand': { start: [4, 11], boxes: 2 },
+    'Singapore': { start: [4, 12], boxes: 1 },
+    
+    // Oceania
+    'Australia': { start: [5, 12], boxes: 3 },
+    'New Zealand': { start: [6, 13], boxes: 1 }
   };
+
+  // Generate actual world grid positions
+  const generateWorldGrid = () => {
+    const grid = {};
+    Object.entries(worldGridBase).forEach(([country, config]) => {
+      const [startRow, startCol] = config.start;
+      const boxCount = config.boxes;
+      
+      for (let i = 0; i < boxCount; i++) {
+        // Create unique key for each box
+        const key = boxCount === 1 ? country : `${country}-${i + 1}`;
+        // Arrange boxes horizontally
+        grid[key] = [startRow, startCol + i];
+      }
+    });
+    return grid;
+  };
+
+  const worldGrid = generateWorldGrid();
 
   const usStatesMapGrid = {
     'WA': [0, 0], 'ME': [0, 11],
@@ -221,7 +262,7 @@ function App() {
   const currentMonth = monthsArchive[currentMonthIndex];
   const currentMonthKey = currentMonth?.key || '2026-01';
   
-  const currentData = zoomLevel === 'world'
+  const rawData = zoomLevel === 'world'
     ? (activeData.world[currentMonthKey] || {})
     : (activeData.countries[selectedRegion]?.[currentMonthKey] || {});
 
@@ -235,6 +276,22 @@ function App() {
   };
 
   const currentGrid = getCurrentGrid();
+
+  // Map grid boxes to data (handles multi-box countries like USA-1, USA-2, etc.)
+  const currentData = {};
+  Object.keys(currentGrid).forEach(gridKey => {
+    // Extract country name from gridKey (e.g., "USA-1" -> "USA")
+    const countryMatch = gridKey.match(/^(.+?)-\d+$/);
+    const country = countryMatch ? countryMatch[1] : gridKey;
+    
+    // If we have data for this country, assign it to the grid box
+    if (rawData[country]) {
+      // For multi-box countries, we might have multiple entries
+      // For now, just use the same data for all boxes
+      // TODO: Later we can support ranked entries (USA-1 = rank 1 artist, etc.)
+      currentData[gridKey] = rawData[country];
+    }
+  });
 
   useEffect(() => {
     Object.values(videoRefs.current).forEach(v => {
@@ -259,9 +316,14 @@ function App() {
   }, []);
 
   const handleItemClick = (code) => {
+    // Extract country name from code (e.g., "USA-1" -> "USA")
+    const countryMatch = code.match(/^(.+?)-\d+$/);
+    const country = countryMatch ? countryMatch[1] : code;
+    
     if (zoomLevel === 'world' && currentData[code]) {
-      if (activeData.countries[code]) {
-        setSelectedRegion(code);
+      // Check if this country has drill-down data
+      if (activeData.countries[country]) {
+        setSelectedRegion(country);
         setZoomLevel('country');
         setCurrentMonthIndex(0);
         setHoveredState(null);
@@ -295,6 +357,10 @@ function App() {
   const getGridDimensions = () => {
     // Responsive cell sizes based on screen width
     const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const availableWidth = screenWidth - 64; // Account for padding
+    const availableHeight = screenHeight - 200; // Account for header/footer
+    
     let cellSize, gap;
     
     if (screenWidth < 640) {
@@ -319,9 +385,30 @@ function App() {
     const maxRow = Math.max(...positions.map(p => p[0]));
     const maxCol = Math.max(...positions.map(p => p[1]));
     
+    let calculatedWidth = (maxCol + 1) * (cellSize + gap);
+    let calculatedHeight = (maxRow + 1) * (cellSize + gap);
+    
+    // Scale down if grid is too wide for viewport
+    if (calculatedWidth > availableWidth) {
+      const scale = availableWidth / calculatedWidth;
+      cellSize = Math.floor(cellSize * scale);
+      gap = Math.max(2, Math.floor(gap * scale));
+      calculatedWidth = (maxCol + 1) * (cellSize + gap);
+      calculatedHeight = (maxRow + 1) * (cellSize + gap);
+    }
+    
+    // Scale down if grid is too tall for viewport
+    if (calculatedHeight > availableHeight) {
+      const scale = availableHeight / calculatedHeight;
+      cellSize = Math.floor(cellSize * scale);
+      gap = Math.max(2, Math.floor(gap * scale));
+      calculatedWidth = (maxCol + 1) * (cellSize + gap);
+      calculatedHeight = (maxRow + 1) * (cellSize + gap);
+    }
+    
     return {
-      width: (maxCol + 1) * (cellSize + gap),
-      height: (maxRow + 1) * (cellSize + gap),
+      width: calculatedWidth,
+      height: calculatedHeight,
       cellSize,
       gap
     };
