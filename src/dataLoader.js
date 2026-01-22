@@ -162,16 +162,24 @@ export async function loadData() {
 export function getAvailableMonths(data) {
   const monthsSet = new Set();
   
-  // Get months from world data
-  Object.keys(data.world || {}).forEach(month => monthsSet.add(month));
+  // Get months from world data (only if they have content)
+  Object.entries(data.world || {}).forEach(([month, content]) => {
+    if (content && Object.keys(content).length > 0) {
+      monthsSet.add(month);
+    }
+  });
   
-  // Get months from country data
+  // Get months from country data (only if they have content)
   Object.values(data.countries || {}).forEach(countryData => {
-    Object.keys(countryData).forEach(month => monthsSet.add(month));
+    Object.entries(countryData || {}).forEach(([month, content]) => {
+      if (content && Object.keys(content).length > 0) {
+        monthsSet.add(month);
+      }
+    });
   });
   
   // Convert to sorted array of {month, year} objects
-  return Array.from(monthsSet)
+  const monthsArray = Array.from(monthsSet)
     .sort()
     .map(monthStr => {
       const [year, month] = monthStr.split('-');
@@ -183,4 +191,6 @@ export function getAvailableMonths(data) {
         key: monthStr
       };
     });
+  
+  return monthsArray;
 }
