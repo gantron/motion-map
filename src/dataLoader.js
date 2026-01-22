@@ -187,14 +187,8 @@ export function getAvailableMonths(data) {
     });
   });
   
-  // Get months from state data (only if they have real content)
-  Object.values(data.states || {}).forEach(stateData => {
-    Object.entries(stateData || {}).forEach(([month, content]) => {
-      if (hasRealContent(content)) {
-        monthsSet.add(month);
-      }
-    });
-  });
+  // NOTE: We don't add months from states data because states are drill-down views
+  // that should only show when you're already in a country view
   
   // Convert to sorted array of {month, year} objects
   const monthsArray = Array.from(monthsSet)
