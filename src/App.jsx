@@ -265,24 +265,16 @@ function App() {
     try {
       const availableMonths = getAvailableMonths(sheetData);
       if (availableMonths && availableMonths.length > 0) {
-        console.log('Available months from sheet:', availableMonths);
         monthsArchive = availableMonths;
-      } else {
-        console.log('No months found, using default');
       }
     } catch (error) {
       console.error('Error getting available months:', error);
     }
   }
   
-  console.log('MonthsArchive:', monthsArchive);
-  console.log('CurrentMonthIndex:', currentMonthIndex);
-  
   // Ensure currentMonthIndex is valid
   const safeIndex = Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1));
   const currentMonth = monthsArchive[safeIndex] || { month: 'January', year: 2026, key: '2026-01' };
-  
-  console.log('SafeIndex:', safeIndex, 'CurrentMonth:', currentMonth);
   
   // Triple-check that month and year are valid
   const displayMonth = currentMonth?.month || 'January';
@@ -556,24 +548,33 @@ function App() {
                 </svg>
               </button>
             </div>
-            <button
-              onClick={() => navigateMonth(-1)}
-              disabled={currentMonthIndex === 0}
-              className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
-            >
-              <ChevronLeft />
-            </button>
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg">
-              <Calendar />
-              <span className="text-sm font-medium">{displayMonth} {displayYear}</span>
-            </div>
-            <button
-              onClick={() => navigateMonth(1)}
-              disabled={currentMonthIndex === monthsArchive.length - 1}
-              className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
-            >
-              <ChevronRight />
-            </button>
+            {viewMode === 'archive' ? (
+              <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg">
+                <Calendar />
+                <span className="text-sm font-medium">Archive - All Time</span>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigateMonth(-1)}
+                  disabled={currentMonthIndex === 0}
+                  className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
+                >
+                  <ChevronLeft />
+                </button>
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg">
+                  <Calendar />
+                  <span className="text-sm font-medium">{displayMonth} {displayYear}</span>
+                </div>
+                <button
+                  onClick={() => navigateMonth(1)}
+                  disabled={currentMonthIndex === monthsArchive.length - 1}
+                  className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
+                >
+                  <ChevronRight />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
