@@ -162,17 +162,35 @@ export async function loadData() {
 export function getAvailableMonths(data) {
   const monthsSet = new Set();
   
-  // Get months from world data (only if they have content)
+  // Helper to check if month data actually has content
+  const hasRealContent = (monthData) => {
+    if (!monthData || typeof monthData !== 'object') return false;
+    const keys = Object.keys(monthData);
+    if (keys.length === 0) return false;
+    // Check if at least one entry has a name (real artist data)
+    return keys.some(key => monthData[key] && monthData[key].name);
+  };
+  
+  // Get months from world data (only if they have real content)
   Object.entries(data.world || {}).forEach(([month, content]) => {
-    if (content && Object.keys(content).length > 0) {
+    if (hasRealContent(content)) {
       monthsSet.add(month);
     }
   });
   
-  // Get months from country data (only if they have content)
+  // Get months from country data (only if they have real content)
   Object.values(data.countries || {}).forEach(countryData => {
     Object.entries(countryData || {}).forEach(([month, content]) => {
-      if (content && Object.keys(content).length > 0) {
+      if (hasRealContent(content)) {
+        monthsSet.add(month);
+      }
+    });
+  });
+  
+  // Get months from state data (only if they have real content)
+  Object.values(data.states || {}).forEach(stateData => {
+    Object.entries(stateData || {}).forEach(([month, content]) => {
+      if (hasRealContent(content)) {
         monthsSet.add(month);
       }
     });
