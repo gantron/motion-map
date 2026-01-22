@@ -192,17 +192,24 @@ export function getAvailableMonths(data) {
   
   // Convert to sorted array of {month, year} objects
   const monthsArray = Array.from(monthsSet)
+    .filter(monthStr => monthStr && monthStr.match(/^\d{4}-\d{2}$/)) // Only valid YYYY-MM format
     .sort()
     .map(monthStr => {
       const [year, month] = monthStr.split('-');
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                          'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthIndex = parseInt(month) - 1;
+      
+      // Skip if month index is invalid
+      if (monthIndex < 0 || monthIndex > 11) return null;
+      
       return {
-        month: monthNames[parseInt(month) - 1],
+        month: monthNames[monthIndex],
         year: parseInt(year),
         key: monthStr
       };
-    });
+    })
+    .filter(item => item !== null); // Remove any nulls from invalid months
   
   // Extra safety: deduplicate by key in case Set didn't catch it
   const seenKeys = new Set();
