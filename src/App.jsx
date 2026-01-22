@@ -263,24 +263,21 @@ function App() {
   // Use loaded data or show loading state
   const activeData = sheetData || demoData;
   
-  // Get available months - NO fallback until we check the data
+  // Get available months - NO fallback
   let monthsArchive = [];
   if (sheetData) {
     try {
       monthsArchive = getAvailableMonths(sheetData);
     } catch (error) {
       console.error('Error getting available months:', error);
+      // On error, just use empty array - the UI will handle it
+      monthsArchive = [];
     }
   }
   
-  // Only use fallback if we truly have no months
-  if (monthsArchive.length === 0) {
-    monthsArchive = [{ month: 'January', year: 2026, key: '2026-01' }];
-  }
-  
   // Ensure currentMonthIndex is valid
-  const safeIndex = Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1));
-  const currentMonth = monthsArchive[safeIndex] || { month: 'January', year: 2026, key: '2026-01' };
+  const safeIndex = monthsArchive.length > 0 ? Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1)) : 0;
+  const currentMonth = monthsArchive[safeIndex] || { month: '', year: 2026, key: '' };
   
   // Triple-check that month and year are valid
   const displayMonth = currentMonth?.month || 'January';
