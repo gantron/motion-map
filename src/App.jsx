@@ -278,31 +278,9 @@ function App() {
     monthsArchive = [{ month: 'January', year: 2026, key: '2026-01' }];
   }
   
-  // Ensure currentMonthIndex is valid and points to a month with data
+  // Ensure currentMonthIndex is valid
   const safeIndex = Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1));
-  let finalIndex = safeIndex;
-  
-  // If current month has no data, find the first month that does
-  if (monthsArchive.length > 0) {
-    const currentMonthData = zoomLevel === 'world' 
-      ? activeData.world[monthsArchive[safeIndex]?.key]
-      : activeData.countries[selectedRegion]?.[monthsArchive[safeIndex]?.key];
-    
-    // If current month is empty, find first non-empty month
-    if (!currentMonthData || Object.keys(currentMonthData).length === 0) {
-      for (let i = 0; i < monthsArchive.length; i++) {
-        const testData = zoomLevel === 'world'
-          ? activeData.world[monthsArchive[i]?.key]
-          : activeData.countries[selectedRegion]?.[monthsArchive[i]?.key];
-        if (testData && Object.keys(testData).length > 0) {
-          finalIndex = i;
-          break;
-        }
-      }
-    }
-  }
-  
-  const currentMonth = monthsArchive[finalIndex] || { month: 'January', year: 2026, key: '2026-01' };
+  const currentMonth = monthsArchive[safeIndex] || { month: 'January', year: 2026, key: '2026-01' };
   
   // Triple-check that month and year are valid
   const displayMonth = currentMonth?.month || 'January';
