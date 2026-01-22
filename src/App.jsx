@@ -263,23 +263,14 @@ function App() {
   let monthsArchive = [{ month: 'January', year: 2026, key: '2026-01' }];
   if (sheetData) {
     const availableMonths = getAvailableMonths(sheetData);
-    console.log('DEBUG: sheetData:', sheetData);
-    console.log('DEBUG: availableMonths:', availableMonths);
     if (availableMonths && availableMonths.length > 0) {
       monthsArchive = availableMonths;
     }
   }
   
-  console.log('DEBUG: monthsArchive:', monthsArchive);
-  console.log('DEBUG: currentMonthIndex:', currentMonthIndex);
-  
   // Ensure currentMonthIndex is valid
   const safeIndex = Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1));
   const currentMonth = monthsArchive[safeIndex];
-  
-  console.log('DEBUG: safeIndex:', safeIndex);
-  console.log('DEBUG: currentMonth:', currentMonth);
-  
   const currentMonthKey = currentMonth?.key || '2026-01';
   
   const rawData = zoomLevel === 'world'
@@ -347,12 +338,25 @@ function App() {
     // Normal mode
     Object.keys(currentGrid).forEach(gridKey => {
       // Extract country name from gridKey (e.g., "USA-1" -> "USA")
-      const countryMatch = gridKey.match(/^(.+?)-\d+$/);
-      const country = countryMatch ? countryMatch[1] : gridKey;
+      const gridMatch = gridKey.match(/^(.+?)-(\d+)$/);
       
-      // If we have data for this country, assign it to the grid box
-      if (rawData[country]) {
-        currentData[gridKey] = rawData[country];
+      if (gridMatch) {
+        // Multi-box key like "USA-1"
+        const [, country, boxNum] = gridMatch;
+        
+        // Try to find data with this exact key first (e.g., "USA-1" from Rank column)
+        if (rawData[gridKey]) {
+          currentData[gridKey] = rawData[gridKey];
+        } 
+        // Otherwise try the country without rank
+        else if (rawData[country]) {
+          currentData[gridKey] = rawData[country];
+        }
+      } else {
+        // Single box key (no rank)
+        if (rawData[gridKey]) {
+          currentData[gridKey] = rawData[gridKey];
+        }
       }
     });
   }
