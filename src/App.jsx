@@ -258,8 +258,13 @@ function App() {
 
   // Use loaded data or show loading state
   const activeData = sheetData || demoData;
-  const monthsArchive = sheetData ? getAvailableMonths(sheetData) : [{ month: 'January', year: 2026, key: '2026-01' }];
-  const currentMonth = monthsArchive[currentMonthIndex];
+  const monthsArchive = sheetData && getAvailableMonths(sheetData).length > 0 
+    ? getAvailableMonths(sheetData) 
+    : [{ month: 'January', year: 2026, key: '2026-01' }];
+  
+  // Ensure currentMonthIndex is valid
+  const validMonthIndex = Math.min(currentMonthIndex, monthsArchive.length - 1);
+  const currentMonth = monthsArchive[validMonthIndex] || monthsArchive[0] || { month: 'January', year: 2026, key: '2026-01' };
   const currentMonthKey = currentMonth?.key || '2026-01';
   
   const rawData = zoomLevel === 'world'
