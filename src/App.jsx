@@ -285,6 +285,7 @@ function App() {
       
       Object.entries(allData).forEach(([month, artists]) => {
         Object.keys(artists).forEach(code => {
+          // Create unique key: country-month (e.g., "USA-2026-01")
           allArtists.push(`${code}-${month}`);
         });
       });
@@ -313,6 +314,20 @@ function App() {
       // gridKey format: "USA-2026-01"
       const match = gridKey.match(/^(.+?)-(\d{4}-\d{2})$/);
       if (match) {
+        const [, countryCode, month] = match;
+        if (allData[month] && allData[month][countryCode]) {
+          currentData[gridKey] = { ...allData[month][countryCode], month, displayMonth: month };
+        }
+      }
+    });
+  } else {
+        const [, countryCode, month] = match;
+        if (allData[month] && allData[month][countryCode]) {
+          currentData[gridKey] = { ...allData[month][countryCode], month, displayMonth: month };
+        }
+      }
+    });
+  } else {
         const [, code, month] = match;
         if (allData[month] && allData[month][code]) {
           currentData[gridKey] = { ...allData[month][code], month };
