@@ -47,6 +47,10 @@ function transformSheetData(rows, level = 'world') {
     // Determine the code based on level
     if (level === 'world') {
       code = row.Country;
+      // If there's a Seed column, append it to create unique keys
+      if (row.Seed) {
+        code = `${code}-${row.Seed}`;
+      }
     } else if (level === 'country') {
       code = row.State || row.Region || row.Prefecture;
     } else if (level === 'state') {
@@ -65,6 +69,7 @@ function transformSheetData(rows, level = 'world') {
       state: row.State || row.Region || row.Prefecture || undefined,
       city: row.City || undefined,
       region: level === 'world' ? getRegion(row.Country) : undefined,
+      seed: row.Seed || undefined,
       bio: row.Bio,
       website: row.Website,
       instagram: row.Instagram,
