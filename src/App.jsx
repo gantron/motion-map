@@ -258,13 +258,19 @@ function App() {
 
   // Use loaded data or show loading state
   const activeData = sheetData || demoData;
-  const monthsArchive = sheetData && getAvailableMonths(sheetData).length > 0 
-    ? getAvailableMonths(sheetData) 
-    : [{ month: 'January', year: 2026, key: '2026-01' }];
+  
+  // Get available months with fallback
+  let monthsArchive = [{ month: 'January', year: 2026, key: '2026-01' }];
+  if (sheetData) {
+    const availableMonths = getAvailableMonths(sheetData);
+    if (availableMonths && availableMonths.length > 0) {
+      monthsArchive = availableMonths;
+    }
+  }
   
   // Ensure currentMonthIndex is valid
-  const validMonthIndex = Math.min(currentMonthIndex, monthsArchive.length - 1);
-  const currentMonth = monthsArchive[validMonthIndex] || monthsArchive[0] || { month: 'January', year: 2026, key: '2026-01' };
+  const safeIndex = Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1));
+  const currentMonth = monthsArchive[safeIndex];
   const currentMonthKey = currentMonth?.key || '2026-01';
   
   const rawData = zoomLevel === 'world'
