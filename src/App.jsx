@@ -157,9 +157,13 @@ function App() {
   // Load data from Google Sheets on mount
   useEffect(() => {
     loadData().then(data => {
-      // Check if we got real data or empty data
-      const hasData = Object.keys(data.world).length > 0 || Object.keys(data.countries).length > 0;
-      setSheetData(hasData ? data : demoData);
+      // Always use the data from sheets, even if empty
+      setSheetData(data);
+      setIsLoading(false);
+    }).catch(error => {
+      console.error('Failed to load data:', error);
+      // Set empty data structure on error
+      setSheetData({ world: {}, countries: {}, states: {} });
       setIsLoading(false);
     });
   }, []);
