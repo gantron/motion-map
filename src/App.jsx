@@ -262,15 +262,23 @@ function App() {
   // Get available months with fallback
   let monthsArchive = [{ month: 'January', year: 2026, key: '2026-01' }];
   if (sheetData) {
-    const availableMonths = getAvailableMonths(sheetData);
-    if (availableMonths && availableMonths.length > 0) {
-      monthsArchive = availableMonths;
+    try {
+      const availableMonths = getAvailableMonths(sheetData);
+      if (availableMonths && availableMonths.length > 0) {
+        monthsArchive = availableMonths;
+      }
+    } catch (error) {
+      console.error('Error getting available months:', error);
     }
   }
   
   // Ensure currentMonthIndex is valid
   const safeIndex = Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1));
-  const currentMonth = monthsArchive[safeIndex];
+  const currentMonth = monthsArchive[safeIndex] || { month: 'January', year: 2026, key: '2026-01' };
+  
+  // Triple-check that month and year are valid
+  const displayMonth = currentMonth?.month || 'January';
+  const displayYear = currentMonth?.year || 2026;
   const currentMonthKey = currentMonth?.key || '2026-01';
   
   const rawData = zoomLevel === 'world'
@@ -563,7 +571,7 @@ function App() {
             </button>
             <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg">
               <Calendar />
-              <span className="text-sm font-medium">{currentMonth.month} {currentMonth.year}</span>
+              <span className="text-sm font-medium">{displayMonth} {displayYear}</span>
             </div>
             <button
               onClick={() => navigateMonth(1)}
