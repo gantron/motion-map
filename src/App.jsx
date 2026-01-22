@@ -270,10 +270,47 @@ function App() {
       monthsArchive = getAvailableMonths(sheetData);
     } catch (error) {
       console.error('Error getting available months:', error);
-      // On error, just use empty array - the UI will handle it
       monthsArchive = [];
     }
   }
+  
+  // Find the current month or closest available month
+  const findCurrentMonthIndex = () => {
+    if (monthsArchive.length === 0) return 0;
+    
+    const now = new Date();
+    const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; // e.g., "2026-01"
+    
+    // Try to find exact match for current month
+    const exactMatch = monthsArchive.findIndex(m => m.key === currentKey);
+    if (exactMatch !== -1) return exactMatch;
+    
+    // If no exact match, find the closest month (prefer showing current or future months)
+    let closestIndex = 0;
+    let closestDiff = Infinity;
+    
+    monthsArchive.forEach((month, index) => {
+      const monthDate = new Date(month.year, parseInt(month.key.split('-')[1]) - 1);
+      const diff = Math.abs(monthDate - now);
+      
+      if (diff < closestDiff) {
+        closestDiff = diff;
+        closestIndex = index;
+      }
+    });
+    
+    return closestIndex;
+  };
+  
+  // Set initial month index to current month (only on first load)
+  const [hasSetInitialMonth, setHasSetInitialMonth] = useState(false);
+  useEffect(() => {
+    if (!hasSetInitialMonth && monthsArchive.length > 0) {
+      const currentIdx = findCurrentMonthIndex();
+      setCurrentMonthIndex(currentIdx);
+      setHasSetInitialMonth(true);
+    }
+  }, [monthsArchive.length, hasSetInitialMonth]);
   
   // Ensure currentMonthIndex is valid
   const safeIndex = monthsArchive.length > 0 ? Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1)) : 0;
