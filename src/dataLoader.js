@@ -210,5 +210,15 @@ export function getAvailableMonths(data) {
       };
     });
   
-  return monthsArray;
+  // Extra safety: deduplicate by key in case Set didn't catch it
+  const seenKeys = new Set();
+  const dedupedArray = monthsArray.filter(item => {
+    if (seenKeys.has(item.key)) {
+      return false; // Skip duplicate
+    }
+    seenKeys.add(item.key);
+    return true;
+  });
+  
+  return dedupedArray;
 }
