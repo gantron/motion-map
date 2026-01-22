@@ -263,14 +263,23 @@ function App() {
   let monthsArchive = [{ month: 'January', year: 2026, key: '2026-01' }];
   if (sheetData) {
     const availableMonths = getAvailableMonths(sheetData);
+    console.log('DEBUG: sheetData:', sheetData);
+    console.log('DEBUG: availableMonths:', availableMonths);
     if (availableMonths && availableMonths.length > 0) {
       monthsArchive = availableMonths;
     }
   }
   
+  console.log('DEBUG: monthsArchive:', monthsArchive);
+  console.log('DEBUG: currentMonthIndex:', currentMonthIndex);
+  
   // Ensure currentMonthIndex is valid
   const safeIndex = Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1));
   const currentMonth = monthsArchive[safeIndex];
+  
+  console.log('DEBUG: safeIndex:', safeIndex);
+  console.log('DEBUG: currentMonth:', currentMonth);
+  
   const currentMonthKey = currentMonth?.key || '2026-01';
   
   const rawData = zoomLevel === 'world'
