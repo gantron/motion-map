@@ -14,13 +14,9 @@ const SHEET_URLS = {
   
   // State-level sheets (cities within state/region)
   states: {
-    'USA-NC': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1795075384&single=true&output=csv', // Format: cities in North Carolina
-    'USA-FL': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=417903892&single=true&output=csv', // Format: cities in California
-    'USA-CA': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1871246132&single=true&output=csv', // Format: cities in California
-
-    // Add more states as needed:
-    // 'USA-NY': 'YOUR_NY_SHEET_URL',
-    // 'Japan-Tokyo': 'YOUR_TOKYO_SHEET_URL',
+    'USA-NC': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1795075384&single=true&output=csv',
+    'USA-FL': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=417903892&single=true&output=csv',
+    'USA-CA': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNm8Ske4pUlToMxmtWvB0mdv2OUzPxMZZruAMAZJCF6p8vhYaVeXU02CXVRxwumlvSXPEA2QYHWGVh/pub?gid=1871246132&single=true&output=csv',
   }
 };
 
@@ -150,7 +146,8 @@ export async function loadData() {
     // Return empty data structure on error
     return {
       world: {},
-      countries: {}
+      countries: {},
+      states: {}
     };
   }
 }
