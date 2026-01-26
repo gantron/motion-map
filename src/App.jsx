@@ -465,7 +465,7 @@ function App() {
     });
 
     // Dynamic cell size based on zoom level and item count
-    let baseCellSize = 135; // Increased from 120 for world/country views
+    let baseCellSize = 137; // Increased from 135 for bigger world/country views
     const itemCount = Object.keys(currentGrid).length;
     
     if (zoomLevel === 'state') {
@@ -475,7 +475,7 @@ function App() {
       } else if (itemCount <= 8) {
         baseCellSize = 150;
       } else {
-        baseCellSize = 130;
+        baseCellSize = 137;
       }
     }
     
@@ -518,7 +518,30 @@ function App() {
   }
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col overflow-hidden">
+    <div className="w-full h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col overflow-hidden">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideDown {
+          from { transform: translateY(-20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        .animate-slideDown {
+          animation: slideDown 0.4s ease-out;
+        }
+        .animate-slideUp {
+          animation: slideUp 0.4s ease-out 0.1s backwards;
+        }
+      `}</style>
       {/* Header */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 p-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -642,10 +665,18 @@ function App() {
                 const x = col * (cellSize + gap);
                 const y = row * (cellSize + gap);
 
-                // Calculate staggered delay based on distance from origin
+                // Calculate staggered delay with randomization
+                // Base delay from distance + random component for organic feel
                 const distanceFromOrigin = Math.sqrt(row * row + col * col);
                 const normalizedDistance = maxDistance > 0 ? distanceFromOrigin / maxDistance : 0;
-                const staggerDelay = normalizedDistance * 0.5; // 0-500ms stagger
+                const baseDelay = normalizedDistance * 0.6; // Base 0-600ms from position
+                const randomDelay = Math.random() * 0.4; // Random 0-400ms
+                const staggerDelay = baseDelay + randomDelay; // Total 0-1000ms
+                
+                // Random duration variation for more organic movement
+                const baseDuration = 0.4;
+                const randomDuration = Math.random() * 0.2; // Vary by ±100ms
+                const transitionDuration = baseDuration + randomDuration;
 
                 return (
                   <div
@@ -659,7 +690,7 @@ function App() {
                     transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0)',
                     zIndex: isHovered ? 10 : (isSelected ? 5 : 1),
                     cursor: hasContent ? 'pointer' : 'default',
-                    transition: `left 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.15s ease-out`
+                    transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.15s ease-out`
                   }}
                   onMouseEnter={() => {
                     if (hasContent && !('ontouchstart' in window)) {
@@ -672,12 +703,12 @@ function App() {
                 >
                   {isHovered && (
                     <div
-                      className="absolute inset-0 bg-black/40 rounded-xl blur-xl"
+                      className="absolute inset-0 bg-black/40 rounded-[13px] blur-xl"
                       style={{ transform: 'translateY(8px)' }}
                     />
                   )}
                   <div
-                    className={`w-full h-full rounded-xl border-2 overflow-hidden relative ${
+                    className={`w-full h-full rounded-[13px] border-2 overflow-hidden relative ${
                       hasContent
                         ? isSelected 
                           ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
@@ -699,7 +730,7 @@ function App() {
                         if (videoInfo) {
                           if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                             return (
-                              <div className="absolute inset-0 overflow-hidden rounded-xl">
+                              <div className="absolute inset-0 overflow-hidden rounded-[13px]">
                                 <iframe
                                   src={videoInfo.embedUrl}
                                   className="absolute"
@@ -783,9 +814,9 @@ function App() {
         {/* Sidebar */}
         <div className="w-96 bg-slate-800 border-l border-slate-700 flex flex-col overflow-hidden flex-shrink-0">
           {selectedArtist ? (
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden animate-fadeIn">
               {/* Artist Header */}
-              <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-6 relative flex-shrink-0">
+              <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-6 relative flex-shrink-0 animate-slideDown">
                 <button
                   onClick={() => setSelectedArtist(null)}
                   className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
@@ -801,7 +832,7 @@ function App() {
               </div>
 
               {/* Artist Content */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-6 animate-slideUp">
                 {/* Video/Poster */}
                 {(() => {
                   // Check for valid video URL
