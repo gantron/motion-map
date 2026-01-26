@@ -468,7 +468,14 @@ function App() {
       <div className="flex-1 flex overflow-hidden">
         {/* Map Area */}
         <div className="flex-1 flex items-start justify-start p-8 overflow-auto">
-          <div className="relative mx-auto" style={{ width: gridWidth, height: gridHeight }}>
+          <div 
+            className="relative mx-auto" 
+            style={{ 
+              width: gridWidth, 
+              height: gridHeight,
+              transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
             {Object.entries(currentGrid).map(([code, [row, col]]) => {
               const isHovered = hoveredState === code;
               const hasContent = !!currentData[code];
@@ -480,7 +487,7 @@ function App() {
               const distanceFromOrigin = Math.sqrt(row * row + col * col);
               const maxDistance = Math.sqrt(8 * 8 + 18 * 18); // Approximate max grid distance
               const normalizedDistance = distanceFromOrigin / maxDistance;
-              const staggerDelay = normalizedDistance * 0.3; // 0-300ms stagger
+              const staggerDelay = normalizedDistance * 0.5; // 0-500ms stagger
 
               return (
                 <div
