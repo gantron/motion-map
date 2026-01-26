@@ -420,22 +420,34 @@ function App() {
   }, []);
 
   const handleItemClick = (code) => {
-    // Extract country name from code (e.g., "USA-1" -> "USA")
-    const countryMatch = code.match(/^(.+?)-\d+$/);
-    const country = countryMatch ? countryMatch[1] : code;
-    
-    if (zoomLevel === 'world' && currentData[code]) {
+    // Single click: Always show artist modal if there's data
+    if (currentData[code]) {
+      setSelectedArtist({ ...currentData[code], code });
+    }
+  };
+
+  const handleItemDoubleClick = (code) => {
+    // Double click: Drill down to next level
+    if (zoomLevel === 'world') {
+      // Extract country name from code (e.g., "USA-1" -> "USA")
+      const countryMatch = code.match(/^(.+?)-\d+$/);
+      const country = countryMatch ? countryMatch[1] : code;
+      
       // Check if this country has drill-down data
       if (activeData.countries[country]) {
         setSelectedRegion(country);
         setZoomLevel('country');
         setCurrentMonthIndex(0);
         setHoveredState(null);
-      } else {
-        setSelectedArtist({ ...currentData[code], code });
+        setSelectedArtist(null); // Close modal if open
       }
-    } else if (currentData[code]) {
-      setSelectedArtist({ ...currentData[code], code });
+    } else if (zoomLevel === 'country') {
+      // Check if this state has drill-down data (cities)
+      const stateKey = `${selectedRegion}-${code}`;
+      if (activeData.states && activeData.states[stateKey]) {
+        // TODO: Implement state drill-down when ready
+        console.log('State drill-down coming soon:', code);
+      }
     }
   };
 
@@ -657,6 +669,7 @@ function App() {
                 }}
                 onMouseLeave={() => setHoveredState(null)}
                 onClick={() => handleItemClick(code)}
+                onDoubleClick={() => handleItemDoubleClick(code)}
               >
                 {isHovered && (
                   <div
@@ -734,6 +747,19 @@ function App() {
               }}
             >
               <div className="p-4">
+                {/* Show drill-down hint if available */}
+                {(() => {
+                  const countryMatch = hoveredState.match(/^(.+?)-\d+$/);
+                  const country = countryMatch ? countryMatch[1] : hoveredState;
+                  const canDrillDown = (zoomLevel === 'world' && activeData.countries[country]) ||
+                                      (zoomLevel === 'country' && activeData.states && activeData.states[`${selectedRegion}-${hoveredState}`]);
+                  
+                  return canDrillDown && (
+                    <div className="mb-2 px-2 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded text-xs text-indigo-300 text-center">
+                      💡 Double-click to explore {zoomLevel === 'world' ? 'states' : 'cities'}
+                    </div>
+                  );
+                })()}
                 <div className="text-xs text-slate-400 mb-1 uppercase">
                   {zoomLevel === 'world' && activeData.countries[hoveredState] ? 'Click to Explore' : 'Now Playing'}
                 </div>
