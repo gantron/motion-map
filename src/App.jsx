@@ -510,43 +510,60 @@ function App() {
                       hasContent ? 'bg-gradient-to-br from-indigo-600 to-purple-600' : 'bg-slate-800/30'
                     }`}
                   >
-                    {hasContent && currentData[code].videoUrl && (() => {
-                      const videoInfo = getVideoEmbedInfo(currentData[code].videoUrl);
-                      if (videoInfo) {
-                        if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
-                          return (
-                            <iframe
-                              src={videoInfo.embedUrl}
-                              className="absolute inset-0 w-full h-full"
-                              allow="autoplay; encrypted-media"
-                              style={{ pointerEvents: 'none' }}
-                            />
-                          );
-                        } else if (videoInfo.type === 'direct') {
-                          return (
-                            <video
-                              ref={el => videoRefs.current[code] = el}
-                              className="absolute inset-0 w-full h-full object-cover"
-                              loop
-                              muted
-                              playsInline
-                              poster={currentData[code].posterUrl || ''}
-                            >
-                              <source src={videoInfo.embedUrl} type="video/mp4" />
-                            </video>
-                          );
+                    {/* Video or Poster Display */}
+                    {(() => {
+                      // Only try to display video if videoUrl exists and is valid
+                      const hasValidVideo = hasContent && currentData[code].videoUrl && 
+                                          currentData[code].videoUrl.trim().length > 0 &&
+                                          currentData[code].videoUrl !== '#N/A';
+                      
+                      if (hasValidVideo) {
+                        const videoInfo = getVideoEmbedInfo(currentData[code].videoUrl);
+                        if (videoInfo) {
+                          if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
+                            return (
+                              <iframe
+                                src={videoInfo.embedUrl}
+                                className="absolute inset-0 w-full h-full"
+                                allow="autoplay; encrypted-media"
+                                style={{ pointerEvents: 'none' }}
+                              />
+                            );
+                          } else if (videoInfo.type === 'direct') {
+                            return (
+                              <video
+                                ref={el => videoRefs.current[code] = el}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                loop
+                                muted
+                                playsInline
+                                poster={currentData[code].posterUrl || ''}
+                              >
+                                <source src={videoInfo.embedUrl} type="video/mp4" />
+                              </video>
+                            );
+                          }
                         }
                       }
+                      
+                      // Show poster if available (and no valid video)
+                      const hasValidPoster = hasContent && currentData[code].posterUrl && 
+                                            currentData[code].posterUrl.trim().length > 0 &&
+                                            currentData[code].posterUrl !== '#N/A';
+                      
+                      if (hasValidPoster) {
+                        return (
+                          <img 
+                            src={currentData[code].posterUrl} 
+                            alt={currentData[code].name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        );
+                      }
+                      
+                      // If no video or poster, just show gradient (already set as background)
                       return null;
                     })()}
-                    
-                    {hasContent && !currentData[code].videoUrl && currentData[code].posterUrl && (
-                      <img 
-                        src={currentData[code].posterUrl} 
-                        alt={currentData[code].name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    )}
                     
                     {!hasContent && zoomLevel === 'world' && (
                       <div className="absolute bottom-2 right-2">
@@ -600,32 +617,44 @@ function App() {
               <div className="flex-1 overflow-y-auto p-6">
                 {/* Video/Poster */}
                 {(() => {
-                  const videoInfo = getVideoEmbedInfo(selectedArtist.videoUrl);
-                  if (videoInfo) {
-                    if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
-                      return (
-                        <iframe
-                          src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
-                          className="w-full aspect-video rounded-lg mb-6"
-                          allow="encrypted-media; fullscreen"
-                        />
-                      );
-                    } else if (videoInfo.type === 'direct') {
-                      return (
-                        <video
-                          ref={sidebarVideoRef}
-                          className="w-full aspect-video rounded-lg mb-6 object-cover"
-                          controls
-                          loop
-                          poster={selectedArtist.posterUrl || ''}
-                        >
-                          <source src={videoInfo.embedUrl} type="video/mp4" />
-                        </video>
-                      );
+                  // Check for valid video URL
+                  const hasValidVideo = selectedArtist.videoUrl && 
+                                       selectedArtist.videoUrl.trim().length > 0 &&
+                                       selectedArtist.videoUrl !== '#N/A';
+                  
+                  if (hasValidVideo) {
+                    const videoInfo = getVideoEmbedInfo(selectedArtist.videoUrl);
+                    if (videoInfo) {
+                      if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
+                        return (
+                          <iframe
+                            src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
+                            className="w-full aspect-video rounded-lg mb-6"
+                            allow="encrypted-media; fullscreen"
+                          />
+                        );
+                      } else if (videoInfo.type === 'direct') {
+                        return (
+                          <video
+                            ref={sidebarVideoRef}
+                            className="w-full aspect-video rounded-lg mb-6 object-cover"
+                            controls
+                            loop
+                            poster={selectedArtist.posterUrl || ''}
+                          >
+                            <source src={videoInfo.embedUrl} type="video/mp4" />
+                          </video>
+                        );
+                      }
                     }
                   }
                   
-                  if (selectedArtist.posterUrl) {
+                  // Check for valid poster URL
+                  const hasValidPoster = selectedArtist.posterUrl && 
+                                        selectedArtist.posterUrl.trim().length > 0 &&
+                                        selectedArtist.posterUrl !== '#N/A';
+                  
+                  if (hasValidPoster) {
                     return (
                       <img 
                         src={selectedArtist.posterUrl} 
@@ -635,6 +664,7 @@ function App() {
                     );
                   }
                   
+                  // Fallback gradient
                   return (
                     <div className="w-full aspect-video rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 mb-6" />
                   );
