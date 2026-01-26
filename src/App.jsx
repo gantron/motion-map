@@ -20,6 +20,11 @@ function App() {
   const videoRefs = useRef({});
   const sidebarVideoRef = useRef(null);
 
+  // Clear hover state when view mode changes to prevent animation conflicts
+  useEffect(() => {
+    setHoveredState(null);
+  }, [viewMode]);
+
   // Helper function to get embed URL for video platforms
   const getVideoEmbedInfo = (url) => {
     if (!url) return null;
@@ -471,10 +476,16 @@ function App() {
               const x = col * (cellSize + gap);
               const y = row * (cellSize + gap);
 
+              // Calculate staggered delay based on distance from origin
+              const distanceFromOrigin = Math.sqrt(row * row + col * col);
+              const maxDistance = Math.sqrt(8 * 8 + 18 * 18); // Approximate max grid distance
+              const normalizedDistance = distanceFromOrigin / maxDistance;
+              const staggerDelay = normalizedDistance * 0.3; // 0-300ms stagger
+
               return (
                 <div
                   key={code}
-                  className="absolute transition-all duration-300"
+                  className="absolute"
                   style={{
                     left: `${x}px`,
                     top: `${y}px`,
@@ -482,7 +493,8 @@ function App() {
                     height: `${cellSize}px`,
                     transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0)',
                     zIndex: isHovered ? 10 : (isSelected ? 5 : 1),
-                    cursor: hasContent ? 'pointer' : 'default'
+                    cursor: hasContent ? 'pointer' : 'default',
+                    transition: `left 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.15s ease-out`
                   }}
                   onMouseEnter={() => {
                     if (hasContent && !('ontouchstart' in window)) {
