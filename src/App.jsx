@@ -424,7 +424,7 @@ function App() {
       if (activeData.countries[country]) {
         setSelectedRegion(country);
         setZoomLevel('country');
-        setCurrentMonthIndex(0);
+        // Don't reset month - keep current month
         setHoveredState(null);
         setSelectedArtist(null);
       }
@@ -434,7 +434,7 @@ function App() {
       if (activeData.states && activeData.states[stateKey]) {
         setSelectedState(code);
         setZoomLevel('state');
-        setCurrentMonthIndex(0);
+        // Don't reset month - keep current month
         setHoveredState(null);
         setSelectedArtist(null);
       }
@@ -446,14 +446,14 @@ function App() {
       // Zoom out from State to Country
       setZoomLevel('country');
       setSelectedState(null);
-      setCurrentMonthIndex(0);
+      // Don't reset month - keep current month
       setHoveredState(null);
       setSelectedArtist(null);
     } else if (zoomLevel === 'country') {
       // Zoom out from Country to World
       setZoomLevel('world');
       setSelectedRegion(null);
-      setCurrentMonthIndex(0);
+      // Don't reset month - keep current month
       setHoveredState(null);
       setSelectedArtist(null);
     }
