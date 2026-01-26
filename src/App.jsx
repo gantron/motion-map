@@ -518,11 +518,28 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex items-center justify-center">
+        <style>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+          .spin-globe {
+            animation: spin 3s linear infinite;
+            display: inline-block;
+          }
+          .pulse-text {
+            animation: pulse 2s ease-in-out infinite;
+          }
+        `}</style>
         <div className="text-center">
-          <div className="text-4xl mb-4">🎬</div>
-          <div className="text-white text-xl font-bold mb-2">Motion-Map</div>
-          <div className="text-slate-400">Loading...</div>
+          <div className="text-7xl mb-6 spin-globe">🌍</div>
+          <div className="text-white text-2xl font-bold mb-3">Motion-Map</div>
+          <div className="text-slate-400 text-lg pulse-text">Loading artists...</div>
         </div>
       </div>
     );
