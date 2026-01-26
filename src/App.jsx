@@ -12,8 +12,9 @@ function App() {
   const [isSubmissionFormOpen, setIsSubmissionFormOpen] = useState(false);
   const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
   const [viewMode, setViewMode] = useState('map');
-  const [zoomLevel, setZoomLevel] = useState('world');
-  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState('world'); // 'world', 'country', 'state'
+  const [selectedRegion, setSelectedRegion] = useState(null); // e.g., 'USA'
+  const [selectedState, setSelectedState] = useState(null); // e.g., 'NC'
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [sheetData, setSheetData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,10 +121,118 @@ function App() {
     'AK': [8, 0], 'HI': [8, 1]
   };
 
+  // NC Cities map grid (geographically approximate)
+  const ncCitiesMapGrid = {
+    'Asheville': [1, 0],       // Western mountains
+    'Boone': [0, 1],          // Northwestern mountains
+    'Hickory': [1, 1],        // Western piedmont
+    'Winston-Salem': [1, 2],  // Northern piedmont
+    'Greensboro': [1, 3],     // Central piedmont
+    'Durham': [1, 4],         // Central piedmont
+    'Raleigh': [1, 5],        // Central/eastern
+    'Charlotte': [2, 1],      // Southern piedmont
+    'Chapel Hill': [2, 4],    // Just south of Durham
+    'Cary': [2, 5],          // Just south of Raleigh
+    'Fayetteville': [3, 4],  // South central
+    'Wilmington': [4, 6],    // Coastal southeast
+    'Jacksonville': [3, 6],   // Coastal
+    'Greenville': [2, 7],    // Eastern
+    'Rocky Mount': [1, 6],   // Northeastern
+    'Wilson': [2, 6]         // East of Raleigh
+  };
+
+  // City coordinates database (lat, long) - expand this as needed
+  const cityCoordinates = {
+    // North Carolina
+    'Charlotte': [35.2271, -80.8431],
+    'Raleigh': [35.7796, -78.6382],
+    'Durham': [35.9940, -78.8986],
+    'Greensboro': [36.0726, -79.7920],
+    'Winston-Salem': [36.0999, -80.2442],
+    'Fayetteville': [35.0527, -78.8784],
+    'Cary': [35.7915, -78.7811],
+    'Wilmington': [34.2257, -77.9447],
+    'High Point': [35.9557, -80.0053],
+    'Asheville': [35.5951, -82.5515],
+    'Chapel Hill': [35.9132, -79.0558],
+    'Greenville': [35.6127, -77.3663],
+    'Jacksonville': [34.7540, -77.4302],
+    'Rocky Mount': [35.9382, -77.7905],
+    'Wilson': [35.7213, -77.9155],
+    'Hickory': [35.7344, -81.3412]
+  };
+
+  // Generate geographic grid from city coordinates
+  const generateGeographicGrid = (cities) => {
+    if (cities.length === 0) return {};
+    
+    // Get coordinates for each city
+    const citiesWithCoords = cities
+      .map(city => ({
+        name: city,
+        coords: cityCoordinates[city]
+      }))
+      .filter(c => c.coords); // Only include cities we have coords for
+    
+    if (citiesWithCoords.length === 0) return {};
+    
+    // Find bounds
+    const lats = citiesWithCoords.map(c => c.coords[0]);
+    const longs = citiesWithCoords.map(c => c.coords[1]);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLong = Math.min(...longs);
+    const maxLong = Math.max(...longs);
+    
+    // Calculate grid dimensions based on number of cities
+    // Fewer cities = larger grid (more spacing)
+    const numCities = citiesWithCoords.length;
+    let gridCols, gridRows;
+    
+    if (numCities <= 4) {
+      gridCols = 4;
+      gridRows = 3;
+    } else if (numCities <= 8) {
+      gridCols = 5;
+      gridRows = 4;
+    } else {
+      gridCols = 6;
+      gridRows = 5;
+    }
+    
+    // Normalize coordinates to grid positions
+    const grid = {};
+    citiesWithCoords.forEach(city => {
+      const [lat, long] = city.coords;
+      
+      // Normalize lat/long to 0-1 range
+      const normalizedLat = (lat - minLat) / (maxLat - minLat || 1);
+      const normalizedLong = (long - minLong) / (maxLong - minLong || 1);
+      
+      // Convert to grid position
+      // Latitude goes top to bottom (invert)
+      // Longitude goes left to right
+      const row = Math.round((1 - normalizedLat) * (gridRows - 1));
+      const col = Math.round(normalizedLong * (gridCols - 1));
+      
+      grid[city.name] = [row, col];
+    });
+    
+    return grid;
+  };
+
   const generateGridLayout = (items) => {
     const grid = {};
-    const gridSize = Math.ceil(Math.sqrt(items.length));
-    items.forEach((item, index) => {
+    // Sort items alphabetically for cleaner grid view
+    const sortedItems = [...items].sort((a, b) => {
+      // Remove seed numbers for sorting (e.g., "USA-1" -> "USA")
+      const aClean = a.replace(/-\d+$/, '');
+      const bClean = b.replace(/-\d+$/, '');
+      return aClean.localeCompare(bClean);
+    });
+    
+    const gridSize = Math.ceil(Math.sqrt(sortedItems.length));
+    sortedItems.forEach((item, index) => {
       const row = Math.floor(index / gridSize);
       const col = index % gridSize;
       grid[item] = [row, col];
@@ -199,14 +308,27 @@ function App() {
   const displayYear = currentMonth?.year || 2026;
   const currentMonthKey = currentMonth?.key || '2026-01';
   
-  const rawData = zoomLevel === 'world'
-    ? (activeData.world[currentMonthKey] || {})
-    : (activeData.countries[selectedRegion]?.[currentMonthKey] || {});
+  // Get data based on zoom level
+  const rawData = (() => {
+    if (zoomLevel === 'world') {
+      return activeData.world[currentMonthKey] || {};
+    } else if (zoomLevel === 'country') {
+      return activeData.countries[selectedRegion]?.[currentMonthKey] || {};
+    } else if (zoomLevel === 'state') {
+      const stateKey = `${selectedRegion}-${selectedState}`;
+      return activeData.states?.[stateKey]?.[currentMonthKey] || {};
+    }
+    return {};
+  })();
 
   const getCurrentGrid = () => {
     if (viewMode === 'archive') {
       const allArtists = [];
-      const allData = zoomLevel === 'world' ? activeData.world : (activeData.countries[selectedRegion] || {});
+      const allData = zoomLevel === 'world' 
+        ? activeData.world 
+        : zoomLevel === 'country'
+        ? (activeData.countries[selectedRegion] || {})
+        : (activeData.states[`${selectedRegion}-${selectedState}`] || {});
       
       Object.entries(allData).forEach(([month, artists]) => {
         Object.keys(artists).forEach(code => {
@@ -219,8 +341,13 @@ function App() {
     
     if (zoomLevel === 'world') {
       return viewMode === 'grid' ? generateGridLayout(Object.keys(generateWorldGrid())) : generateWorldGrid();
-    } else if (selectedRegion === 'USA') {
+    } else if (zoomLevel === 'country' && selectedRegion === 'USA') {
       return viewMode === 'grid' ? generateGridLayout(Object.keys(usStatesMapGrid)) : usStatesMapGrid;
+    } else if (zoomLevel === 'state') {
+      // Get cities from current state data
+      const cities = Object.keys(rawData);
+      // Use geographic grid for map view, alphabetical grid for grid view
+      return viewMode === 'grid' ? generateGridLayout(cities) : generateGeographicGrid(cities);
     }
     return {};
   };
@@ -290,6 +417,7 @@ function App() {
 
   const handleItemDoubleClick = (code) => {
     if (zoomLevel === 'world') {
+      // Drilling from World to Country (USA)
       const countryMatch = code.match(/^(.+?)-\d+$/);
       const country = countryMatch ? countryMatch[1] : code;
       
@@ -301,15 +429,28 @@ function App() {
         setSelectedArtist(null);
       }
     } else if (zoomLevel === 'country') {
+      // Drilling from Country to State (NC, CA, FL, etc.)
       const stateKey = `${selectedRegion}-${code}`;
       if (activeData.states && activeData.states[stateKey]) {
-        console.log('State drill-down coming soon:', code);
+        setSelectedState(code);
+        setZoomLevel('state');
+        setCurrentMonthIndex(0);
+        setHoveredState(null);
+        setSelectedArtist(null);
       }
     }
   };
 
   const handleZoomOut = () => {
-    if (zoomLevel === 'country') {
+    if (zoomLevel === 'state') {
+      // Zoom out from State to Country
+      setZoomLevel('country');
+      setSelectedState(null);
+      setCurrentMonthIndex(0);
+      setHoveredState(null);
+      setSelectedArtist(null);
+    } else if (zoomLevel === 'country') {
+      // Zoom out from Country to World
       setZoomLevel('world');
       setSelectedRegion(null);
       setCurrentMonthIndex(0);
@@ -331,7 +472,21 @@ function App() {
       maxCol = Math.max(maxCol, col);
     });
 
-    const baseCellSize = 120;
+    // Dynamic cell size based on zoom level and item count
+    let baseCellSize = 120;
+    const itemCount = Object.keys(currentGrid).length;
+    
+    if (zoomLevel === 'state') {
+      // Fewer cities = bigger boxes
+      if (itemCount <= 4) {
+        baseCellSize = 180;
+      } else if (itemCount <= 8) {
+        baseCellSize = 150;
+      } else {
+        baseCellSize = 130;
+      }
+    }
+    
     const baseGap = 16;
     
     const availableWidth = windowSize.width - 64 - 400;
@@ -379,16 +534,21 @@ function App() {
             <div>
               <h1 className="text-2xl font-bold text-white mb-1">Motion-Map</h1>
               <p className="text-slate-400 text-sm">
-                {zoomLevel === 'world' ? 'Discover artists around the world' : `Exploring ${selectedRegion}`}
+                {zoomLevel === 'world' 
+                  ? 'Discover artists around the world' 
+                  : zoomLevel === 'country'
+                  ? `Exploring ${selectedRegion}`
+                  : `Exploring ${selectedRegion} > ${selectedState}`
+                }
               </p>
             </div>
-            {zoomLevel === 'country' && (
+            {(zoomLevel === 'country' || zoomLevel === 'state') && (
               <button
                 onClick={handleZoomOut}
                 className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
               >
                 <Home />
-                World View
+                {zoomLevel === 'state' ? `Back to ${selectedRegion}` : 'World View'}
               </button>
             )}
           </div>
@@ -473,7 +633,7 @@ function App() {
             style={{ 
               width: gridWidth, 
               height: gridHeight,
-              transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+              transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             {Object.entries(currentGrid).map(([code, [row, col]]) => {
@@ -545,7 +705,7 @@ function App() {
                                 src={videoInfo.embedUrl}
                                 className="absolute inset-0 w-full h-full"
                                 allow="autoplay; encrypted-media"
-                                style={{ pointerEvents: 'none' }}
+                                style={{ pointerEvents: 'none', objectFit: 'cover' }}
                               />
                             );
                           } else if (videoInfo.type === 'direct') {
