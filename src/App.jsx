@@ -159,7 +159,18 @@ function App() {
     'Jacksonville': [34.7540, -77.4302],
     'Rocky Mount': [35.9382, -77.7905],
     'Wilson': [35.7213, -77.9155],
-    'Hickory': [35.7344, -81.3412]
+    'Hickory': [35.7344, -81.3412],
+    // Japan
+    'Tokyo': [35.6762, 139.6503],
+    'Osaka': [34.6937, 135.5023],
+    'Kyoto': [35.0116, 135.7681],
+    'Yokohama': [35.4437, 139.6380],
+    'Nagoya': [35.1815, 136.9066],
+    'Sapporo': [43.0642, 141.3469],
+    'Fukuoka': [33.5904, 130.4017],
+    'Kobe': [34.6901, 135.1955],
+    'Hiroshima': [34.3853, 132.4553],
+    'Sendai': [38.2682, 140.8694]
   };
 
   // Generate geographic grid from city coordinates
@@ -465,21 +476,21 @@ function App() {
     });
 
     // Dynamic cell size based on zoom level and item count
-    let baseCellSize = 137; // Increased from 135 for bigger world/country views
+    let baseCellSize = 140; // Increased from 137 for even bigger boxes
     const itemCount = Object.keys(currentGrid).length;
     
     if (zoomLevel === 'state') {
       // Fewer cities = bigger boxes
       if (itemCount <= 4) {
-        baseCellSize = 180;
+        baseCellSize = 185;
       } else if (itemCount <= 8) {
-        baseCellSize = 150;
+        baseCellSize = 155;
       } else {
-        baseCellSize = 137;
+        baseCellSize = 140;
       }
     }
     
-    const baseGap = 10; // Reduced from 16 for tighter spacing
+    const baseGap = 8; // Reduced from 10 for tighter spacing
     
     const availableWidth = windowSize.width - 64 - 400;
     const availableHeight = windowSize.height - 200;
@@ -518,7 +529,7 @@ function App() {
   }
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col overflow-hidden">
+    <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex flex-col overflow-hidden">
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
@@ -543,7 +554,7 @@ function App() {
         }
       `}</style>
       {/* Header */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 p-4 flex-shrink-0">
+      <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div>
@@ -703,12 +714,12 @@ function App() {
                 >
                   {isHovered && (
                     <div
-                      className="absolute inset-0 bg-black/40 rounded-[13px] blur-xl"
+                      className="absolute inset-0 bg-black/40 rounded-[14px] blur-xl"
                       style={{ transform: 'translateY(8px)' }}
                     />
                   )}
                   <div
-                    className={`w-full h-full rounded-[13px] border-2 overflow-hidden relative ${
+                    className={`w-full h-full rounded-[14px] border-2 overflow-hidden relative ${
                       hasContent
                         ? isSelected 
                           ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
@@ -730,7 +741,7 @@ function App() {
                         if (videoInfo) {
                           if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                             return (
-                              <div className="absolute inset-0 overflow-hidden rounded-[13px]">
+                              <div className="absolute inset-0 overflow-hidden rounded-[14px]">
                                 <iframe
                                   src={videoInfo.embedUrl}
                                   className="absolute"
@@ -812,9 +823,9 @@ function App() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-96 bg-slate-800 border-l border-slate-700 flex flex-col overflow-hidden flex-shrink-0">
+        <div className="w-96 bg-slate-950 border-l border-slate-800 flex flex-col overflow-hidden flex-shrink-0">
           {selectedArtist ? (
-            <div className="flex-1 flex flex-col overflow-hidden animate-fadeIn">
+            <div key={selectedArtist.code} className="flex-1 flex flex-col overflow-hidden animate-fadeIn">
               {/* Artist Header */}
               <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-6 relative flex-shrink-0 animate-slideDown">
                 <button
