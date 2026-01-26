@@ -18,6 +18,7 @@ function App() {
   const [sheetData, setSheetData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const videoRefs = useRef({});
+  const sidebarVideoRef = useRef(null);
 
   // Helper function to get embed URL for video platforms
   const getVideoEmbedInfo = (url) => {
@@ -43,7 +44,7 @@ function App() {
       };
     }
 
-    // Direct video file (mp4, webm, etc.)
+    // Direct video file
     if (url.match(/\.(mp4|webm|ogg)$/i)) {
       return {
         type: 'direct',
@@ -54,117 +55,20 @@ function App() {
     return null;
   };
 
-  // Fallback demo data (used if Google Sheets not configured)
+  // Fallback demo data (not used if sheets load)
   const demoData = {
-    world: {
-      '2026-01': {
-        'USA': {
-          name: 'Zan Gantt',
-          country: 'USA',
-          region: 'North America',
-          bio: 'Motion designer representing the United States.',
-          website: 'zan.blue',
-          instagram: '@zangantt',
-          videoUrl: null,
-          posterUrl: null,
-          monthsActive: 1
-        },
-        'Japan': {
-          name: 'Zan Gantt',
-          country: 'Japan',
-          region: 'Asia',
-          bio: 'Motion designer representing Japan.',
-          website: 'zan.blue',
-          instagram: '@zangantt',
-          videoUrl: null,
-          posterUrl: null,
-          monthsActive: 1
-        },
-        'UK': {
-          name: 'Zan Gantt',
-          country: 'UK',
-          region: 'Europe',
-          bio: 'Motion designer representing the UK.',
-          website: 'zan.blue',
-          instagram: '@zangantt',
-          videoUrl: null,
-          posterUrl: null,
-          monthsActive: 1
-        }
-      }
-    },
-    countries: {
-      'USA': {
-        '2026-01': {
-          'CA': {
-            name: 'Zan Gantt',
-            state: 'California',
-            country: 'USA',
-            bio: 'Motion designer.',
-            website: 'zan.blue',
-            instagram: '@zangantt',
-            videoUrl: null,
-            posterUrl: null,
-            monthsActive: 1
-          },
-          'NY': {
-            name: 'Zan Gantt',
-            state: 'New York',
-            country: 'USA',
-            bio: 'Motion designer.',
-            website: 'zan.blue',
-            instagram: '@zangantt',
-            videoUrl: null,
-            posterUrl: null,
-            monthsActive: 1
-          },
-          'TX': {
-            name: 'Zan Gantt',
-            state: 'Texas',
-            country: 'USA',
-            bio: 'Motion designer.',
-            website: 'zan.blue',
-            instagram: '@zangantt',
-            videoUrl: null,
-            posterUrl: null,
-            monthsActive: 1
-          },
-          'FL': {
-            name: 'Zan Gantt',
-            state: 'Florida',
-            country: 'USA',
-            bio: 'Motion designer.',
-            website: 'zan.blue',
-            instagram: '@zangantt',
-            videoUrl: null,
-            posterUrl: null,
-            monthsActive: 1
-          },
-          'WA': {
-            name: 'Zan Gantt',
-            state: 'Washington',
-            country: 'USA',
-            bio: 'Motion designer.',
-            website: 'zan.blue',
-            instagram: '@zangantt',
-            videoUrl: null,
-            posterUrl: null,
-            monthsActive: 1
-          }
-        }
-      }
-    }
+    world: {},
+    countries: {},
+    states: {}
   };
 
   // Load data from Google Sheets on mount
   useEffect(() => {
     loadData().then(data => {
-      // Always use the data from sheets, even if empty
       setSheetData(data);
       setIsLoading(false);
     }).catch(error => {
       console.error('Failed to load data:', error);
-      // Set empty data structure on error
       setSheetData({ world: {}, countries: {}, states: {} });
       setIsLoading(false);
     });
@@ -172,100 +76,68 @@ function App() {
 
   // World grid with multiple boxes per country (roughly geographical)
   const worldGridBase = {
-    // North America
-    'Canada': { start: [0, 1], boxes: 3 },
-    'USA': { start: [1, 1], boxes: 4 },
-    'Mexico': { start: [3, 2], boxes: 2 },
-    
-    // South America
-    'Brazil': { start: [5, 2], boxes: 3 },
-    'Argentina': { start: [7, 2], boxes: 2 },
-    
-    // Europe
-    'UK': { start: [1, 7], boxes: 2 },
-    'France': { start: [2, 7], boxes: 2 },
-    'Germany': { start: [1, 9], boxes: 2 },
-    'Spain': { start: [3, 7], boxes: 2 },
-    'Italy': { start: [3, 9], boxes: 2 },
-    
-    // Africa
-    'Nigeria': { start: [4, 8], boxes: 2 },
-    'Egypt': { start: [3, 10], boxes: 2 },
-    'South Africa': { start: [7, 8], boxes: 2 },
-    
-    // Middle East
-    'UAE': { start: [4, 11], boxes: 2 },
-    
-    // Asia
-    'Russia': { start: [0, 11], boxes: 4 },
-    'China': { start: [2, 13], boxes: 3 },
-    'Japan': { start: [1, 16], boxes: 3 },
-    'Korea': { start: [2, 16], boxes: 2 },
-    'India': { start: [4, 13], boxes: 3 },
-    'Thailand': { start: [5, 15], boxes: 2 },
-    'Singapore': { start: [6, 15], boxes: 1 },
-    
-    // Oceania
-    'Australia': { start: [7, 16], boxes: 3 },
-    'New Zealand': { start: [8, 17], boxes: 1 }
+    'USA-1': [1, 1], 'USA-2': [1, 2], 'USA-3': [1, 3], 'USA-4': [1, 4],
+    'Canada-1': [0, 1], 'Canada-2': [0, 2], 'Canada-3': [0, 3],
+    'Mexico-1': [2, 2], 'Mexico-2': [2, 3],
+    'Brazil-1': [4, 3], 'Brazil-2': [4, 4], 'Brazil-3': [5, 3],
+    'Argentina-1': [6, 3], 'Argentina-2': [6, 4],
+    'UK-1': [1, 7], 'UK-2': [1, 8],
+    'France-1': [2, 7], 'France-2': [2, 8],
+    'Germany-1': [1, 9], 'Germany-2': [2, 9],
+    'Spain-1': [3, 7], 'Spain-2': [3, 8],
+    'Italy-1': [3, 9], 'Italy-2': [3, 10],
+    'Nigeria-1': [5, 8], 'Nigeria-2': [5, 9],
+    'Egypt-1': [3, 11], 'Egypt-2': [3, 12],
+    'South Africa-1': [7, 8], 'South Africa-2': [7, 9],
+    'UAE-1': [3, 13], 'UAE-2': [3, 14],
+    'Russia-1': [0, 11], 'Russia-2': [0, 12], 'Russia-3': [0, 13], 'Russia-4': [0, 14],
+    'China-1': [2, 14], 'China-2': [2, 15], 'China-3': [3, 15],
+    'Japan-1': [1, 16], 'Japan-2': [1, 17], 'Japan-3': [1, 18],
+    'Korea-1': [2, 16], 'Korea-2': [2, 17],
+    'India-1': [4, 12], 'India-2': [4, 13], 'India-3': [5, 12],
+    'Thailand-1': [4, 15], 'Thailand-2': [4, 16],
+    'Singapore-1': [5, 16],
+    'Australia-1': [7, 16], 'Australia-2': [7, 17], 'Australia-3': [7, 18],
+    'New Zealand-1': [8, 18]
   };
 
-  // Generate actual world grid positions
-  const generateWorldGrid = () => {
-    const grid = {};
-    Object.entries(worldGridBase).forEach(([country, config]) => {
-      const [startRow, startCol] = config.start;
-      const boxCount = config.boxes;
-      
-      for (let i = 0; i < boxCount; i++) {
-        // Create unique key for each box
-        const key = boxCount === 1 ? country : `${country}-${i + 1}`;
-        // Arrange boxes horizontally
-        grid[key] = [startRow, startCol + i];
-      }
-    });
-    return grid;
-  };
+  const generateWorldGrid = () => worldGridBase;
 
-  const worldGrid = generateWorldGrid();
-
+  // US States map grid
   const usStatesMapGrid = {
-    'WA': [0, 0], 'ME': [0, 11],
-    'OR': [1, 0], 'ID': [1, 1], 'MT': [1, 2], 'ND': [1, 3], 'MN': [1, 4], 'WI': [1, 5], 'MI': [1, 6], 'VT': [1, 9], 'NH': [1, 10],
-    'CA': [2, 0], 'NV': [2, 1], 'WY': [2, 2], 'SD': [2, 3], 'IA': [2, 4], 'IL': [2, 5], 'IN': [2, 6], 'OH': [2, 7], 'PA': [2, 8], 'NY': [2, 9], 'MA': [2, 10], 'CT': [2, 11], 'RI': [2, 12],
-    'UT': [3, 1], 'CO': [3, 2], 'NE': [3, 3], 'MO': [3, 4], 'KY': [3, 5], 'WV': [3, 6], 'VA': [3, 7], 'MD': [3, 8], 'DE': [3, 9], 'NJ': [3, 10],
-    'AZ': [4, 3], 'NM': [4, 4], 'KS': [4, 5], 'AR': [4, 6], 'TN': [4, 7], 'NC': [4, 8],
-    'OK': [5, 3], 'LA': [5, 4], 'MS': [5, 5], 'AL': [5, 6], 'GA': [5, 7], 'SC': [5, 8],
-    'TX': [6, 4], 'FL': [6, 9],
-    'AK': [8, 0], 'HI': [8, 1]
-  };
-
-  const stateNames = {
-    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
-    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
-    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
-    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
-    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
-    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
-    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
-    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
-    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
-    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+    WA: [0, 2], OR: [1, 2], CA: [2, 1], NV: [2, 2], ID: [1, 3], MT: [0, 4], WY: [1, 4],
+    UT: [2, 3], AZ: [3, 2], CO: [2, 4], NM: [3, 3], TX: [4, 4], OK: [3, 5], KS: [2, 5],
+    NE: [1, 5], SD: [1, 6], ND: [0, 6], MN: [0, 7], IA: [2, 7], MO: [3, 7], AR: [4, 6],
+    LA: [5, 6], MS: [5, 7], AL: [5, 8], TN: [4, 8], KY: [4, 9], WV: [4, 10], VA: [4, 11],
+    NC: [5, 11], SC: [6, 11], GA: [6, 9], FL: [7, 10], IL: [3, 8], IN: [3, 9], OH: [3, 10],
+    MI: [2, 9], WI: [1, 8], PA: [3, 11], NY: [2, 12], VT: [1, 13], NH: [1, 14], ME: [0, 14],
+    MA: [2, 14], RI: [2, 15], CT: [2, 13], NJ: [3, 12], DE: [4, 12], MD: [4, 13]
   };
 
   const generateGridLayout = (items) => {
-    const cols = Math.ceil(Math.sqrt(items.length * 1.5));
     const grid = {};
-    items.forEach((item, i) => {
-      grid[item] = [Math.floor(i / cols), i % cols];
+    const gridSize = Math.ceil(Math.sqrt(items.length));
+    items.forEach((item, index) => {
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
+      grid[item] = [row, col];
     });
     return grid;
   };
 
-  // Use loaded data or show loading state
+  // Window resize handler
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Use loaded data
   const activeData = sheetData || demoData;
   
-  // Get available months - NO fallback
+  // Get available months
   let monthsArchive = [];
   if (sheetData) {
     try {
@@ -281,13 +153,11 @@ function App() {
     if (monthsArchive.length === 0) return 0;
     
     const now = new Date();
-    const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; // e.g., "2026-01"
+    const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     
-    // Try to find exact match for current month
     const exactMatch = monthsArchive.findIndex(m => m.key === currentKey);
     if (exactMatch !== -1) return exactMatch;
     
-    // If no exact match, find the closest month (prefer showing current or future months)
     let closestIndex = 0;
     let closestDiff = Infinity;
     
@@ -329,13 +199,11 @@ function App() {
 
   const getCurrentGrid = () => {
     if (viewMode === 'archive') {
-      // Archive mode: show all artists from all months
       const allArtists = [];
       const allData = zoomLevel === 'world' ? activeData.world : (activeData.countries[selectedRegion] || {});
       
       Object.entries(allData).forEach(([month, artists]) => {
         Object.keys(artists).forEach(code => {
-          // Create unique key: country-month (e.g., "USA-2026-01")
           allArtists.push(`${code}-${month}`);
         });
       });
@@ -344,7 +212,7 @@ function App() {
     }
     
     if (zoomLevel === 'world') {
-      return viewMode === 'grid' ? generateGridLayout(Object.keys(worldGrid)) : worldGrid;
+      return viewMode === 'grid' ? generateGridLayout(Object.keys(generateWorldGrid())) : generateWorldGrid();
     } else if (selectedRegion === 'USA') {
       return viewMode === 'grid' ? generateGridLayout(Object.keys(usStatesMapGrid)) : usStatesMapGrid;
     }
@@ -353,15 +221,13 @@ function App() {
 
   const currentGrid = getCurrentGrid();
 
-  // Map grid boxes to data (handles multi-box countries like USA-1, USA-2, etc.)
+  // Map grid boxes to data
   const currentData = {};
   
   if (viewMode === 'archive') {
-    // In archive mode, map month-specific data
     const allData = zoomLevel === 'world' ? activeData.world : (activeData.countries[selectedRegion] || {});
     
     Object.keys(currentGrid).forEach(gridKey => {
-      // gridKey format: "USA-1-2026-01"
       const match = gridKey.match(/^(.+?)-(\d{4}-\d{2})$/);
       if (match) {
         const [, countryCode, month] = match;
@@ -371,25 +237,18 @@ function App() {
       }
     });
   } else {
-    // Normal mode
     Object.keys(currentGrid).forEach(gridKey => {
-      // Extract country name from gridKey (e.g., "USA-1" -> "USA")
       const gridMatch = gridKey.match(/^(.+?)-(\d+)$/);
       
       if (gridMatch) {
-        // Multi-box key like "USA-1"
         const [, country, boxNum] = gridMatch;
         
-        // Try to find data with this exact key first (e.g., "USA-1" from Seed column)
         if (rawData[gridKey]) {
           currentData[gridKey] = rawData[gridKey];
-        } 
-        // Otherwise try the country without seed
-        else if (rawData[country]) {
+        } else if (rawData[country]) {
           currentData[gridKey] = rawData[country];
         }
       } else {
-        // Single box key (no seed)
         if (rawData[gridKey]) {
           currentData[gridKey] = rawData[gridKey];
         }
@@ -397,6 +256,7 @@ function App() {
     });
   }
 
+  // Video control
   useEffect(() => {
     Object.values(videoRefs.current).forEach(v => {
       if (v) {
@@ -409,43 +269,34 @@ function App() {
     }
   }, [hoveredState]);
 
-  // Handle window resize for responsive grid
+  // Sidebar video control
   useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (sidebarVideoRef.current && selectedArtist) {
+      sidebarVideoRef.current.play();
+    }
+  }, [selectedArtist]);
 
   const handleItemClick = (code) => {
-    // Single click: Always show artist modal if there's data
     if (currentData[code]) {
       setSelectedArtist({ ...currentData[code], code });
     }
   };
 
   const handleItemDoubleClick = (code) => {
-    // Double click: Drill down to next level
     if (zoomLevel === 'world') {
-      // Extract country name from code (e.g., "USA-1" -> "USA")
       const countryMatch = code.match(/^(.+?)-\d+$/);
       const country = countryMatch ? countryMatch[1] : code;
       
-      // Check if this country has drill-down data
       if (activeData.countries[country]) {
         setSelectedRegion(country);
         setZoomLevel('country');
         setCurrentMonthIndex(0);
         setHoveredState(null);
-        setSelectedArtist(null); // Close modal if open
+        setSelectedArtist(null);
       }
     } else if (zoomLevel === 'country') {
-      // Check if this state has drill-down data (cities)
       const stateKey = `${selectedRegion}-${code}`;
       if (activeData.states && activeData.states[stateKey]) {
-        // TODO: Implement state drill-down when ready
         console.log('State drill-down coming soon:', code);
       }
     }
@@ -457,82 +308,50 @@ function App() {
       setSelectedRegion(null);
       setCurrentMonthIndex(0);
       setHoveredState(null);
+      setSelectedArtist(null);
     }
   };
 
-  const closeModal = () => setSelectedArtist(null);
-
-  const navigateMonth = (dir) => {
-    const newIdx = currentMonthIndex + dir;
-    if (newIdx >= 0 && newIdx < monthsArchive.length) {
-      setCurrentMonthIndex(newIdx);
-      setHoveredState(null);
-    }
+  const navigateMonth = (direction) => {
+    setCurrentMonthIndex(prev => Math.max(0, Math.min(prev + direction, monthsArchive.length - 1)));
   };
 
   const getGridDimensions = () => {
-    // Responsive cell sizes based on screen width
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    const availableWidth = screenWidth - 64; // Account for padding
-    const availableHeight = screenHeight - 200; // Account for header/footer
+    const worldGrid = generateWorldGrid();
+    let maxRow = 0, maxCol = 0;
     
-    let cellSize, gap;
+    Object.values(currentGrid).forEach(([row, col]) => {
+      maxRow = Math.max(maxRow, row);
+      maxCol = Math.max(maxCol, col);
+    });
+
+    const baseCellSize = 120;
+    const baseGap = 16;
     
-    if (screenWidth < 640) {
-      // Mobile: smaller boxes
-      cellSize = 50;
-      gap = 4;
-    } else if (screenWidth < 1024) {
-      // Tablet: medium boxes
-      cellSize = 80;
-      gap = 6;
-    } else {
-      // Desktop: larger boxes
-      cellSize = 100;
-      gap = 8;
+    const availableWidth = windowSize.width - 64 - 400;
+    const availableHeight = windowSize.height - 200;
+    
+    const gridWidth = (maxCol + 1) * baseCellSize + maxCol * baseGap;
+    const gridHeight = (maxRow + 1) * baseCellSize + maxRow * baseGap;
+    
+    let scale = 1;
+    if (gridWidth > availableWidth || gridHeight > availableHeight) {
+      scale = Math.min(availableWidth / gridWidth, availableHeight / gridHeight);
     }
     
-    if (Object.keys(currentGrid).length === 0) {
-      return { width: 800, height: 600, cellSize, gap };
-    }
-    
-    const positions = Object.values(currentGrid);
-    const maxRow = Math.max(...positions.map(p => p[0]));
-    const maxCol = Math.max(...positions.map(p => p[1]));
-    
-    let calculatedWidth = (maxCol + 1) * (cellSize + gap);
-    let calculatedHeight = (maxRow + 1) * (cellSize + gap);
-    
-    // Scale down if grid is too wide for viewport
-    if (calculatedWidth > availableWidth) {
-      const scale = availableWidth / calculatedWidth;
-      cellSize = Math.floor(cellSize * scale);
-      gap = Math.max(2, Math.floor(gap * scale));
-      calculatedWidth = (maxCol + 1) * (cellSize + gap);
-      calculatedHeight = (maxRow + 1) * (cellSize + gap);
-    }
-    
-    // Scale down if grid is too tall for viewport
-    if (calculatedHeight > availableHeight) {
-      const scale = availableHeight / calculatedHeight;
-      cellSize = Math.floor(cellSize * scale);
-      gap = Math.max(2, Math.floor(gap * scale));
-      calculatedWidth = (maxCol + 1) * (cellSize + gap);
-      calculatedHeight = (maxRow + 1) * (cellSize + gap);
-    }
+    const cellSize = Math.floor(baseCellSize * scale);
+    const gap = Math.max(2, Math.floor(baseGap * scale));
     
     return {
-      width: calculatedWidth,
-      height: calculatedHeight,
       cellSize,
-      gap
+      gap,
+      gridWidth: (maxCol + 1) * cellSize + maxCol * gap,
+      gridHeight: (maxRow + 1) * cellSize + maxRow * gap
     };
   };
 
-  const { width: gridWidth, height: gridHeight, cellSize, gap } = getGridDimensions();
+  const { cellSize, gap, gridWidth, gridHeight } = getGridDimensions();
 
-  // Show loading indicator while data is being fetched
   if (isLoading) {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
@@ -548,7 +367,7 @@ function App() {
   return (
     <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 p-4">
+      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 p-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div>
@@ -598,9 +417,9 @@ function App() {
                 className={`p-2 rounded transition-colors ${
                   viewMode === 'archive' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
-                title="Archive - All Artists"
+                title="Archive View"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <rect x="3" y="3" width="7" height="7"/>
                   <rect x="14" y="3" width="7" height="7"/>
                   <rect x="14" y="14" width="7" height="7"/>
@@ -639,158 +458,165 @@ function App() {
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="flex-1 flex items-start justify-start p-8 overflow-auto">
-        <div className="relative mx-auto" style={{ width: gridWidth, height: gridHeight }}>
-          {Object.entries(currentGrid).map(([code, [row, col]]) => {
-            const isHovered = hoveredState === code;
-            const hasContent = !!currentData[code];
-            const x = col * (cellSize + gap);
-            const y = row * (cellSize + gap);
+      {/* Main Content - Map + Sidebar */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Map Area */}
+        <div className="flex-1 flex items-start justify-start p-8 overflow-auto">
+          <div className="relative mx-auto" style={{ width: gridWidth, height: gridHeight }}>
+            {Object.entries(currentGrid).map(([code, [row, col]]) => {
+              const isHovered = hoveredState === code;
+              const hasContent = !!currentData[code];
+              const isSelected = selectedArtist?.code === code;
+              const x = col * (cellSize + gap);
+              const y = row * (cellSize + gap);
 
-            return (
-              <div
-                key={code}
-                className="absolute transition-all duration-300"
-                style={{
-                  left: `${x}px`,
-                  top: `${y}px`,
-                  width: `${cellSize}px`,
-                  height: `${cellSize}px`,
-                  transform: isHovered ? 'translateY(-12px) scale(1.15)' : 'translateY(0)',
-                  zIndex: isHovered ? 10 : 1,
-                  cursor: hasContent ? 'pointer' : 'default'
-                }}
-                onMouseEnter={() => {
-                  // Only show hover on non-touch devices
-                  if (hasContent && !('ontouchstart' in window)) {
-                    setHoveredState(code);
-                  }
-                }}
-                onMouseLeave={() => setHoveredState(null)}
-                onClick={() => handleItemClick(code)}
-                onDoubleClick={() => handleItemDoubleClick(code)}
-              >
-                {isHovered && (
-                  <div
-                    className="absolute inset-0 bg-black/40 rounded-lg blur-xl"
-                    style={{ transform: 'translateY(12px)' }}
-                  />
-                )}
+              return (
                 <div
-                  className={`w-full h-full rounded-lg border-2 overflow-hidden relative ${
-                    hasContent
-                      ? isHovered
-                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-indigo-400 shadow-lg'
-                        : 'bg-gradient-to-br from-indigo-600 to-purple-700 border-indigo-500'
-                      : 'bg-slate-700 border-slate-600 opacity-30'
-                  } transition-all`}
+                  key={code}
+                  className="absolute transition-all duration-300"
+                  style={{
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    width: `${cellSize}px`,
+                    height: `${cellSize}px`,
+                    transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0)',
+                    zIndex: isHovered ? 10 : (isSelected ? 5 : 1),
+                    cursor: hasContent ? 'pointer' : 'default'
+                  }}
+                  onMouseEnter={() => {
+                    if (hasContent && !('ontouchstart' in window)) {
+                      setHoveredState(code);
+                    }
+                  }}
+                  onMouseLeave={() => setHoveredState(null)}
+                  onClick={() => handleItemClick(code)}
+                  onDoubleClick={() => handleItemDoubleClick(code)}
                 >
-                  {/* Artwork background image */}
-                  {hasContent && currentData[code].posterUrl && (
-                    <div 
-                      className="absolute inset-0 bg-cover bg-center"
-                      style={{
-                        backgroundImage: `url(${currentData[code].posterUrl})`,
-                      }}
+                  {isHovered && (
+                    <div
+                      className="absolute inset-0 bg-black/40 rounded-lg blur-xl"
+                      style={{ transform: 'translateY(8px)' }}
                     />
                   )}
-                  {/* Gradient overlay when no artwork or for contrast */}
-                  {hasContent && !isHovered && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-600/40" />
-                  )}
-                  {/* Center label - only show on non-world views or when not hovered */}
-                  {zoomLevel !== 'world' && (
-                    <div className={`absolute inset-0 flex items-center justify-center p-2 transition-all ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
-                      <span
-                        className={`font-bold text-white drop-shadow-lg text-center ${
-                          cellSize < 60 
-                            ? 'text-[10px]'
-                            : cellSize < 90
-                            ? 'text-sm'
-                            : 'text-lg'
-                        }`}
-                      >
-                        {code}
-                      </span>
-                    </div>
-                  )}
-                  {/* Small label in bottom-right on hover */}
-                  {isHovered && (
-                    <div className="absolute bottom-2 right-2">
-                      <span className="text-xs font-bold text-white drop-shadow-lg">
-                        {/* Strip rank number from display (e.g., "USA-1" -> "USA") */}
-                        {code.replace(/-\d+$/, '')}
-                      </span>
-                    </div>
-                  )}
-                  {isHovered && hasContent && (
-                    <div className="absolute top-1 right-1">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                    </div>
-                  )}
+                  <div
+                    className={`w-full h-full rounded-lg border-2 overflow-hidden relative ${
+                      hasContent
+                        ? isSelected 
+                          ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
+                          : 'border-indigo-500/50 shadow-lg'
+                        : 'border-slate-700/30'
+                    } ${
+                      hasContent ? 'bg-gradient-to-br from-indigo-600 to-purple-600' : 'bg-slate-800/30'
+                    }`}
+                  >
+                    {hasContent && currentData[code].videoUrl && (() => {
+                      const videoInfo = getVideoEmbedInfo(currentData[code].videoUrl);
+                      if (videoInfo) {
+                        if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
+                          return (
+                            <iframe
+                              src={videoInfo.embedUrl}
+                              className="absolute inset-0 w-full h-full"
+                              allow="autoplay; encrypted-media"
+                              style={{ pointerEvents: 'none' }}
+                            />
+                          );
+                        } else if (videoInfo.type === 'direct') {
+                          return (
+                            <video
+                              ref={el => videoRefs.current[code] = el}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              loop
+                              muted
+                              playsInline
+                              poster={currentData[code].posterUrl || ''}
+                            >
+                              <source src={videoInfo.embedUrl} type="video/mp4" />
+                            </video>
+                          );
+                        }
+                      }
+                      return null;
+                    })()}
+                    
+                    {hasContent && !currentData[code].videoUrl && currentData[code].posterUrl && (
+                      <img 
+                        src={currentData[code].posterUrl} 
+                        alt={currentData[code].name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )}
+                    
+                    {!hasContent && zoomLevel === 'world' && (
+                      <div className="absolute bottom-2 right-2">
+                        <span className="text-xs font-bold text-white/30 drop-shadow-lg">
+                          {code.replace(/-\d+$/, '')}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {zoomLevel === 'world' && isHovered && hasContent && (
+                      <div className="absolute bottom-2 right-2">
+                        <span className="text-xs font-bold text-white drop-shadow-lg">
+                          {code.replace(/-\d+$/, '')}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {isHovered && hasContent && (
+                      <div className="absolute top-1 right-1">
+                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        </div>
 
-          {/* Hover Preview */}
-          {hoveredState && currentData[hoveredState] && (
-            <div
-              className="fixed bg-slate-800 border border-slate-600 rounded-xl shadow-2xl overflow-hidden z-50"
-              style={{
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '400px',
-                maxWidth: '90vw'
-              }}
-            >
-              <div className="p-4">
-                {/* Show drill-down hint if available */}
+        {/* Sidebar */}
+        <div className="w-96 bg-slate-800 border-l border-slate-700 flex flex-col overflow-hidden flex-shrink-0">
+          {selectedArtist ? (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Artist Header */}
+              <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-6 relative flex-shrink-0">
+                <button
+                  onClick={() => setSelectedArtist(null)}
+                  className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+                >
+                  <X />
+                </button>
+                <h2 className="text-2xl font-bold text-white mb-1">{selectedArtist.name}</h2>
+                {selectedArtist.country && (
+                  <p className="text-indigo-100">
+                    {[selectedArtist.city, selectedArtist.state, selectedArtist.country].filter(Boolean).join(', ')}
+                  </p>
+                )}
+              </div>
+
+              {/* Artist Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {/* Video/Poster */}
                 {(() => {
-                  const countryMatch = hoveredState.match(/^(.+?)-\d+$/);
-                  const country = countryMatch ? countryMatch[1] : hoveredState;
-                  const canDrillDown = (zoomLevel === 'world' && activeData.countries[country]) ||
-                                      (zoomLevel === 'country' && activeData.states && activeData.states[`${selectedRegion}-${hoveredState}`]);
-                  
-                  return canDrillDown && (
-                    <div className="mb-2 px-2 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded text-xs text-indigo-300 text-center">
-                      💡 Double-click to explore {zoomLevel === 'world' ? 'states' : 'cities'}
-                    </div>
-                  );
-                })()}
-                <div className="text-xs text-slate-400 mb-1 uppercase">
-                  {zoomLevel === 'world' && activeData.countries[hoveredState] ? 'Click to Explore' : 'Now Playing'}
-                </div>
-                <div className="text-lg font-bold text-white mb-1">{currentData[hoveredState].name}</div>
-                <div className="text-sm text-slate-300 mb-3">
-                  {zoomLevel === 'world' ? hoveredState : (stateNames[hoveredState] || hoveredState)}
-                </div>
-                
-                {/* Video or Poster */}
-                {(() => {
-                  const videoInfo = getVideoEmbedInfo(currentData[hoveredState].videoUrl);
-                  
+                  const videoInfo = getVideoEmbedInfo(selectedArtist.videoUrl);
                   if (videoInfo) {
                     if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                       return (
                         <iframe
-                          className="w-full aspect-video rounded-lg"
-                          src={videoInfo.embedUrl}
-                          allow="autoplay; encrypted-media"
-                          allowFullScreen
+                          src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
+                          className="w-full aspect-video rounded-lg mb-6"
+                          allow="encrypted-media; fullscreen"
                         />
                       );
                     } else if (videoInfo.type === 'direct') {
                       return (
-                        <video 
-                          className="w-full aspect-video rounded-lg"
-                          autoPlay
+                        <video
+                          ref={sidebarVideoRef}
+                          className="w-full aspect-video rounded-lg mb-6 object-cover"
+                          controls
                           loop
-                          muted
-                          playsInline
-                          poster={currentData[hoveredState].posterUrl || ''}
+                          poster={selectedArtist.posterUrl || ''}
                         >
                           <source src={videoInfo.embedUrl} type="video/mp4" />
                         </video>
@@ -798,165 +624,91 @@ function App() {
                     }
                   }
                   
-                  // Fallback to poster or gradient
-                  if (currentData[hoveredState].posterUrl) {
+                  if (selectedArtist.posterUrl) {
                     return (
                       <img 
-                        src={currentData[hoveredState].posterUrl} 
-                        alt={currentData[hoveredState].name}
-                        className="w-full aspect-video rounded-lg object-cover"
+                        src={selectedArtist.posterUrl} 
+                        alt={selectedArtist.name}
+                        className="w-full aspect-video rounded-lg object-cover mb-6"
                       />
                     );
                   }
                   
                   return (
-                    <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="text-2xl mb-2">🎬</div>
-                        <div className="text-xs opacity-70">No preview</div>
-                      </div>
+                    <div className="w-full aspect-video rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 mb-6" />
+                  );
+                })()}
+
+                {/* Bio */}
+                {selectedArtist.bio && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-slate-400 uppercase mb-2">About</h3>
+                    <p className="text-slate-300 leading-relaxed">{selectedArtist.bio}</p>
+                  </div>
+                )}
+
+                {/* Links */}
+                <div className="flex gap-3">
+                  {selectedArtist.website && (
+                    <a
+                      href={selectedArtist.website.startsWith('http') ? selectedArtist.website : `https://${selectedArtist.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                    >
+                      <Globe />
+                      <span className="text-sm">Website</span>
+                    </a>
+                  )}
+                  {selectedArtist.instagram && (
+                    <a
+                      href={`https://instagram.com/${selectedArtist.instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-500 hover:to-pink-500 transition-colors"
+                    >
+                      <Instagram />
+                      <span className="text-sm">Instagram</span>
+                    </a>
+                  )}
+                </div>
+
+                {/* Drill-down hint */}
+                {(() => {
+                  const countryMatch = selectedArtist.code?.match(/^(.+?)-\d+$/);
+                  const country = countryMatch ? countryMatch[1] : selectedArtist.code;
+                  const canDrillDown = (zoomLevel === 'world' && activeData.countries[country]);
+                  
+                  return canDrillDown && (
+                    <div className="mt-6 p-4 bg-indigo-600/20 border border-indigo-500/30 rounded-lg">
+                      <p className="text-sm text-indigo-300">
+                        💡 <strong>Tip:</strong> Double-click on the map to explore more artists from {country}
+                      </p>
                     </div>
                   );
                 })()}
-                <div className="mt-3 text-xs text-slate-400 text-center">
-                  {zoomLevel === 'world' && activeData.countries[hoveredState] ? 'Click to explore' : 'Click for details'}
+              </div>
+            </div>
+          ) : (
+            /* Empty State */
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🎬</div>
+                <h3 className="text-xl font-bold text-white mb-2">Select an Artist</h3>
+                <p className="text-slate-400">Click on any highlighted box to view artist details</p>
+                <div className="mt-6 p-4 bg-slate-700/50 rounded-lg text-left">
+                  <p className="text-sm text-slate-300 mb-2">
+                    <strong className="text-white">Single-click:</strong> View artist
+                  </p>
+                  <p className="text-sm text-slate-300">
+                    <strong className="text-white">Double-click:</strong> Explore region
+                  </p>
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="bg-slate-800/30 border-t border-slate-700 p-3">
-        <div className="max-w-7xl mx-auto flex justify-between items-center text-xs">
-          <div className="flex gap-6 text-slate-400">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-gradient-to-br from-indigo-600 to-purple-700 border-2 border-indigo-500" />
-              <span>Featured</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-slate-700 border-2 border-slate-600 opacity-30" />
-              <span>Available</span>
-            </div>
-          </div>
-          <div className="text-slate-400">
-            <span className="font-semibold text-slate-300">Hover</span> to preview •{' '}
-            <span className="font-semibold text-slate-300">Click</span> to {zoomLevel === 'world' ? 'explore' : 'view'}
-          </div>
-        </div>
-      </div>
-
-      {/* Artist Modal */}
-      {selectedArtist && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-700 overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 relative">
-              <button
-                onClick={closeModal}
-                className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full"
-              >
-                <X />
-              </button>
-              <div className="text-sm text-indigo-100 mb-2">
-                {zoomLevel === 'world'
-                  ? `${selectedArtist.code} • ${currentMonth.month} ${currentMonth.year}`
-                  : `${stateNames[selectedArtist.code] || selectedArtist.code} • ${currentMonth.month} ${currentMonth.year}`}
-              </div>
-              <h2 className="text-3xl font-bold text-white">{selectedArtist.name}</h2>
-            </div>
-            <div className="p-6">
-              {/* Video or Poster in Modal */}
-              {(() => {
-                const videoInfo = getVideoEmbedInfo(selectedArtist.videoUrl);
-                
-                if (videoInfo) {
-                  if (videoInfo.type === 'youtube') {
-                    // YouTube with controls (no autoplay in modal)
-                    const youtubeId = selectedArtist.videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)[1];
-                    return (
-                      <iframe
-                        className="w-full aspect-video rounded-xl mb-6"
-                        src={`https://www.youtube.com/embed/${youtubeId}`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    );
-                  } else if (videoInfo.type === 'vimeo') {
-                    // Vimeo with controls (no autoplay in modal)
-                    const vimeoId = selectedArtist.videoUrl.match(/(?:vimeo\.com\/)(?:.*\/)?(\d+)/)[1];
-                    return (
-                      <iframe
-                        className="w-full aspect-video rounded-xl mb-6"
-                        src={`https://player.vimeo.com/video/${vimeoId}`}
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                      />
-                    );
-                  } else if (videoInfo.type === 'direct') {
-                    return (
-                      <video 
-                        className="w-full aspect-video rounded-xl mb-6"
-                        controls
-                        poster={selectedArtist.posterUrl || ''}
-                      >
-                        <source src={videoInfo.embedUrl} type="video/mp4" />
-                      </video>
-                    );
-                  }
-                }
-                
-                // Fallback to poster or gradient
-                if (selectedArtist.posterUrl) {
-                  return (
-                    <img 
-                      src={selectedArtist.posterUrl} 
-                      alt={selectedArtist.name}
-                      className="w-full aspect-video rounded-xl mb-6 object-cover"
-                    />
-                  );
-                }
-                
-                return (
-                  <div className="w-full aspect-video bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl mb-6 flex items-center justify-center">
-                    <div className="text-white text-center">
-                      <div className="text-4xl mb-3">🎨</div>
-                      <div className="text-lg font-medium">Motion Design</div>
-                    </div>
-                  </div>
-                );
-              })()}
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-400 uppercase mb-2">About</h3>
-                  <p className="text-slate-200">{selectedArtist.bio}</p>
-                </div>
-                <div className="flex gap-3 pt-4 border-t border-slate-700">
-                  <a
-                    href={`https://${selectedArtist.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
-                  >
-                    <Globe />
-                    <span className="text-sm">Website</span>
-                  </a>
-                  <a
-                    href={`https://instagram.com/${selectedArtist.instagram.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg"
-                  >
-                    <Instagram />
-                    <span className="text-sm">Instagram</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Submission Form Modal */}
       <SubmissionForm 
