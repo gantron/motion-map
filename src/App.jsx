@@ -644,14 +644,19 @@ function App() {
               const y = row * (cellSize + gap);
 
               // Calculate staggered delay based on distance from origin
+              // Find actual max row/col in current grid for accurate normalization
+              const allPositions = Object.values(currentGrid);
+              const maxRow = Math.max(...allPositions.map(([r]) => r));
+              const maxCol = Math.max(...allPositions.map(([, c]) => c));
+              const maxDistance = Math.sqrt(maxRow * maxRow + maxCol * maxCol);
+              
               const distanceFromOrigin = Math.sqrt(row * row + col * col);
-              const maxDistance = Math.sqrt(8 * 8 + 18 * 18); // Approximate max grid distance
-              const normalizedDistance = distanceFromOrigin / maxDistance;
+              const normalizedDistance = maxDistance > 0 ? distanceFromOrigin / maxDistance : 0;
               const staggerDelay = normalizedDistance * 0.5; // 0-500ms stagger
 
               return (
                 <div
-                  key={code}
+                  key={`${code}-${viewMode}`}
                   className="absolute"
                   style={{
                     left: `${x}px`,
@@ -701,12 +706,21 @@ function App() {
                         if (videoInfo) {
                           if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                             return (
-                              <iframe
-                                src={videoInfo.embedUrl}
-                                className="absolute inset-0 w-full h-full"
-                                allow="autoplay; encrypted-media"
-                                style={{ pointerEvents: 'none', objectFit: 'cover' }}
-                              />
+                              <div className="absolute inset-0 overflow-hidden">
+                                <iframe
+                                  src={videoInfo.embedUrl}
+                                  className="absolute"
+                                  style={{
+                                    left: '50%',
+                                    top: '50%',
+                                    width: '177.78%', // 16/9 = 1.7778, so scale to fill square
+                                    height: '177.78%',
+                                    transform: 'translate(-50%, -50%)',
+                                    pointerEvents: 'none'
+                                  }}
+                                  allow="autoplay; encrypted-media"
+                                />
+                              </div>
                             );
                           } else if (videoInfo.type === 'direct') {
                             return (
