@@ -223,16 +223,8 @@ function App() {
 
   const generateGridLayout = (items) => {
     const grid = {};
-    // Sort items alphabetically for cleaner grid view
-    const sortedItems = [...items].sort((a, b) => {
-      // Remove seed numbers for sorting (e.g., "USA-1" -> "USA")
-      const aClean = a.replace(/-\d+$/, '');
-      const bClean = b.replace(/-\d+$/, '');
-      return aClean.localeCompare(bClean);
-    });
-    
-    const gridSize = Math.ceil(Math.sqrt(sortedItems.length));
-    sortedItems.forEach((item, index) => {
+    const gridSize = Math.ceil(Math.sqrt(items.length));
+    items.forEach((item, index) => {
       const row = Math.floor(index / gridSize);
       const col = index % gridSize;
       grid[item] = [row, col];
@@ -473,7 +465,7 @@ function App() {
     });
 
     // Dynamic cell size based on zoom level and item count
-    let baseCellSize = 120;
+    let baseCellSize = 135; // Increased from 120 for world/country views
     const itemCount = Object.keys(currentGrid).length;
     
     if (zoomLevel === 'state') {
@@ -487,7 +479,7 @@ function App() {
       }
     }
     
-    const baseGap = 16;
+    const baseGap = 10; // Reduced from 16 for tighter spacing
     
     const availableWidth = windowSize.width - 64 - 400;
     const availableHeight = windowSize.height - 200;
@@ -636,28 +628,29 @@ function App() {
               transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            {Object.entries(currentGrid).map(([code, [row, col]]) => {
-              const isHovered = hoveredState === code;
-              const hasContent = !!currentData[code];
-              const isSelected = selectedArtist?.code === code;
-              const x = col * (cellSize + gap);
-              const y = row * (cellSize + gap);
-
-              // Calculate staggered delay based on distance from origin
-              // Find actual max row/col in current grid for accurate normalization
+            {(() => {
+              // Calculate max distance once for all items
               const allPositions = Object.values(currentGrid);
-              const maxRow = Math.max(...allPositions.map(([r]) => r));
-              const maxCol = Math.max(...allPositions.map(([, c]) => c));
+              const maxRow = allPositions.length > 0 ? Math.max(...allPositions.map(([r]) => r)) : 1;
+              const maxCol = allPositions.length > 0 ? Math.max(...allPositions.map(([, c]) => c)) : 1;
               const maxDistance = Math.sqrt(maxRow * maxRow + maxCol * maxCol);
               
-              const distanceFromOrigin = Math.sqrt(row * row + col * col);
-              const normalizedDistance = maxDistance > 0 ? distanceFromOrigin / maxDistance : 0;
-              const staggerDelay = normalizedDistance * 0.5; // 0-500ms stagger
+              return Object.entries(currentGrid).map(([code, [row, col]]) => {
+                const isHovered = hoveredState === code;
+                const hasContent = !!currentData[code];
+                const isSelected = selectedArtist?.code === code;
+                const x = col * (cellSize + gap);
+                const y = row * (cellSize + gap);
 
-              return (
-                <div
-                  key={`${code}-${viewMode}`}
-                  className="absolute"
+                // Calculate staggered delay based on distance from origin
+                const distanceFromOrigin = Math.sqrt(row * row + col * col);
+                const normalizedDistance = maxDistance > 0 ? distanceFromOrigin / maxDistance : 0;
+                const staggerDelay = normalizedDistance * 0.5; // 0-500ms stagger
+
+                return (
+                  <div
+                    key={code}
+                    className="absolute"
                   style={{
                     left: `${x}px`,
                     top: `${y}px`,
@@ -679,12 +672,12 @@ function App() {
                 >
                   {isHovered && (
                     <div
-                      className="absolute inset-0 bg-black/40 rounded-lg blur-xl"
+                      className="absolute inset-0 bg-black/40 rounded-xl blur-xl"
                       style={{ transform: 'translateY(8px)' }}
                     />
                   )}
                   <div
-                    className={`w-full h-full rounded-lg border-2 overflow-hidden relative ${
+                    className={`w-full h-full rounded-xl border-2 overflow-hidden relative ${
                       hasContent
                         ? isSelected 
                           ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
@@ -706,7 +699,7 @@ function App() {
                         if (videoInfo) {
                           if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                             return (
-                              <div className="absolute inset-0 overflow-hidden">
+                              <div className="absolute inset-0 overflow-hidden rounded-xl">
                                 <iframe
                                   src={videoInfo.embedUrl}
                                   className="absolute"
@@ -782,7 +775,8 @@ function App() {
                   </div>
                 </div>
               );
-            })}
+            });
+            })()}
           </div>
         </div>
 
