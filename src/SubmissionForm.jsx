@@ -25,7 +25,7 @@ function SubmissionForm({ isOpen, onClose }) {
   const SUBMISSION_URL = 'https://script.google.com/macros/s/AKfycbzJGzFrjxV9OJ9dVTabOTLmKdtbJOm06ilhoj74ajhnL1vuq5hrOaETJDdwROFiKbd_Uw/exec';
   
   // TODO: Replace with your Cloudflare Turnstile site key
-  const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY';
+  const TURNSTILE_SITE_KEY = '0x4AAAAAACT9ClrKULRWVUBM';
 
   // Load Cloudflare Turnstile
   useEffect(() => {
