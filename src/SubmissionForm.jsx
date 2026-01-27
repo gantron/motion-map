@@ -22,7 +22,7 @@ function SubmissionForm({ isOpen, onClose }) {
   const [rateLimitError, setRateLimitError] = useState(false);
 
   // TODO: Replace this with your actual Google Apps Script Web App URL after deployment
-  const SUBMISSION_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+  const SUBMISSION_URL = 'https://script.google.com/macros/s/AKfycbzJGzFrjxV9OJ9dVTabOTLmKdtbJOm06ilhoj74ajhnL1vuq5hrOaETJDdwROFiKbd_Uw/exec';
   
   // TODO: Replace with your Cloudflare Turnstile site key
   const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY';
