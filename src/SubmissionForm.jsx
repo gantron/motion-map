@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from './Icons';
 
 function SubmissionForm({ isOpen, onClose }) {
@@ -18,9 +18,42 @@ function SubmissionForm({ isOpen, onClose }) {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null); // 'success' or 'error'
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [rateLimitError, setRateLimitError] = useState(false);
 
   // TODO: Replace this with your actual Google Apps Script Web App URL after deployment
-  const SUBMISSION_URL = 'https://script.google.com/macros/s/AKfycbzKevtc9aSAVW-7ArqgkXG7aGh_Cqn7FRMJM1zb-feNfxGZ34r4jdm03ZtlI1Als4icgw/exec';
+  const SUBMISSION_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+  
+  // TODO: Replace with your Cloudflare Turnstile site key
+  const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY';
+
+  // Load Cloudflare Turnstile
+  useEffect(() => {
+    if (isOpen && !window.turnstile) {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }, [isOpen]);
+
+  // Check rate limit (client-side prevention)
+  const checkRateLimit = () => {
+    const lastSubmission = localStorage.getItem('motionmap-last-submit');
+    if (lastSubmission) {
+      const timeSince = Date.now() - parseInt(lastSubmission);
+      const cooldownMinutes = 10;
+      const cooldownMs = cooldownMinutes * 60 * 1000;
+      
+      if (timeSince < cooldownMs) {
+        const minutesLeft = Math.ceil((cooldownMs - timeSince) / 60000);
+        setRateLimitError(`Please wait ${minutesLeft} minutes before submitting again.`);
+        return false;
+      }
+    }
+    return true;
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -31,8 +64,36 @@ function SubmissionForm({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setRateLimitError(false);
+    
+    // Check rate limit
+    if (!checkRateLimit()) {
+      return;
+    }
+    
+    // Check captcha
+    if (!captchaToken) {
+      setSubmitStatus('error');
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitStatus(null);
+
+    // Auto-add https:// to URLs if missing
+    const cleanedData = {
+      ...formData,
+      captchaToken, // Include captcha for server-side verification
+      website: formData.website && !formData.website.match(/^https?:\/\//) 
+        ? `https://${formData.website}` 
+        : formData.website,
+      videoUrl: formData.videoUrl && !formData.videoUrl.match(/^https?:\/\//) 
+        ? `https://${formData.videoUrl}` 
+        : formData.videoUrl,
+      posterUrl: formData.posterUrl && !formData.posterUrl.match(/^https?:\/\//) 
+        ? `https://${formData.posterUrl}` 
+        : formData.posterUrl,
+    };
 
     try {
       const response = await fetch(SUBMISSION_URL, {
@@ -41,12 +102,15 @@ function SubmissionForm({ isOpen, onClose }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(cleanedData)
       });
 
       // Note: With no-cors mode, we can't read the response
       // We'll assume success if no error is thrown
       setSubmitStatus('success');
+      
+      // Store submission time
+      localStorage.setItem('motionmap-last-submit', Date.now().toString());
       
       // Reset form after 2 seconds
       setTimeout(() => {
@@ -63,6 +127,7 @@ function SubmissionForm({ isOpen, onClose }) {
           posterUrl: '',
           preferredMonth: ''
         });
+        setCaptchaToken(null);
         setSubmitStatus(null);
         onClose();
       }, 2000);
@@ -194,12 +259,12 @@ function SubmissionForm({ isOpen, onClose }) {
               Website
             </label>
             <input
-              type="url"
+              type="text"
               name="website"
               value={formData.website}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="https://yourwebsite.com"
+              placeholder="yourwebsite.com (https:// added automatically)"
             />
           </div>
 
@@ -224,12 +289,12 @@ function SubmissionForm({ isOpen, onClose }) {
               Video URL (Vimeo or YouTube)
             </label>
             <input
-              type="url"
+              type="text"
               name="videoUrl"
               value={formData.videoUrl}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="https://vimeo.com/... or https://youtube.com/..."
+              placeholder="vimeo.com/... or youtube.com/... (https:// added automatically)"
             />
           </div>
 
@@ -239,12 +304,12 @@ function SubmissionForm({ isOpen, onClose }) {
               Poster / Artwork URL
             </label>
             <input
-              type="url"
+              type="text"
               name="posterUrl"
               value={formData.posterUrl}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="https://... (direct link to image)"
+              placeholder="Direct link to image (https:// added automatically)"
             />
             <p className="text-xs text-slate-400 mt-1">
               Upload your image to Imgur, Google Drive, or your portfolio site and paste the direct link
@@ -267,6 +332,23 @@ function SubmissionForm({ isOpen, onClose }) {
               Optional - we'll feature you when space is available
             </p>
           </div>
+
+          {/* Cloudflare Turnstile Captcha */}
+          <div>
+            <div 
+              className="cf-turnstile" 
+              data-sitekey={TURNSTILE_SITE_KEY}
+              data-callback={(token) => setCaptchaToken(token)}
+              data-theme="dark"
+            ></div>
+          </div>
+
+          {/* Rate Limit Error */}
+          {rateLimitError && (
+            <div className="bg-yellow-500/20 border border-yellow-500 text-yellow-200 px-4 py-3 rounded-lg">
+              ⏱️ {rateLimitError}
+            </div>
+          )}
 
           {/* Submit Status */}
           {submitStatus === 'success' && (
