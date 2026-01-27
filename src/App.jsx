@@ -61,13 +61,6 @@ function App() {
     return null;
   };
 
-  // Fallback demo data (not used if sheets load)
-  const demoData = {
-    world: {},
-    countries: {},
-    states: {}
-  };
-
   // Load data from Google Sheets on mount
   useEffect(() => {
     loadData().then(data => {
@@ -119,26 +112,6 @@ function App() {
     'OK': [5, 3], 'LA': [5, 4], 'MS': [5, 5], 'AL': [5, 6], 'GA': [5, 7], 'SC': [5, 8],
     'TX': [6, 4], 'FL': [6, 9],
     'AK': [8, 0], 'HI': [8, 1]
-  };
-
-  // NC Cities map grid (geographically approximate)
-  const ncCitiesMapGrid = {
-    'Asheville': [1, 0],       // Western mountains
-    'Boone': [0, 1],          // Northwestern mountains
-    'Hickory': [1, 1],        // Western piedmont
-    'Winston-Salem': [1, 2],  // Northern piedmont
-    'Greensboro': [1, 3],     // Central piedmont
-    'Durham': [1, 4],         // Central piedmont
-    'Raleigh': [1, 5],        // Central/eastern
-    'Charlotte': [2, 1],      // Southern piedmont
-    'Chapel Hill': [2, 4],    // Just south of Durham
-    'Cary': [2, 5],          // Just south of Raleigh
-    'Fayetteville': [3, 4],  // South central
-    'Wilmington': [4, 6],    // Coastal southeast
-    'Jacksonville': [3, 6],   // Coastal
-    'Greenville': [2, 7],    // Eastern
-    'Rocky Mount': [1, 6],   // Northeastern
-    'Wilson': [2, 6]         // East of Raleigh
   };
 
   // City coordinates database (lat, long) - expand this as needed
@@ -253,7 +226,7 @@ function App() {
   }, []);
 
   // Use loaded data
-  const activeData = sheetData || demoData;
+  const activeData = sheetData || { world: {}, countries: {}, states: {} };
   
   // Get available months
   let monthsArchive = [];
@@ -520,24 +493,50 @@ function App() {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex items-center justify-center">
         <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+          @keyframes rotate3d {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
           }
           @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
           }
-          .spin-globe {
-            animation: spin 3s linear infinite;
-            display: inline-block;
+          .loader-container {
+            perspective: 1000px;
+            width: 80px;
+            height: 80px;
+            position: relative;
           }
+          .rotating-square {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: rotate3d 3s linear infinite;
+            transform-style: preserve-3d;
+          }
+          .square-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid;
+            border-radius: 14px;
+            box-sizing: border-box;
+          }
+          .square-1 { border-color: rgba(99, 102, 241, 0.8); transform: translateZ(0px); }
+          .square-2 { border-color: rgba(168, 85, 247, 0.6); transform: translateZ(-20px) scale(0.8); }
+          .square-3 { border-color: rgba(236, 72, 153, 0.4); transform: translateZ(-40px) scale(0.6); }
           .pulse-text {
             animation: pulse 2s ease-in-out infinite;
           }
         `}</style>
         <div className="text-center">
-          <div className="text-7xl mb-6 spin-globe">🌍</div>
+          <div className="loader-container mx-auto mb-8">
+            <div className="rotating-square">
+              <div className="square-face square-1"></div>
+              <div className="square-face square-2"></div>
+              <div className="square-face square-3"></div>
+            </div>
+          </div>
           <div className="text-white text-2xl font-bold mb-3">Motion-Map</div>
           <div className="text-slate-400 text-lg pulse-text">Loading artists...</div>
         </div>
@@ -718,7 +717,7 @@ function App() {
                     transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0)',
                     zIndex: isHovered ? 10 : (isSelected ? 5 : 1),
                     cursor: hasContent ? 'pointer' : 'default',
-                    transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.15s ease-out`
+                    transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
                   }}
                   onMouseEnter={() => {
                     if (hasContent && !('ontouchstart' in window)) {
