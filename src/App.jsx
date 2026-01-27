@@ -493,9 +493,17 @@ function App() {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex items-center justify-center">
         <style>{`
-          @keyframes rotate3d {
+          @keyframes rotate1 {
             0% { transform: rotateX(0deg) rotateY(0deg); }
             100% { transform: rotateX(360deg) rotateY(360deg); }
+          }
+          @keyframes rotate2 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(450deg) rotateY(270deg); }
+          }
+          @keyframes rotate3 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(270deg) rotateY(450deg); }
           }
           @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -503,39 +511,50 @@ function App() {
           }
           .loader-container {
             perspective: 1000px;
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             position: relative;
           }
           .rotating-square {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            animation: rotate3d 3s linear infinite;
+            top: 50%;
+            left: 50%;
             transform-style: preserve-3d;
+            transform-origin: center;
           }
-          .square-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 3px solid;
-            border-radius: 14px;
-            box-sizing: border-box;
+          .square-1 {
+            animation: rotate1 4s linear infinite;
+            margin: -40px 0 0 -40px;
           }
-          .square-1 { border-color: rgba(99, 102, 241, 0.8); transform: translateZ(0px); }
-          .square-2 { border-color: rgba(168, 85, 247, 0.6); transform: translateZ(-20px) scale(0.8); }
-          .square-3 { border-color: rgba(236, 72, 153, 0.4); transform: translateZ(-40px) scale(0.6); }
+          .square-2 {
+            animation: rotate2 5s linear infinite;
+            margin: -35px 0 0 -35px;
+          }
+          .square-3 {
+            animation: rotate3 6s linear infinite;
+            margin: -30px 0 0 -30px;
+          }
           .pulse-text {
             animation: pulse 2s ease-in-out infinite;
           }
         `}</style>
         <div className="text-center">
           <div className="loader-container mx-auto mb-8">
-            <div className="rotating-square">
-              <div className="square-face square-1"></div>
-              <div className="square-face square-2"></div>
-              <div className="square-face square-3"></div>
-            </div>
+            <svg className="rotating-square square-1" width="80" height="80" viewBox="0 0 80 80">
+              <rect x="2" y="2" width="76" height="76" rx="14" 
+                    fill="none" stroke="rgba(99, 102, 241, 0.8)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <svg className="rotating-square square-2" width="70" height="70" viewBox="0 0 70 70">
+              <rect x="2" y="2" width="66" height="66" rx="12" 
+                    fill="none" stroke="rgba(168, 85, 247, 0.7)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <svg className="rotating-square square-3" width="60" height="60" viewBox="0 0 60 60">
+              <rect x="2" y="2" width="56" height="56" rx="10" 
+                    fill="none" stroke="rgba(236, 72, 153, 0.5)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
           </div>
           <div className="text-white text-2xl font-bold mb-3">Motion-Map</div>
           <div className="text-slate-400 text-lg pulse-text">Loading artists...</div>
