@@ -27,6 +27,18 @@ function SubmissionForm({ isOpen, onClose }) {
   // TODO: Replace with your Cloudflare Turnstile site key
   const TURNSTILE_SITE_KEY = '0x4AAAAAACT9ClrKULRWVUBM';
 
+  // Set up global callback for Turnstile
+  useEffect(() => {
+    // Create global callback function
+    window.onTurnstileSuccess = (token) => {
+      setCaptchaToken(token);
+    };
+
+    return () => {
+      delete window.onTurnstileSuccess;
+    };
+  }, []);
+
   // Load Cloudflare Turnstile
   useEffect(() => {
     if (isOpen && !window.turnstile) {
@@ -338,7 +350,7 @@ function SubmissionForm({ isOpen, onClose }) {
             <div 
               className="cf-turnstile" 
               data-sitekey={TURNSTILE_SITE_KEY}
-              data-callback={(token) => setCaptchaToken(token)}
+              data-callback="onTurnstileSuccess"
               data-theme="dark"
             ></div>
           </div>
@@ -374,7 +386,7 @@ function SubmissionForm({ isOpen, onClose }) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !captchaToken}
               className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Submitting...' : 'Submit'}
