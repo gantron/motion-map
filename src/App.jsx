@@ -757,7 +757,7 @@ function App() {
                     transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
                   }}
                   onMouseEnter={() => {
-                    if (hasContent && !('ontouchstart' in window)) {
+                    if (hasContent && (typeof window === 'undefined' || !('ontouchstart' in window))) {
                       setHoveredState(code);
                     }
                   }}
