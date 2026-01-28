@@ -287,14 +287,14 @@ function App() {
       const params = new URLSearchParams(window.location.search);
       const artistParam = params.get('artist');
       
-      if (artistParam && currentData && Object.keys(currentData).length > 0 && currentData[artistParam]) {
+      if (artistParam && currentData[artistParam]) {
         setSelectedArtist({ ...currentData[artistParam], code: artistParam });
       }
     } catch (e) {
       // Silently fail if anything goes wrong
       console.error('Error loading artist from URL:', e);
     }
-  }, [sheetData, currentData]);
+  }, [sheetData]);
   
   // Ensure currentMonthIndex is valid
   const safeIndex = monthsArchive.length > 0 ? Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1)) : 0;
