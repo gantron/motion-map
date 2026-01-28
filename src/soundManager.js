@@ -1,26 +1,14 @@
-// Minimal Sound Manager for Motion-Map
-// Safe for server-side rendering
+// Sound Manager for Motion-Map - SSR Safe
 
 class SoundManager {
   constructor() {
     this.sounds = {};
     this.isMuted = false;
     this.volume = 0.3;
-    this.isClient = typeof window !== 'undefined';
-    
-    // Only try to load from localStorage in browser
-    if (this.isClient && window.localStorage) {
-      try {
-        this.isMuted = localStorage.getItem('motionmap-muted') === 'true';
-        this.volume = parseFloat(localStorage.getItem('motionmap-volume')) || 0.3;
-      } catch (e) {
-        // Ignore errors
-      }
-    }
   }
 
   preload(soundMap) {
-    if (!this.isClient) return;
+    if (typeof window === 'undefined') return;
     
     Object.entries(soundMap).forEach(([key, path]) => {
       try {
@@ -29,13 +17,13 @@ class SoundManager {
         audio.preload = 'auto';
         this.sounds[key] = audio;
       } catch (e) {
-        console.debug('Failed to load sound:', key);
+        // Ignore
       }
     });
   }
 
   play(soundKey) {
-    if (!this.isClient || this.isMuted) return;
+    if (typeof window === 'undefined' || this.isMuted) return;
     
     const sound = this.sounds[soundKey];
     if (sound) {
@@ -50,7 +38,7 @@ class SoundManager {
   }
 
   playLoop(soundKey) {
-    if (!this.isClient || this.isMuted) return;
+    if (typeof window === 'undefined' || this.isMuted) return;
     
     const sound = this.sounds[soundKey];
     if (sound) {
@@ -65,7 +53,7 @@ class SoundManager {
   }
 
   stopLoop(soundKey) {
-    if (!this.isClient) return;
+    if (typeof window === 'undefined') return;
     
     const sound = this.sounds[soundKey];
     if (sound) {
@@ -80,15 +68,6 @@ class SoundManager {
 
   setVolume(vol) {
     this.volume = Math.max(0, Math.min(1, vol));
-    
-    if (this.isClient && window.localStorage) {
-      try {
-        localStorage.setItem('motionmap-volume', this.volume.toString());
-      } catch (e) {
-        // Ignore
-      }
-    }
-    
     Object.values(this.sounds).forEach(sound => {
       try {
         sound.volume = this.volume;
@@ -100,14 +79,6 @@ class SoundManager {
 
   toggleMute() {
     this.isMuted = !this.isMuted;
-    
-    if (this.isClient && window.localStorage) {
-      try {
-        localStorage.setItem('motionmap-muted', this.isMuted.toString());
-      } catch (e) {
-        // Ignore
-      }
-    }
     
     if (this.isMuted) {
       Object.values(this.sounds).forEach(sound => {
@@ -123,38 +94,29 @@ class SoundManager {
   }
 }
 
-// Lazy-initialized singleton to avoid SSR issues
-let soundManagerInstance = null;
+// Only create instance in browser
+let instance = null;
+function getInstance() {
+  if (typeof window === 'undefined') {
+    // Return no-op for SSR
+    return {
+      preload: () => {},
+      play: () => {},
+      playLoop: () => {},
+      stopLoop: () => {},
+      setVolume: () => {},
+      toggleMute: () => false,
+      isMuted: false
+    };
+  }
+  if (!instance) {
+    instance = new SoundManager();
+  }
+  return instance;
+}
 
-export const soundManager = {
-  get instance() {
-    if (typeof window === 'undefined') {
-      // Return a no-op object for SSR
-      return {
-        preload: () => {},
-        play: () => {},
-        playLoop: () => {},
-        stopLoop: () => {},
-        setVolume: () => {},
-        toggleMute: () => false,
-        isMuted: false,
-        volume: 0.3
-      };
-    }
-    if (!soundManagerInstance) {
-      soundManagerInstance = new SoundManager();
-    }
-    return soundManagerInstance;
-  },
-  preload: (...args) => soundManager.instance.preload(...args),
-  play: (...args) => soundManager.instance.play(...args),
-  playLoop: (...args) => soundManager.instance.playLoop(...args),
-  stopLoop: (...args) => soundManager.instance.stopLoop(...args),
-  setVolume: (...args) => soundManager.instance.setVolume(...args),
-  toggleMute: (...args) => soundManager.instance.toggleMute(...args)
-};
+export const soundManager = getInstance();
 
-// Initialize sounds - call this in your App component
 export const initSounds = () => {
   if (typeof window === 'undefined') return;
   
