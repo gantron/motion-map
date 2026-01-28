@@ -7,8 +7,6 @@ import { loadData, getAvailableMonths } from './dataLoader';
 import SubmissionForm from './SubmissionForm';
 import { soundManager, initSounds } from './soundManager';
 import MuteButton from './MuteButton';
-import { soundManager, initSounds } from './soundManager';
-import MuteButton from './MuteButton';
 
 function App() {
   const [hoveredState, setHoveredState] = useState(null);
