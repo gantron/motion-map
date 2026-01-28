@@ -15,7 +15,10 @@ function App() {
   const [zoomLevel, setZoomLevel] = useState('world'); // 'world', 'country', 'state'
   const [selectedRegion, setSelectedRegion] = useState(null); // e.g., 'USA'
   const [selectedState, setSelectedState] = useState(null); // e.g., 'NC'
-  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [windowSize, setWindowSize] = useState({ 
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920, 
+    height: typeof window !== 'undefined' ? window.innerHeight : 1080 
+  });
   const [sheetData, setSheetData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const videoRefs = useRef({});
