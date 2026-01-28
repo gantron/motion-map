@@ -4,9 +4,7 @@ import {
   Map, Grid, Home
 } from './Icons';
 import { loadData, getAvailableMonths } from './dataLoader';
-// import SubmissionForm from './SubmissionForm';
-// import { soundManager, initSounds } from './soundManager';
-// import MuteButton from './MuteButton';
+import SubmissionForm from './SubmissionForm';
 
 function App() {
   const [hoveredState, setHoveredState] = useState(null);
@@ -17,10 +15,7 @@ function App() {
   const [zoomLevel, setZoomLevel] = useState('world'); // 'world', 'country', 'state'
   const [selectedRegion, setSelectedRegion] = useState(null); // e.g., 'USA'
   const [selectedState, setSelectedState] = useState(null); // e.g., 'NC'
-  const [windowSize, setWindowSize] = useState({ 
-    width: typeof window !== 'undefined' ? window.innerWidth : 1920, 
-    height: typeof window !== 'undefined' ? window.innerHeight : 1080 
-  });
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [sheetData, setSheetData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const videoRefs = useRef({});
@@ -223,12 +218,9 @@ function App() {
 
   // Window resize handler
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
     const handleResize = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
-    
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -501,78 +493,68 @@ function App() {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex items-center justify-center">
         <style>{`
-          @keyframes orbit1 {
-            0% { transform: rotateY(0deg) translateZ(60px) rotateY(0deg); }
-            100% { transform: rotateY(360deg) translateZ(60px) rotateY(-360deg); }
+          @keyframes rotate1 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
           }
-          @keyframes orbit2 {
-            0% { transform: rotateX(60deg) rotateY(0deg) translateZ(50px) rotateY(0deg) rotateX(-60deg); }
-            100% { transform: rotateX(60deg) rotateY(360deg) translateZ(50px) rotateY(-360deg) rotateX(-60deg); }
+          @keyframes rotate2 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(450deg) rotateY(270deg); }
           }
-          @keyframes orbit3 {
-            0% { transform: rotateX(-45deg) rotateY(0deg) translateZ(70px) rotateY(0deg) rotateX(45deg); }
-            100% { transform: rotateX(-45deg) rotateY(360deg) translateZ(70px) rotateY(-360deg) rotateX(45deg); }
+          @keyframes rotate3 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(270deg) rotateY(450deg); }
           }
           @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
           }
-          .loader-scene {
-            perspective: 800px;
-            width: 200px;
-            height: 200px;
+          .loader-container {
+            perspective: 1000px;
+            width: 100px;
+            height: 100px;
             position: relative;
           }
-          .orbit-container {
+          .rotating-square {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 0;
-            height: 0;
             transform-style: preserve-3d;
-          }
-          .orbiting-square {
-            position: absolute;
-            transform-style: preserve-3d;
+            transform-origin: center;
           }
           .square-1 {
-            animation: orbit1 5s linear infinite;
+            animation: rotate1 4s linear infinite;
+            margin: -40px 0 0 -40px;
           }
           .square-2 {
-            animation: orbit2 6s linear infinite;
+            animation: rotate2 5s linear infinite;
+            margin: -35px 0 0 -35px;
           }
           .square-3 {
-            animation: orbit3 7s linear infinite;
+            animation: rotate3 6s linear infinite;
+            margin: -30px 0 0 -30px;
           }
           .pulse-text {
             animation: pulse 2s ease-in-out infinite;
           }
         `}</style>
         <div className="text-center">
-          <div className="loader-scene mx-auto mb-8">
-            <div className="orbit-container">
-              <div className="orbiting-square square-1">
-                <svg width="80" height="80" viewBox="0 0 80 80" style="margin: -40px 0 0 -40px;">
-                  <rect x="2" y="2" width="76" height="76" rx="14" 
-                        fill="none" stroke="rgba(99, 102, 241, 0.9)" 
-                        stroke-width="3" vector-effect="non-scaling-stroke"/>
-                </svg>
-              </div>
-              <div className="orbiting-square square-2">
-                <svg width="70" height="70" viewBox="0 0 70 70" style="margin: -35px 0 0 -35px;">
-                  <rect x="2" y="2" width="66" height="66" rx="12" 
-                        fill="none" stroke="rgba(168, 85, 247, 0.8)" 
-                        stroke-width="3" vector-effect="non-scaling-stroke"/>
-                </svg>
-              </div>
-              <div className="orbiting-square square-3">
-                <svg width="60" height="60" viewBox="0 0 60 60" style="margin: -30px 0 0 -30px;">
-                  <rect x="2" y="2" width="56" height="56" rx="10" 
-                        fill="none" stroke="rgba(236, 72, 153, 0.7)" 
-                        stroke-width="3" vector-effect="non-scaling-stroke"/>
-                </svg>
-              </div>
-            </div>
+          <div className="loader-container mx-auto mb-8">
+            <svg className="rotating-square square-1" width="80" height="80" viewBox="0 0 80 80">
+              <rect x="2" y="2" width="76" height="76" rx="14" 
+                    fill="none" stroke="rgba(99, 102, 241, 0.8)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <svg className="rotating-square square-2" width="70" height="70" viewBox="0 0 70 70">
+              <rect x="2" y="2" width="66" height="66" rx="12" 
+                    fill="none" stroke="rgba(168, 85, 247, 0.7)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <svg className="rotating-square square-3" width="60" height="60" viewBox="0 0 60 60">
+              <rect x="2" y="2" width="56" height="56" rx="10" 
+                    fill="none" stroke="rgba(236, 72, 153, 0.5)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
           </div>
           <div className="text-white text-2xl font-bold mb-3">Motion-Map</div>
           <div className="text-slate-400 text-lg pulse-text">Loading artists...</div>
@@ -632,14 +614,12 @@ function App() {
             )}
           </div>
           <div className="flex gap-3 items-center">
-            {/* Temporarily disabled
             <button
               onClick={() => setIsSubmissionFormOpen(true)}
               className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-medium transition-colors text-sm"
             >
               Submit Your Work
             </button>
-            */}
             <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('map')}
@@ -759,7 +739,7 @@ function App() {
                     transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
                   }}
                   onMouseEnter={() => {
-                    if (hasContent && (typeof window === 'undefined' || !('ontouchstart' in window))) {
+                    if (hasContent && !('ontouchstart' in window)) {
                       setHoveredState(code);
                     }
                   }}
@@ -1025,12 +1005,11 @@ function App() {
         </div>
       </div>
 
-      {/* Submission Form Modal - Temporarily disabled
+      {/* Submission Form Modal */}
       <SubmissionForm 
         isOpen={isSubmissionFormOpen} 
         onClose={() => setIsSubmissionFormOpen(false)} 
       />
-      */}
     </div>
   );
 }
