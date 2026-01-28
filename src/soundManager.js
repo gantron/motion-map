@@ -4,8 +4,14 @@
 class SoundManager {
   constructor() {
     this.sounds = {};
-    this.isMuted = localStorage.getItem('motionmap-muted') === 'true';
-    this.volume = parseFloat(localStorage.getItem('motionmap-volume')) || 0.3;
+    // Check if we're in browser before accessing localStorage
+    if (typeof window !== 'undefined') {
+      this.isMuted = localStorage.getItem('motionmap-muted') === 'true';
+      this.volume = parseFloat(localStorage.getItem('motionmap-volume')) || 0.3;
+    } else {
+      this.isMuted = false;
+      this.volume = 0.3;
+    }
   }
 
   // Preload sounds for better performance
@@ -56,7 +62,9 @@ class SoundManager {
 
   setVolume(vol) {
     this.volume = Math.max(0, Math.min(1, vol));
-    localStorage.setItem('motionmap-volume', this.volume.toString());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('motionmap-volume', this.volume.toString());
+    }
     Object.values(this.sounds).forEach(sound => {
       sound.volume = this.volume;
     });
@@ -64,7 +72,9 @@ class SoundManager {
 
   toggleMute() {
     this.isMuted = !this.isMuted;
-    localStorage.setItem('motionmap-muted', this.isMuted.toString());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('motionmap-muted', this.isMuted.toString());
+    }
     
     if (this.isMuted) {
       Object.values(this.sounds).forEach(sound => sound.pause());
