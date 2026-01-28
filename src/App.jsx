@@ -891,11 +891,30 @@ function App() {
                     if (videoInfo) {
                       if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                         return (
-                          <iframe
-                            src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
-                            className="w-full aspect-video rounded-lg mb-6"
-                            allow="encrypted-media; fullscreen"
-                          />
+                          <div className="mb-6">
+                            <iframe
+                              src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
+                              className="w-full aspect-video rounded-lg mb-3"
+                              allow="encrypted-media; fullscreen"
+                            />
+                            <a
+                              href={selectedArtist.videoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
+                            >
+                              {videoInfo.type === 'youtube' ? (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                </svg>
+                              ) : (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M23.977 6.416c-.105 2.338-1.382 5.854-3.828 10.548-2.496 4.836-4.605 7.254-6.328 7.254-1.067 0-1.969-.98-2.706-2.939l-1.48-5.418c-.547-1.96-1.135-2.939-1.762-2.939-.137 0-.617.287-1.438.862L5.5 12.5l.973-1.173c1.24-1.214 2.175-1.865 2.805-1.955 1.488-.143 2.406.875 2.754 3.051.375 2.366.636 3.837.785 4.414.44 1.995.926 2.992 1.457 2.992.411 0 1.026-.648 1.848-1.944.824-1.297 1.266-2.283 1.326-2.958.12-1.122-.324-1.683-1.332-1.683-.472 0-.959.107-1.46.322.969-3.171 2.82-4.715 5.551-4.631 2.024.062 2.979 1.369 2.867 3.921z"/>
+                                </svg>
+                              )}
+                              <span>Watch on {videoInfo.type === 'youtube' ? 'YouTube' : 'Vimeo'}</span>
+                            </a>
+                          </div>
                         );
                       } else if (videoInfo.type === 'direct') {
                         return (
