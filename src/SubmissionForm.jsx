@@ -22,14 +22,14 @@ function SubmissionForm({ isOpen, onClose }) {
   const [rateLimitError, setRateLimitError] = useState(false);
 
   // TODO: Replace this with your actual Google Apps Script Web App URL after deployment
-  const SUBMISSION_URL = 'https://script.google.com/macros/s/AKfycbzJGzFrjxV9OJ9dVTabOTLmKdtbJOm06ilhoj74ajhnL1vuq5hrOaETJDdwROFiKbd_Uw/exec';
+  const SUBMISSION_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
   
   // TODO: Replace with your Cloudflare Turnstile site key
-  const TURNSTILE_SITE_KEY = '0x4AAAAAACT9ClrKULRWVUBM';
+  const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY';
 
   // Load Cloudflare Turnstile
   useEffect(() => {
-    if (isOpen && !window.turnstile) {
+    if (typeof window !== 'undefined' && isOpen && !window.turnstile) {
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
       script.async = true;
@@ -40,6 +40,8 @@ function SubmissionForm({ isOpen, onClose }) {
 
   // Check rate limit (client-side prevention)
   const checkRateLimit = () => {
+    if (typeof window === 'undefined' || !window.localStorage) return true;
+    
     const lastSubmission = localStorage.getItem('motionmap-last-submit');
     if (lastSubmission) {
       const timeSince = Date.now() - parseInt(lastSubmission);
@@ -110,7 +112,9 @@ function SubmissionForm({ isOpen, onClose }) {
       setSubmitStatus('success');
       
       // Store submission time
-      localStorage.setItem('motionmap-last-submit', Date.now().toString());
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('motionmap-last-submit', Date.now().toString());
+      }
       
       // Reset form after 2 seconds
       setTimeout(() => {
