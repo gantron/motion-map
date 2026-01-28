@@ -274,6 +274,22 @@ function App() {
       setHasSetInitialMonth(true);
     }
   }, [monthsArchive.length, hasSetInitialMonth]);
+
+  // Handle shareable artist links from URL parameters
+  useEffect(() => {
+    if (typeof window === 'undefined' || !sheetData) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const artistParam = params.get('artist');
+    
+    if (artistParam && currentData[artistParam]) {
+      setSelectedArtist({ ...currentData[artistParam], code: artistParam });
+      
+      // Clean URL after loading (optional - removes the parameter)
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [sheetData, currentData]);
   
   // Ensure currentMonthIndex is valid
   const safeIndex = monthsArchive.length > 0 ? Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1)) : 0;
@@ -908,7 +924,7 @@ function App() {
                                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                 </svg>
                               ) : (
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" style={{ marginTop: '-5px' }}>
                                   <path d="M23.977 6.416c-.105 2.338-1.382 5.854-3.828 10.548-2.496 4.836-4.605 7.254-6.328 7.254-1.067 0-1.969-.98-2.706-2.939l-1.48-5.418c-.547-1.96-1.135-2.939-1.762-2.939-.137 0-.617.287-1.438.862L5.5 12.5l.973-1.173c1.24-1.214 2.175-1.865 2.805-1.955 1.488-.143 2.406.875 2.754 3.051.375 2.366.636 3.837.785 4.414.44 1.995.926 2.992 1.457 2.992.411 0 1.026-.648 1.848-1.944.824-1.297 1.266-2.283 1.326-2.958.12-1.122-.324-1.683-1.332-1.683-.472 0-.959.107-1.46.322.969-3.171 2.82-4.715 5.551-4.631 2.024.062 2.979 1.369 2.867 3.921z"/>
                                 </svg>
                               )}
@@ -962,7 +978,7 @@ function App() {
                 )}
 
                 {/* Links */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 mb-4">
                   {selectedArtist.website && (
                     <a
                       href={selectedArtist.website.startsWith('http') ? selectedArtist.website : `https://${selectedArtist.website}`}
@@ -986,6 +1002,22 @@ function App() {
                     </a>
                   )}
                 </div>
+
+                {/* Share Button */}
+                <button
+                  onClick={() => {
+                    const shareUrl = `${window.location.origin}${window.location.pathname}?artist=${selectedArtist.code}`;
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                      alert('Link copied! Share this URL to link directly to this artist.');
+                    });
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors mb-6"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  <span className="text-sm font-medium">Share Artist</span>
+                </button>
 
                 {/* Drill-down hint */}
                 {(() => {
