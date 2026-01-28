@@ -123,8 +123,36 @@ class SoundManager {
   }
 }
 
-// Create singleton instance
-export const soundManager = new SoundManager();
+// Lazy-initialized singleton to avoid SSR issues
+let soundManagerInstance = null;
+
+export const soundManager = {
+  get instance() {
+    if (typeof window === 'undefined') {
+      // Return a no-op object for SSR
+      return {
+        preload: () => {},
+        play: () => {},
+        playLoop: () => {},
+        stopLoop: () => {},
+        setVolume: () => {},
+        toggleMute: () => false,
+        isMuted: false,
+        volume: 0.3
+      };
+    }
+    if (!soundManagerInstance) {
+      soundManagerInstance = new SoundManager();
+    }
+    return soundManagerInstance;
+  },
+  preload: (...args) => soundManager.instance.preload(...args),
+  play: (...args) => soundManager.instance.play(...args),
+  playLoop: (...args) => soundManager.instance.playLoop(...args),
+  stopLoop: (...args) => soundManager.instance.stopLoop(...args),
+  setVolume: (...args) => soundManager.instance.setVolume(...args),
+  toggleMute: (...args) => soundManager.instance.toggleMute(...args)
+};
 
 // Initialize sounds - call this in your App component
 export const initSounds = () => {
