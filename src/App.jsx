@@ -899,8 +899,8 @@ function App() {
               </div>
 
               {/* Artist Content */}
-              <div className="flex-1 overflow-y-auto p-6 animate-slideUp">
-                {/* Video/Poster */}
+              <div className="flex-1 overflow-y-auto animate-slideUp">
+                {/* Video/Poster - NO padding */}
                 {(() => {
                   // Check for valid video URL
                   const hasValidVideo = selectedArtist.videoUrl && 
@@ -914,9 +914,9 @@ function App() {
                         return (
                           <div className="mb-4">
                             <iframe
-                              src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
+                              src={videoInfo.embedUrl}
                               className="w-full aspect-video"
-                              allow="encrypted-media; fullscreen"
+                              allow="autoplay; encrypted-media; fullscreen"
                             />
                             <a
                               href={selectedArtist.videoUrl}
@@ -974,6 +974,8 @@ function App() {
                   );
                 })()}
 
+                {/* Content with padding */}
+                <div className="px-6">
                 {/* Bio */}
                 {selectedArtist.bio && (
                   <div className="mb-6">
@@ -1046,6 +1048,7 @@ function App() {
                     </div>
                   );
                 })()}
+                </div>
               </div>
             </div>
           ) : (
