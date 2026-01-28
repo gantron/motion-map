@@ -29,7 +29,7 @@ function SubmissionForm({ isOpen, onClose }) {
 
   // Load Cloudflare Turnstile
   useEffect(() => {
-    if (typeof window !== 'undefined' && isOpen && !window.turnstile) {
+    if (typeof window !== 'undefined' && typeof document !== 'undefined' && isOpen && !window.turnstile) {
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
       script.async = true;
