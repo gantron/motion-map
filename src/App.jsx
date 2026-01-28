@@ -486,7 +486,7 @@ function App() {
     
     const baseGap = 8; // Reduced from 10 for tighter spacing
     
-    const availableWidth = windowSize.width - 32 - 400; // p-4 = 16px × 2 = 32px total
+    const availableWidth = windowSize.width - 64 - 400;
     const availableHeight = windowSize.height - 200;
     
     const gridWidth = (maxCol + 1) * baseCellSize + maxCol * baseGap;
@@ -711,7 +711,7 @@ function App() {
         {/* Map Area */}
         <div className="flex-1 flex items-start justify-start p-4 overflow-auto">
           <div 
-            className="relative" 
+            className="relative mx-auto" 
             style={{ 
               width: gridWidth, 
               height: gridHeight,
