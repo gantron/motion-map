@@ -5,8 +5,6 @@ import {
 } from './Icons';
 import { loadData, getAvailableMonths } from './dataLoader';
 import SubmissionForm from './SubmissionForm';
-import { soundManager, initSounds } from './soundManager';
-import MuteButton from './MuteButton';
 
 function App() {
   const [hoveredState, setHoveredState] = useState(null);
@@ -76,18 +74,6 @@ function App() {
       setSheetData({ world: {}, countries: {}, states: {} });
       setIsLoading(false);
     });
-  }, []);
-
-  // Initialize sounds and start ambient loop (SSR-safe)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    initSounds();
-    soundManager.playLoop('ambient');
-    
-    return () => {
-      soundManager.stopLoop('ambient');
-    };
   }, []);
 
   // World grid with multiple boxes per country (roughly geographical)
@@ -412,10 +398,6 @@ function App() {
   };
 
   const handleItemDoubleClick = (code) => {
-    if (typeof window !== 'undefined') {
-      soundManager.play('drilldown');
-    }
-    
     if (zoomLevel === 'world') {
       // Drilling from World to Country (USA)
       const countryMatch = code.match(/^(.+?)-\d+$/);
@@ -442,10 +424,6 @@ function App() {
   };
 
   const handleZoomOut = () => {
-    if (typeof window !== 'undefined') {
-      soundManager.play('back');
-    }
-    
     if (zoomLevel === 'state') {
       // Zoom out from State to Country
       setZoomLevel('country');
@@ -658,7 +636,6 @@ function App() {
             >
               Submit Your Work
             </button>
-            <MuteButton />
             <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('map')}
@@ -779,19 +756,11 @@ function App() {
                   }}
                   onMouseEnter={() => {
                     if (hasContent && !('ontouchstart' in window)) {
-                      if (typeof window !== 'undefined') {
-                        soundManager.play('hover');
-                      }
                       setHoveredState(code);
                     }
                   }}
                   onMouseLeave={() => setHoveredState(null)}
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      soundManager.play('click');
-                    }
-                    handleItemClick(code);
-                  }}
+                  onClick={() => handleItemClick(code)}
                   onDoubleClick={() => handleItemDoubleClick(code)}
                 >
                   {isHovered && (
