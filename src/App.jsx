@@ -15,10 +15,7 @@ function App() {
   const [zoomLevel, setZoomLevel] = useState('world'); // 'world', 'country', 'state'
   const [selectedRegion, setSelectedRegion] = useState(null); // e.g., 'USA'
   const [selectedState, setSelectedState] = useState(null); // e.g., 'NC'
-  const [windowSize, setWindowSize] = useState({ 
-    width: typeof window !== 'undefined' ? window.innerWidth : 1920, 
-    height: typeof window !== 'undefined' ? window.innerHeight : 1080 
-  });
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [sheetData, setSheetData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const videoRefs = useRef({});
@@ -221,12 +218,9 @@ function App() {
 
   // Window resize handler
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
     const handleResize = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
-    
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -280,22 +274,6 @@ function App() {
       setHasSetInitialMonth(true);
     }
   }, [monthsArchive.length, hasSetInitialMonth]);
-
-  // Handle shareable artist links from URL parameters
-  useEffect(() => {
-    if (typeof window === 'undefined' || !sheetData) return;
-    
-    const params = new URLSearchParams(window.location.search);
-    const artistParam = params.get('artist');
-    
-    if (artistParam && currentData[artistParam]) {
-      setSelectedArtist({ ...currentData[artistParam], code: artistParam });
-      
-      // Update URL without the parameter (clean URL)
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [sheetData, currentData]);
   
   // Ensure currentMonthIndex is valid
   const safeIndex = monthsArchive.length > 0 ? Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1)) : 0;
@@ -515,64 +493,68 @@ function App() {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex items-center justify-center">
         <style>{`
+          @keyframes rotate1 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+          }
+          @keyframes rotate2 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(450deg) rotateY(270deg); }
+          }
+          @keyframes rotate3 {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(270deg) rotateY(450deg); }
+          }
           @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            50% { opacity: 0.4; }
           }
-          @keyframes slideIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+          .loader-container {
+            perspective: 1000px;
+            width: 100px;
+            height: 100px;
+            position: relative;
           }
-          .loader-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            animation: slideIn 0.5s ease-out;
+          .rotating-square {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-style: preserve-3d;
+            transform-origin: center;
           }
-          .loader-cube {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            animation: pulse 2s ease-in-out infinite;
+          .square-1 {
+            animation: rotate1 4s linear infinite;
+            margin: -40px 0 0 -40px;
           }
-          .loader-cube:nth-child(1) { animation-delay: 0s; }
-          .loader-cube:nth-child(2) { animation-delay: 0.1s; }
-          .loader-cube:nth-child(3) { animation-delay: 0.2s; }
-          .loader-cube:nth-child(4) { animation-delay: 0.3s; }
-          .loader-cube:nth-child(5) { animation-delay: 0.4s; }
-          .loader-cube:nth-child(6) { animation-delay: 0.1s; }
-          .loader-cube:nth-child(7) { animation-delay: 0.2s; }
-          .loader-cube:nth-child(8) { animation-delay: 0.3s; }
-          .loader-cube:nth-child(9) { animation-delay: 0.4s; }
-          .loader-cube:nth-child(10) { animation-delay: 0.5s; }
-          .loader-cube:nth-child(11) { animation-delay: 0.2s; }
-          .loader-cube:nth-child(12) { animation-delay: 0.3s; }
-          .loader-cube:nth-child(13) { animation-delay: 0.4s; }
-          .loader-cube:nth-child(14) { animation-delay: 0.5s; }
-          .loader-cube:nth-child(15) { animation-delay: 0.6s; }
+          .square-2 {
+            animation: rotate2 5s linear infinite;
+            margin: -35px 0 0 -35px;
+          }
+          .square-3 {
+            animation: rotate3 6s linear infinite;
+            margin: -30px 0 0 -30px;
+          }
           .pulse-text {
             animation: pulse 2s ease-in-out infinite;
           }
         `}</style>
         <div className="text-center">
-          <div className="loader-grid mx-auto mb-8">
-            <div className="loader-cube bg-gradient-to-br from-indigo-600 to-indigo-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-purple-600 to-purple-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-pink-600 to-pink-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-indigo-600 to-indigo-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-purple-600 to-purple-700"></div>
-            
-            <div className="loader-cube bg-gradient-to-br from-purple-600 to-purple-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-indigo-600 to-indigo-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-purple-600 to-purple-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-pink-600 to-pink-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-indigo-600 to-indigo-700"></div>
-            
-            <div className="loader-cube bg-gradient-to-br from-pink-600 to-pink-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-purple-600 to-purple-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-indigo-600 to-indigo-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-purple-600 to-purple-700"></div>
-            <div className="loader-cube bg-gradient-to-br from-pink-600 to-pink-700"></div>
+          <div className="loader-container mx-auto mb-8">
+            <svg className="rotating-square square-1" width="80" height="80" viewBox="0 0 80 80">
+              <rect x="2" y="2" width="76" height="76" rx="14" 
+                    fill="none" stroke="rgba(99, 102, 241, 0.8)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <svg className="rotating-square square-2" width="70" height="70" viewBox="0 0 70 70">
+              <rect x="2" y="2" width="66" height="66" rx="12" 
+                    fill="none" stroke="rgba(168, 85, 247, 0.7)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <svg className="rotating-square square-3" width="60" height="60" viewBox="0 0 60 60">
+              <rect x="2" y="2" width="56" height="56" rx="10" 
+                    fill="none" stroke="rgba(236, 72, 153, 0.5)" 
+                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+            </svg>
           </div>
           <div className="text-white text-2xl font-bold mb-3">Motion-Map</div>
           <div className="text-slate-400 text-lg pulse-text">Loading artists...</div>
@@ -604,26 +586,6 @@ function App() {
         }
         .animate-slideUp {
           animation: slideUp 0.4s ease-out 0.1s backwards;
-        }
-        
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-          .sidebar-container {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-out;
-            z-index: 50;
-          }
-          .sidebar-container.open {
-            transform: translateX(0);
-          }
-          .map-container-mobile {
-            padding: 1rem !important;
-          }
         }
       `}</style>
       {/* Header */}
@@ -726,7 +688,7 @@ function App() {
       {/* Main Content - Map + Sidebar */}
       <div className="flex-1 flex overflow-hidden">
         {/* Map Area */}
-        <div className="flex-1 flex items-start justify-start p-8 max-md:p-4 overflow-auto map-container-mobile">
+        <div className="flex-1 flex items-start justify-start p-8 overflow-auto">
           <div 
             className="relative mx-auto" 
             style={{ 
@@ -777,7 +739,7 @@ function App() {
                     transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
                   }}
                   onMouseEnter={() => {
-                    if (hasContent && (typeof window === 'undefined' || !('ontouchstart' in window))) {
+                    if (hasContent && !('ontouchstart' in window)) {
                       setHoveredState(code);
                     }
                   }}
@@ -896,7 +858,7 @@ function App() {
         </div>
 
         {/* Sidebar */}
-        <div className={`w-96 max-md:w-full bg-slate-950 border-l border-slate-800 flex flex-col overflow-hidden flex-shrink-0 sidebar-container ${selectedArtist ? 'open' : ''}`}>
+        <div className="w-96 bg-slate-950 border-l border-slate-800 flex flex-col overflow-hidden flex-shrink-0">
           {selectedArtist ? (
             <div key={selectedArtist.code} className="flex-1 flex flex-col overflow-hidden animate-fadeIn">
               {/* Artist Header */}
@@ -929,30 +891,11 @@ function App() {
                     if (videoInfo) {
                       if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                         return (
-                          <div className="mb-6">
-                            <iframe
-                              src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
-                              className="w-full aspect-video rounded-lg mb-3"
-                              allow="encrypted-media; fullscreen"
-                            />
-                            <a
-                              href={selectedArtist.videoUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
-                            >
-                              {videoInfo.type === 'youtube' ? (
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                </svg>
-                              ) : (
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M23.977 6.416c-.105 2.338-1.382 5.854-3.828 10.548-2.496 4.836-4.605 7.254-6.328 7.254-1.067 0-1.969-.98-2.706-2.939l-1.48-5.418c-.547-1.96-1.135-2.939-1.762-2.939-.137 0-.617.287-1.438.862L5.5 12.5l.973-1.173c1.24-1.214 2.175-1.865 2.805-1.955 1.488-.143 2.406.875 2.754 3.051.375 2.366.636 3.837.785 4.414.44 1.995.926 2.992 1.457 2.992.411 0 1.026-.648 1.848-1.944.824-1.297 1.266-2.283 1.326-2.958.12-1.122-.324-1.683-1.332-1.683-.472 0-.959.107-1.46.322.969-3.171 2.82-4.715 5.551-4.631 2.024.062 2.979 1.369 2.867 3.921z"/>
-                                </svg>
-                              )}
-                              <span>Watch on {videoInfo.type === 'youtube' ? 'YouTube' : 'Vimeo'}</span>
-                            </a>
-                          </div>
+                          <iframe
+                            src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
+                            className="w-full aspect-video rounded-lg mb-6"
+                            allow="encrypted-media; fullscreen"
+                          />
                         );
                       } else if (videoInfo.type === 'direct') {
                         return (
@@ -1000,7 +943,7 @@ function App() {
                 )}
 
                 {/* Links */}
-                <div className="flex gap-3 mb-4">
+                <div className="flex gap-3">
                   {selectedArtist.website && (
                     <a
                       href={selectedArtist.website.startsWith('http') ? selectedArtist.website : `https://${selectedArtist.website}`}
@@ -1024,23 +967,6 @@ function App() {
                     </a>
                   )}
                 </div>
-
-                {/* Share Button */}
-                <button
-                  onClick={() => {
-                    const shareUrl = `${window.location.origin}${window.location.pathname}?artist=${selectedArtist.code}`;
-                    navigator.clipboard.writeText(shareUrl).then(() => {
-                      // Could add a toast notification here
-                      alert('Link copied to clipboard!');
-                    });
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                  <span className="text-sm font-medium">Share Artist</span>
-                </button>
 
                 {/* Drill-down hint */}
                 {(() => {
@@ -1089,3 +1015,4 @@ function App() {
 }
 
 export default App;
+
