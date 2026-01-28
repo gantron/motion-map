@@ -287,14 +287,14 @@ function App() {
       const params = new URLSearchParams(window.location.search);
       const artistParam = params.get('artist');
       
-      if (artistParam && currentData[artistParam]) {
+      if (artistParam && currentData && Object.keys(currentData).length > 0 && currentData[artistParam]) {
         setSelectedArtist({ ...currentData[artistParam], code: artistParam });
       }
     } catch (e) {
       // Silently fail if anything goes wrong
       console.error('Error loading artist from URL:', e);
     }
-  }, [sheetData]);
+  }, [sheetData, currentData]);
   
   // Ensure currentMonthIndex is valid
   const safeIndex = monthsArchive.length > 0 ? Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1)) : 0;
@@ -709,7 +709,7 @@ function App() {
       {/* Main Content - Map + Sidebar */}
       <div className="flex-1 flex overflow-hidden">
         {/* Map Area */}
-        <div className="flex-1 flex items-start justify-start p-8 overflow-auto">
+        <div className="flex-1 flex items-start justify-start p-4 overflow-auto">
           <div 
             className="relative mx-auto" 
             style={{ 
@@ -883,7 +883,7 @@ function App() {
           {selectedArtist ? (
             <div key={selectedArtist.code} className="flex-1 flex flex-col overflow-hidden animate-fadeIn">
               {/* Artist Header */}
-              <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-6 relative flex-shrink-0 animate-slideDown">
+              <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-4 relative flex-shrink-0 animate-slideDown">
                 <button
                   onClick={() => setSelectedArtist(null)}
                   className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
@@ -912,17 +912,17 @@ function App() {
                     if (videoInfo) {
                       if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
                         return (
-                          <div className="mb-6">
+                          <div className="mb-4">
                             <iframe
                               src={videoInfo.embedUrl.replace('autoplay=1&mute=1', 'autoplay=0')}
-                              className="w-full aspect-video rounded-lg mb-3"
+                              className="w-full aspect-video"
                               allow="encrypted-media; fullscreen"
                             />
                             <a
                               href={selectedArtist.videoUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
+                              className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white transition-colors text-sm mb-4"
                             >
                               {videoInfo.type === 'youtube' ? (
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -941,7 +941,7 @@ function App() {
                         return (
                           <video
                             ref={sidebarVideoRef}
-                            className="w-full aspect-video rounded-lg mb-6 object-cover"
+                            className="w-full aspect-video mb-4 object-cover"
                             controls
                             loop
                             poster={selectedArtist.posterUrl || ''}
@@ -963,14 +963,14 @@ function App() {
                       <img 
                         src={selectedArtist.posterUrl} 
                         alt={selectedArtist.name}
-                        className="w-full aspect-video rounded-lg object-cover mb-6"
+                        className="w-full aspect-video object-cover mb-4"
                       />
                     );
                   }
                   
                   // Fallback gradient
                   return (
-                    <div className="w-full aspect-video rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 mb-6" />
+                    <div className="w-full aspect-video bg-gradient-to-br from-indigo-600 to-purple-600 mb-4" />
                   );
                 })()}
 
