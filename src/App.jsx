@@ -470,13 +470,10 @@ function App() {
     });
 
     // Dynamic cell size based on zoom level and item count
-    let baseCellSize = 140;
+    let baseCellSize = 140; // Increased from 137 for even bigger boxes
     const itemCount = Object.keys(currentGrid).length;
     
-    // Increase base size only for world view
-    if (zoomLevel === 'world') {
-      baseCellSize = 155; // Bigger tiles for world view
-    } else if (zoomLevel === 'state') {
+    if (zoomLevel === 'state') {
       // Fewer cities = bigger boxes
       if (itemCount <= 4) {
         baseCellSize = 185;
