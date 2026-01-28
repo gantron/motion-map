@@ -7,6 +7,35 @@ import { loadData, getAvailableMonths } from './dataLoader';
 import SubmissionForm from './SubmissionForm';
 
 function App() {
+  const [soundManagerLoaded, setSoundManagerLoaded] = useState(false);
+  const soundManagerRef = useRef(null);
+  const MuteButtonRef = useRef(null);
+  
+  // Dynamically import sound modules only in browser
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    Promise.all([
+      import('./soundManager'),
+      import('./MuteButton')
+    ]).then(([soundModule, muteModule]) => {
+      soundManagerRef.current = soundModule.soundManager;
+      MuteButtonRef.current = muteModule.default;
+      soundModule.initSounds();
+      soundModule.soundManager.playLoop('ambient');
+      setSoundManagerLoaded(true);
+    }).catch(err => {
+      console.debug('Sound loading failed:', err);
+    });
+    
+    return () => {
+      if (soundManagerRef.current) {
+        soundManagerRef.current.stopLoop('ambient');
+      }
+    };
+  }, []);
+
+function App() {
   const [hoveredState, setHoveredState] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [isSubmissionFormOpen, setIsSubmissionFormOpen] = useState(false);
@@ -398,6 +427,10 @@ function App() {
   };
 
   const handleItemDoubleClick = (code) => {
+    if (soundManagerRef.current) {
+      soundManagerRef.current.play('drilldown');
+    }
+    
     if (zoomLevel === 'world') {
       // Drilling from World to Country (USA)
       const countryMatch = code.match(/^(.+?)-\d+$/);
@@ -424,6 +457,10 @@ function App() {
   };
 
   const handleZoomOut = () => {
+    if (soundManagerRef.current) {
+      soundManagerRef.current.play('back');
+    }
+    
     if (zoomLevel === 'state') {
       // Zoom out from State to Country
       setZoomLevel('country');
@@ -636,6 +673,9 @@ function App() {
             >
               Submit Your Work
             </button>
+            {soundManagerLoaded && MuteButtonRef.current && (
+              <MuteButtonRef.current />
+            )}
             <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('map')}
@@ -756,11 +796,19 @@ function App() {
                   }}
                   onMouseEnter={() => {
                     if (hasContent && !('ontouchstart' in window)) {
+                      if (soundManagerRef.current) {
+                        soundManagerRef.current.play('hover');
+                      }
                       setHoveredState(code);
                     }
                   }}
                   onMouseLeave={() => setHoveredState(null)}
-                  onClick={() => handleItemClick(code)}
+                  onClick={() => {
+                    if (soundManagerRef.current) {
+                      soundManagerRef.current.play('click');
+                    }
+                    handleItemClick(code);
+                  }}
                   onDoubleClick={() => handleItemDoubleClick(code)}
                 >
                   {isHovered && (
