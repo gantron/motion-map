@@ -22,7 +22,7 @@ function SubmissionForm({ isOpen, onClose }) {
   const [rateLimitError, setRateLimitError] = useState(false);
 
   // TODO: Replace this with your actual Google Apps Script Web App URL after deployment
-  const SUBMISSION_URL = 'https://script.google.com/macros/s/AKfycbzJGzFrjxV9OJ9dVTabOTLmKdtbJOm06ilhoj74ajhnL1vuq5hrOaETJDdwROFiKbd_Uw/exec';
+  const SUBMISSION_URL = 'https://script.google.com/macros/s/AKfycbzKevtc9aSAVW-7ArqgkXG7aGh_Cqn7FRMJM1zb-feNfxGZ34r4jdm03ZtlI1Als4icgw/exec';
   
   // TODO: Replace with your Cloudflare Turnstile site key
   const TURNSTILE_SITE_KEY = '0x4AAAAAACT9ClrKULRWVUBM';
