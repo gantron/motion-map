@@ -4,7 +4,7 @@ import {
   Map, Grid, Home
 } from './Icons';
 import { loadData, getAvailableMonths } from './dataLoader';
-import SubmissionForm from './SubmissionForm';
+// import SubmissionForm from './SubmissionForm';
 // import { soundManager, initSounds } from './soundManager';
 // import MuteButton from './MuteButton';
 
@@ -632,12 +632,14 @@ function App() {
             )}
           </div>
           <div className="flex gap-3 items-center">
+            {/* Temporarily disabled
             <button
               onClick={() => setIsSubmissionFormOpen(true)}
               className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-medium transition-colors text-sm"
             >
               Submit Your Work
             </button>
+            */}
             <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('map')}
@@ -1023,11 +1025,12 @@ function App() {
         </div>
       </div>
 
-      {/* Submission Form Modal */}
+      {/* Submission Form Modal - Temporarily disabled
       <SubmissionForm 
         isOpen={isSubmissionFormOpen} 
         onClose={() => setIsSubmissionFormOpen(false)} 
       />
+      */}
     </div>
   );
 }
