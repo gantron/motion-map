@@ -1,4 +1,4 @@
-// Sound Manager for Motion-Map - SSR Safe
+// Sound Manager for Motion-Map - Fully Lazy-Loaded
 
 class SoundManager {
   constructor() {
@@ -17,7 +17,7 @@ class SoundManager {
         audio.preload = 'auto';
         this.sounds[key] = audio;
       } catch (e) {
-        // Ignore
+        console.debug('Failed to preload sound:', key);
       }
     });
   }
@@ -31,9 +31,7 @@ class SoundManager {
         const audioClone = sound.cloneNode();
         audioClone.volume = this.volume;
         audioClone.play().catch(() => {});
-      } catch (e) {
-        // Ignore
-      }
+      } catch (e) {}
     }
   }
 
@@ -46,9 +44,7 @@ class SoundManager {
         sound.loop = true;
         sound.volume = this.volume * 0.5;
         sound.play().catch(() => {});
-      } catch (e) {
-        // Ignore
-      }
+      } catch (e) {}
     }
   }
 
@@ -60,9 +56,7 @@ class SoundManager {
       try {
         sound.pause();
         sound.currentTime = 0;
-      } catch (e) {
-        // Ignore
-      }
+      } catch (e) {}
     }
   }
 
@@ -71,9 +65,7 @@ class SoundManager {
     Object.values(this.sounds).forEach(sound => {
       try {
         sound.volume = this.volume;
-      } catch (e) {
-        // Ignore
-      }
+      } catch (e) {}
     });
   }
 
@@ -84,9 +76,7 @@ class SoundManager {
       Object.values(this.sounds).forEach(sound => {
         try {
           sound.pause();
-        } catch (e) {
-          // Ignore
-        }
+        } catch (e) {}
       });
     }
     
@@ -94,28 +84,45 @@ class SoundManager {
   }
 }
 
-// Only create instance in browser
-let instance = null;
-function getInstance() {
-  if (typeof window === 'undefined') {
-    // Return no-op for SSR
-    return {
-      preload: () => {},
-      play: () => {},
-      playLoop: () => {},
-      stopLoop: () => {},
-      setVolume: () => {},
-      toggleMute: () => false,
-      isMuted: false
-    };
-  }
-  if (!instance) {
-    instance = new SoundManager();
-  }
-  return instance;
-}
+// NO instance created here - nothing runs at import time!
+let _instance = null;
 
-export const soundManager = getInstance();
+// Export an object with getter methods - no direct instance creation
+export const soundManager = {
+  get _inst() {
+    if (typeof window === 'undefined') return null;
+    if (!_instance) _instance = new SoundManager();
+    return _instance;
+  },
+  
+  preload(soundMap) {
+    this._inst?.preload(soundMap);
+  },
+  
+  play(soundKey) {
+    this._inst?.play(soundKey);
+  },
+  
+  playLoop(soundKey) {
+    this._inst?.playLoop(soundKey);
+  },
+  
+  stopLoop(soundKey) {
+    this._inst?.stopLoop(soundKey);
+  },
+  
+  setVolume(vol) {
+    this._inst?.setVolume(vol);
+  },
+  
+  toggleMute() {
+    return this._inst?.toggleMute() || false;
+  },
+  
+  get isMuted() {
+    return this._inst?.isMuted || false;
+  }
+};
 
 export const initSounds = () => {
   if (typeof window === 'undefined') return;
