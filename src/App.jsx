@@ -7,8 +7,6 @@ import { loadData, getAvailableMonths } from './dataLoader';
 import SubmissionForm from './SubmissionForm';
 
 function App() {
-
-function App() {
   const [hoveredState, setHoveredState] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [isSubmissionFormOpen, setIsSubmissionFormOpen] = useState(false);
