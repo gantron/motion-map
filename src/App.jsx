@@ -624,43 +624,57 @@ function App() {
       {/* Header */}
       <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
+          {/* Left: Logo + Title + Breadcrumb */}
           <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-1">Motion-Map</h1>
-              <p className="text-slate-400 text-sm">
-                {zoomLevel === 'world' 
-                  ? 'Discover artists around the world' 
-                  : zoomLevel === 'country'
-                  ? `Exploring ${selectedRegion}`
-                  : `Exploring ${selectedRegion} > ${selectedState}`
-                }
-              </p>
+            <div className="flex items-center gap-3">
+              {/* Logo */}
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="4" width="24" height="24" rx="4" 
+                      stroke="url(#gradient)" strokeWidth="2" 
+                      className="animate-pulse"/>
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#6366f1" />
+                    <stop offset="50%" stopColor="#a855f7" />
+                    <stop offset="100%" stopColor="#ec4899" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              {/* Title */}
+              <h1 className="text-xl font-bold text-white">Motion-Map</h1>
             </div>
+            
+            {/* Breadcrumb for zoom levels */}
             {(zoomLevel === 'country' || zoomLevel === 'state') && (
-              <button
-                onClick={handleZoomOut}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
-              >
-                <Home />
-                {zoomLevel === 'state' ? `Back to ${selectedRegion}` : 'World View'}
-              </button>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-slate-600">/</span>
+                <button
+                  onClick={handleZoomOut}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  {zoomLevel === 'state' ? selectedRegion : 'World'}
+                </button>
+                {zoomLevel === 'state' && (
+                  <>
+                    <span className="text-slate-600">/</span>
+                    <span className="text-white">{selectedState}</span>
+                  </>
+                )}
+              </div>
             )}
           </div>
+
+          {/* Right: Controls */}
           <div className="flex gap-3 items-center">
-            {/* About/Contact Links */}
-            <Link to="/about" className="text-slate-400 hover:text-white transition-colors text-sm">
-              About
-            </Link>
-            <Link to="/contact" className="text-slate-400 hover:text-white transition-colors text-sm">
-              Contact
-            </Link>
-            
+            {/* Submit Button */}
             <button
               onClick={() => setIsSubmissionFormOpen(true)}
               className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-medium transition-colors text-sm"
             >
               Submit Your Work
             </button>
+            
+            {/* View Mode Toggle */}
             <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('map')}
@@ -680,47 +694,43 @@ function App() {
               >
                 <Grid />
               </button>
-              <button
-                onClick={() => setViewMode('archive')}
-                className={`p-2 rounded transition-colors ${
-                  viewMode === 'archive' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                }`}
-                title="Archive View"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="7" height="7"/>
-                  <rect x="14" y="3" width="7" height="7"/>
-                  <rect x="14" y="14" width="7" height="7"/>
-                  <rect x="3" y="14" width="7" height="7"/>
-                </svg>
-              </button>
             </div>
-            {viewMode === 'archive' ? (
-              <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg">
-                <Calendar />
-                <span className="text-sm font-medium">Archive - All Time</span>
-              </div>
-            ) : (
-              <>
+            
+            {/* Archive Toggle (separate) */}
+            <button
+              onClick={() => setViewMode('archive')}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === 'archive' ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'
+              }`}
+              title="Archive - All Time"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+            
+            {/* Month Navigation */}
+            {viewMode !== 'archive' && (
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => navigateMonth(-1)}
                   disabled={currentMonthIndex === 0}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
+                  className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg transition-colors"
                 >
                   <ChevronLeft />
                 </button>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg">
+                <div className="flex items-center gap-2 px-3 py-2 bg-slate-700 text-white rounded-lg min-w-[140px] justify-center">
                   <Calendar />
                   <span className="text-sm font-medium">{displayMonth} {displayYear}</span>
                 </div>
                 <button
                   onClick={() => navigateMonth(1)}
                   disabled={currentMonthIndex === monthsArchive.length - 1}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
+                  className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg transition-colors"
                 >
                   <ChevronRight />
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -896,10 +906,20 @@ function App() {
           
           {/* Footer Credits */}
           <div className="bg-slate-950/50 border-t border-slate-800 py-3 px-4">
-            <div className="max-w-7xl mx-auto flex justify-center items-center gap-4 text-xs text-slate-500">
-              <span>Designed by <a href="https://blueteamstudio.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">BlueTeam Studio</a></span>
-              <span>•</span>
-              <span>Sound by <span className="text-slate-400">The Chicken</span></span>
+            <div className="max-w-7xl mx-auto flex justify-between items-center text-xs">
+              <div className="flex items-center gap-4 text-slate-500">
+                <span>Designed by <a href="https://blueteamstudio.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">BlueTeam Studio</a></span>
+                <span>•</span>
+                <span>Sound by <span className="text-slate-400">The Chicken</span></span>
+              </div>
+              <div className="flex gap-4">
+                <Link to="/about" className="text-slate-400 hover:text-white transition-colors">
+                  About
+                </Link>
+                <Link to="/contact" className="text-slate-400 hover:text-white transition-colors">
+                  Contact
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -1118,4 +1138,5 @@ function App() {
 }
 
 export default App;
+
 
