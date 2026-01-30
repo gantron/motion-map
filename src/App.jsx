@@ -86,111 +86,162 @@ function App() {
   // World grid with multiple boxes per country (geographically accurate)
   // Layout designed to visually resemble actual world map geography
   const worldGridBase = {
-    // NORTH AMERICA
-    // Row 0: Northern Canada/Alaska
-    'Canada-1': [0, 1], 'Canada-2': [0, 2], 'Canada-3': [0, 3], 'Canada-4': [0, 4],
+    // ========== NORTH AMERICA ==========
+    // Row 0: Northern Canada
+    'Canada-1': [0, 1], 
+    'Canada-2': [0, 2], 
+    'Canada-3': [0, 3], 
+    'Canada-4': [0, 4],
     
-    // Row 1: USA northern tier
-    'USA-1': [1, 1], 'USA-2': [1, 2], 'USA-3': [1, 3], 'USA-4': [1, 4], 'USA-5': [1, 5],
+    // Row 1: USA - Northern tier
+    'USA-1': [1, 1], 
+    'USA-2': [1, 2], 
+    'USA-3': [1, 3], 
+    'USA-4': [1, 4], 
+    'USA-5': [1, 5],
     
-    // Row 2: USA southern tier + Mexico start
-    'USA-6': [2, 2], 'USA-7': [2, 3], 'Mexico-1': [2, 4], 'Mexico-2': [2, 5],
+    // Row 2: USA - Southern tier, Mexico begins
+    'USA-6': [2, 2], 
+    'USA-7': [2, 3], 
+    'Mexico-1': [2, 4], 
+    'Mexico-2': [2, 5],
     
     // Row 3: Central America
-    'Costa Rica-1': [3, 4], 'Panama-1': [3, 5],
+    'Costa Rica-1': [3, 4], 
+    'Panama-1': [3, 5],
     
-    // SOUTH AMERICA
+    // ========== SOUTH AMERICA ==========
     // Row 4: Northern South America
-    'Colombia-1': [4, 4], 'Venezuela-1': [4, 5],
-    'Brazil-1': [4, 6],
+    'Colombia-1': [4, 4], 
+    'Venezuela-1': [4, 5],
     
-    // Row 5: Central South America
-    'Peru-1': [5, 4], 'Brazil-2': [5, 5], 'Brazil-3': [5, 6],
+    // Row 5: Central-North South America
+    'Peru-1': [5, 4], 
+    'Brazil-1': [5, 5], 
+    'Brazil-2': [5, 6],
     
-    // Row 6: Southern South America
-    'Chile-1': [6, 4], 'Argentina-1': [6, 5], 'Brazil-4': [6, 6],
+    // Row 6: Central-South South America
+    'Chile-1': [6, 4], 
+    'Argentina-1': [6, 5], 
+    'Brazil-3': [6, 6],
     
-    // Row 7: Far Southern South America
-    'Chile-2': [7, 4], 'Argentina-2': [7, 5],
+    // Row 7: Southern South America
+    'Chile-2': [7, 4], 
+    'Argentina-2': [7, 5],
     
-    // EUROPE
-    // Row 0-1: Northern Europe
-    'Iceland-1': [0, 8],
-    'Norway-1': [0, 9], 'Sweden-1': [0, 10], 'Finland-1': [0, 11],
+    // ========== EUROPE ==========
+    // Row 0: Nordic Countries
+    'Iceland-1': [0, 7],
+    'Norway-1': [0, 8], 
+    'Sweden-1': [0, 9], 
+    'Finland-1': [0, 10],
+    'Denmark-1': [0, 11],
     
-    // Row 1: UK, Northern Europe
-    'Ireland-1': [1, 8], 'UK-1': [1, 9], 'UK-2': [1, 10], 
-    'Denmark-1': [1, 11], 'Poland-1': [1, 12],
+    // Row 1: British Isles & Eastern Europe
+    'Ireland-1': [1, 7], 
+    'UK-1': [1, 8], 
+    'UK-2': [1, 9],
+    'Poland-1': [1, 11],
     
     // Row 2: Western/Central Europe
-    'France-1': [2, 8], 'France-2': [2, 9], 
-    'Germany-1': [2, 10], 'Germany-2': [2, 11],
+    'France-1': [2, 8], 
+    'France-2': [2, 9],
+    'Germany-1': [2, 10], 
+    'Germany-2': [2, 11],
     'Czech-1': [2, 12],
     
     // Row 3: Southern Europe
-    'Spain-1': [3, 8], 'Spain-2': [3, 9],
-    'Italy-1': [3, 10], 'Italy-2': [3, 11],
-    'Greece-1': [3, 12],
+    'Spain-1': [3, 7], 
+    'Spain-2': [3, 8],
+    'Italy-1': [3, 9], 
+    'Italy-2': [3, 10],
+    'Greece-1': [3, 11],
     
-    // AFRICA
+    // ========== AFRICA ==========
     // Row 3-4: North Africa
-    'Morocco-1': [3, 7], 'Algeria-1': [4, 7], 'Tunisia-1': [4, 8],
-    'Egypt-1': [3, 13], 'Egypt-2': [4, 13],
+    'Morocco-1': [3, 7],
+    'Algeria-1': [3, 8],
+    'Tunisia-1': [3, 12],
+    'Egypt-1': [3, 13], 
+    'Egypt-2': [4, 13],
+    
+    // Row 4: North-Central Africa
+    'Libya-1': [4, 7],
+    'Sudan-1': [4, 8],
     
     // Row 5: West/Central Africa
-    'Nigeria-1': [5, 8], 'Nigeria-2': [5, 9],
     'Ghana-1': [5, 7],
-    'Kenya-1': [5, 13],
+    'Nigeria-1': [5, 8], 
+    'Nigeria-2': [5, 9],
+    'Ethiopia-1': [5, 13],
     
-    // Row 6: Central/East Africa
-    'Kenya-2': [6, 13], 'Tanzania-1': [6, 12],
+    // Row 6: Central-East Africa
+    'Tanzania-1': [6, 12],
+    'Kenya-1': [6, 13],
     
     // Row 7: Southern Africa
-    'South Africa-1': [7, 11], 'South Africa-2': [7, 12],
+    'South Africa-1': [7, 11], 
+    'South Africa-2': [7, 12],
     
-    // MIDDLE EAST
-    // Row 3-4: Turkey and Levant
+    // ========== MIDDLE EAST ==========
+    // Row 3-4: Levant & Turkey
     'Turkey-1': [3, 14],
-    'Israel-1': [4, 14], 'Lebanon-1': [4, 15],
+    'Israel-1': [4, 14],
+    'Lebanon-1': [4, 15],
     
-    // Row 4-5: Gulf States
+    // Row 5: Gulf Region
     'Saudi Arabia-1': [5, 14],
-    'UAE-1': [5, 15], 'UAE-2': [5, 16],
+    'UAE-1': [5, 15],
+    'UAE-2': [5, 16],
     
-    // ASIA
-    // Row 0-1: Russia (spans top)
-    'Russia-1': [0, 13], 'Russia-2': [0, 14], 'Russia-3': [0, 15], 
-    'Russia-4': [0, 16], 'Russia-5': [0, 17],
+    // ========== ASIA ==========
+    // Row 0: Northern Russia
+    'Russia-1': [0, 14], 
+    'Russia-2': [0, 15], 
+    'Russia-3': [0, 16], 
+    'Russia-4': [0, 17],
+    'Russia-5': [0, 18],
     
     // Row 2: Central Asia to China
     'Kazakhstan-1': [2, 14],
-    'China-1': [2, 15], 'China-2': [2, 16], 'China-3': [2, 17],
+    'China-1': [2, 15], 
+    'China-2': [2, 16], 
+    'China-3': [2, 17],
     
-    // Row 3: China to Japan
-    'China-4': [3, 16], 'China-5': [3, 17],
-    'Japan-1': [3, 18], 'Japan-2': [3, 19],
+    // Row 3: China expanded + Japan
+    'China-4': [3, 15], 
+    'China-5': [3, 16],
+    'Taiwan-1': [3, 17],
+    'Japan-1': [3, 18],
     
-    // Row 4: Korea to Japan
-    'Korea-1': [4, 17], 'Korea-2': [4, 18],
-    'Japan-3': [4, 19],
+    // Row 4: Korea + Japan
+    'Korea-1': [4, 17], 
+    'Korea-2': [4, 18],
+    'Japan-2': [4, 19],
     
     // Row 5: South Asia
     'Pakistan-1': [5, 17],
-    'India-1': [5, 18], 'India-2': [5, 19],
+    'India-1': [5, 18], 
+    'India-2': [5, 19],
     'Bangladesh-1': [5, 20],
     
-    // Row 6: South/Southeast Asia
+    // Row 6: Southeast Asia
     'India-3': [6, 18],
-    'Thailand-1': [6, 19], 'Vietnam-1': [6, 20],
+    'Thailand-1': [6, 19],
+    'Vietnam-1': [6, 20],
     'Philippines-1': [6, 21],
     
-    // Row 7: Southeast Asia
-    'Malaysia-1': [7, 19], 'Singapore-1': [7, 20],
-    'Indonesia-1': [7, 21], 'Indonesia-2': [7, 22],
+    // Row 7: Maritime Southeast Asia
+    'Malaysia-1': [7, 19],
+    'Singapore-1': [7, 20],
+    'Indonesia-1': [7, 21],
+    'Indonesia-2': [7, 22],
     
-    // OCEANIA
+    // ========== OCEANIA ==========
     // Row 8: Australia
-    'Australia-1': [8, 20], 'Australia-2': [8, 21], 'Australia-3': [8, 22],
+    'Australia-1': [8, 20], 
+    'Australia-2': [8, 21], 
+    'Australia-3': [8, 22],
     
     // Row 9: New Zealand
     'New Zealand-1': [9, 22]
