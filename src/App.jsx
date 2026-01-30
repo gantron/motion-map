@@ -84,30 +84,92 @@ function App() {
   }, []);
 
   // World grid with multiple boxes per country (roughly geographical)
+  // Expanded to include more global representation
   const worldGridBase = {
-    'USA-1': [1, 1], 'USA-2': [1, 2], 'USA-3': [1, 3], 'USA-4': [1, 4],
-    'Canada-1': [0, 1], 'Canada-2': [0, 2], 'Canada-3': [0, 3],
+    // North America - USA (5 tiles, added one more)
+    'USA-1': [1, 1], 'USA-2': [1, 2], 'USA-3': [1, 3], 'USA-4': [1, 4], 'USA-5': [1, 5],
+    
+    // North America - Canada (4 tiles, added one more)
+    'Canada-1': [0, 1], 'Canada-2': [0, 2], 'Canada-3': [0, 3], 'Canada-4': [0, 4],
+    
+    // North America - Mexico
     'Mexico-1': [2, 2], 'Mexico-2': [2, 3],
-    'Brazil-1': [4, 3], 'Brazil-2': [4, 4], 'Brazil-3': [5, 3],
-    'Argentina-1': [6, 3], 'Argentina-2': [6, 4],
-    'UK-1': [1, 7], 'UK-2': [1, 8],
-    'France-1': [2, 7], 'France-2': [2, 8],
-    'Germany-1': [1, 9], 'Germany-2': [2, 9],
+    
+    // Central America (new region!)
+    'Costa Rica-1': [3, 2],
+    'Panama-1': [3, 3],
+    
+    // South America - expanded
+    'Colombia-1': [4, 2], 'Colombia-2': [4, 3],
+    'Venezuela-1': [4, 4],
+    'Peru-1': [5, 2], 'Peru-2': [5, 3],
+    'Brazil-1': [5, 4], 'Brazil-2': [5, 5], 'Brazil-3': [6, 4],
+    'Chile-1': [6, 2], 'Chile-2': [7, 2],
+    'Argentina-1': [7, 3], 'Argentina-2': [7, 4],
+    
+    // Europe - Western
+    'UK-1': [1, 8], 'UK-2': [1, 9],
+    'Ireland-1': [1, 7],
+    'France-1': [2, 8], 'France-2': [2, 9],
+    'Germany-1': [1, 10], 'Germany-2': [2, 10],
+    'Netherlands-1': [1, 11],
+    'Belgium-1': [2, 11],
     'Spain-1': [3, 7], 'Spain-2': [3, 8],
-    'Italy-1': [3, 9], 'Italy-2': [3, 10],
+    'Portugal-1': [3, 9],
+    'Italy-1': [3, 10], 'Italy-2': [3, 11],
+    'Switzerland-1': [2, 12],
+    'Austria-1': [2, 13],
+    
+    // Europe - Eastern & Nordic
+    'Poland-1': [1, 12],
+    'Sweden-1': [0, 10],
+    'Norway-1': [0, 9],
+    'Denmark-1': [0, 11],
+    
+    // Africa - expanded significantly
+    'Morocco-1': [4, 7],
+    'Algeria-1': [4, 8],
+    'Tunisia-1': [3, 12],
+    'Egypt-1': [3, 13], 'Egypt-2': [3, 14],
     'Nigeria-1': [5, 8], 'Nigeria-2': [5, 9],
-    'Egypt-1': [3, 11], 'Egypt-2': [3, 12],
-    'South Africa-1': [7, 8], 'South Africa-2': [7, 9],
-    'UAE-1': [3, 13], 'UAE-2': [3, 14],
-    'Russia-1': [0, 11], 'Russia-2': [0, 12], 'Russia-3': [0, 13], 'Russia-4': [0, 14],
-    'China-1': [2, 14], 'China-2': [2, 15], 'China-3': [3, 15],
-    'Japan-1': [1, 16], 'Japan-2': [1, 17], 'Japan-3': [1, 18],
-    'Korea-1': [2, 16], 'Korea-2': [2, 17],
-    'India-1': [4, 12], 'India-2': [4, 13], 'India-3': [5, 12],
-    'Thailand-1': [4, 15], 'Thailand-2': [4, 16],
-    'Singapore-1': [5, 16],
-    'Australia-1': [7, 16], 'Australia-2': [7, 17], 'Australia-3': [7, 18],
-    'New Zealand-1': [8, 18]
+    'Ghana-1': [5, 7],
+    'Kenya-1': [6, 10], 'Kenya-2': [6, 11],
+    'Ethiopia-1': [5, 13],
+    'South Africa-1': [8, 8], 'South Africa-2': [8, 9],
+    'Tanzania-1': [6, 12],
+    
+    // Middle East - expanded
+    'UAE-1': [4, 14], 'UAE-2': [4, 15],
+    'Saudi Arabia-1': [4, 13],
+    'Israel-1': [3, 15],
+    'Turkey-1': [2, 14],
+    'Lebanon-1': [3, 16],
+    
+    // Asia - Russia
+    'Russia-1': [0, 13], 'Russia-2': [0, 14], 'Russia-3': [0, 15], 'Russia-4': [0, 16],
+    
+    // Asia - East
+    'China-1': [2, 16], 'China-2': [2, 17], 'China-3': [3, 17],
+    'Japan-1': [1, 18], 'Japan-2': [1, 19], 'Japan-3': [1, 20],
+    'Korea-1': [2, 18], 'Korea-2': [2, 19],
+    'Taiwan-1': [3, 18],
+    
+    // Asia - South
+    'India-1': [5, 14], 'India-2': [5, 15], 'India-3': [6, 14],
+    'Pakistan-1': [4, 16],
+    'Bangladesh-1': [5, 16],
+    
+    // Asia - Southeast
+    'Thailand-1': [5, 17], 'Thailand-2': [5, 18],
+    'Vietnam-1': [4, 18],
+    'Philippines-1': [4, 19],
+    'Indonesia-1': [6, 17], 'Indonesia-2': [6, 18],
+    'Singapore-1': [6, 19],
+    'Malaysia-1': [6, 20],
+    
+    // Oceania
+    'Australia-1': [8, 18], 'Australia-2': [8, 19], 'Australia-3': [8, 20],
+    'New Zealand-1': [9, 20]
   };
 
   const generateWorldGrid = () => worldGridBase;
@@ -910,7 +972,7 @@ function App() {
               <div className="flex items-center gap-4 text-slate-500">
                 <span>Designed by <a href="https://blueteamstudio.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">BlueTeam Studio</a></span>
                 <span>•</span>
-                <span>Sound by <span className="text-slate-400">The Chicken</span></span>
+                <span>Sound by <a href="https://www.thechicken.net/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">The Chicken</a></span>
               </div>
               <div className="flex gap-4">
                 <Link to="/about" className="text-slate-400 hover:text-white transition-colors">
@@ -1138,5 +1200,3 @@ function App() {
 }
 
 export default App;
-
-
