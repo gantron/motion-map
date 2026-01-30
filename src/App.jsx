@@ -1089,7 +1089,7 @@ function App() {
               </div>
             </div>
           ) : (
-            /* Empty State */}
+            {/* Empty State */}
             <div className="flex-1 flex items-center justify-center p-8">
               <div className="text-center">
                 <div className="text-6xl mb-4">🎬</div>
