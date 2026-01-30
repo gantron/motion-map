@@ -30,7 +30,7 @@ function App() {
       .replace(/[^a-z0-9]+/g, '')
       .trim();
   };
-
+// v2
   // Clear hover state when view mode changes to prevent animation conflicts
   useEffect(() => {
     setHoveredState(null);
