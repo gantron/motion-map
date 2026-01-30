@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   X, Calendar, Globe, Instagram, ChevronLeft, ChevronRight,
   Map, Grid, Home
@@ -20,6 +21,15 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const videoRefs = useRef({});
   const sidebarVideoRef = useRef(null);
+
+  // Generate slug from artist name
+  const generateSlug = (name) => {
+    if (!name) return '';
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '')
+      .trim();
+  };
 
   // Clear hover state when view mode changes to prevent animation conflicts
   useEffect(() => {
@@ -565,17 +575,17 @@ function App() {
             <svg className="rotating-square square-1" width="80" height="80" viewBox="0 0 80 80">
               <rect x="2" y="2" width="76" height="76" rx="14" 
                     fill="none" stroke="rgba(99, 102, 241, 0.8)" 
-                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+                    strokeWidth="3" vectorEffect="non-scaling-stroke"/>
             </svg>
             <svg className="rotating-square square-2" width="70" height="70" viewBox="0 0 70 70">
               <rect x="2" y="2" width="66" height="66" rx="12" 
                     fill="none" stroke="rgba(168, 85, 247, 0.7)" 
-                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+                    strokeWidth="3" vectorEffect="non-scaling-stroke"/>
             </svg>
             <svg className="rotating-square square-3" width="60" height="60" viewBox="0 0 60 60">
               <rect x="2" y="2" width="56" height="56" rx="10" 
                     fill="none" stroke="rgba(236, 72, 153, 0.5)" 
-                    stroke-width="3" vector-effect="non-scaling-stroke"/>
+                    strokeWidth="3" vectorEffect="non-scaling-stroke"/>
             </svg>
           </div>
           <div className="text-white text-2xl font-bold mb-3">Motion-Map</div>
@@ -586,7 +596,7 @@ function App() {
   }
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex flex-col overflow-hidden">
+    <div className="w-full min-h-screen bg-gradient-to-br from-black via-slate-950 to-black flex flex-col">
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
@@ -610,6 +620,7 @@ function App() {
           animation: slideUp 0.4s ease-out 0.1s backwards;
         }
       `}</style>
+      
       {/* Header */}
       <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -636,6 +647,14 @@ function App() {
             )}
           </div>
           <div className="flex gap-3 items-center">
+            {/* About/Contact Links */}
+            <Link to="/about" className="text-slate-400 hover:text-white transition-colors text-sm">
+              About
+            </Link>
+            <Link to="/contact" className="text-slate-400 hover:text-white transition-colors text-sm">
+              Contact
+            </Link>
+            
             <button
               onClick={() => setIsSubmissionFormOpen(true)}
               className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-medium transition-colors text-sm"
@@ -710,172 +729,178 @@ function App() {
       {/* Main Content - Map + Sidebar */}
       <div className="flex-1 flex overflow-hidden">
         {/* Map Area */}
-        <div className="flex-1 flex items-start justify-start p-4 overflow-auto">
-          <div 
-            className="relative mx-auto" 
-            style={{ 
-              width: gridWidth, 
-              height: gridHeight,
-              transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            {(() => {
-              // Calculate max distance once for all items
-              const allPositions = Object.values(currentGrid);
-              const maxRow = allPositions.length > 0 ? Math.max(...allPositions.map(([r]) => r)) : 1;
-              const maxCol = allPositions.length > 0 ? Math.max(...allPositions.map(([, c]) => c)) : 1;
-              const maxDistance = Math.sqrt(maxRow * maxRow + maxCol * maxCol);
-              
-              return Object.entries(currentGrid).map(([code, [row, col]]) => {
-                const isHovered = hoveredState === code;
-                const hasContent = !!currentData[code];
-                const isSelected = selectedArtist?.code === code;
-                const x = col * (cellSize + gap);
-                const y = row * (cellSize + gap);
-
-                // Calculate staggered delay with randomization
-                // Base delay from distance + random component for organic feel
-                const distanceFromOrigin = Math.sqrt(row * row + col * col);
-                const normalizedDistance = maxDistance > 0 ? distanceFromOrigin / maxDistance : 0;
-                const baseDelay = normalizedDistance * 0.6; // Base 0-600ms from position
-                const randomDelay = Math.random() * 0.4; // Random 0-400ms
-                const staggerDelay = baseDelay + randomDelay; // Total 0-1000ms
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex items-start justify-start p-4 overflow-auto">
+            <div 
+              className="relative mx-auto" 
+              style={{ 
+                width: gridWidth, 
+                height: gridHeight,
+                transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              {(() => {
+                // Calculate max distance once for all items
+                const allPositions = Object.values(currentGrid);
+                const maxRow = allPositions.length > 0 ? Math.max(...allPositions.map(([r]) => r)) : 1;
+                const maxCol = allPositions.length > 0 ? Math.max(...allPositions.map(([, c]) => c)) : 1;
+                const maxDistance = Math.sqrt(maxRow * maxRow + maxCol * maxCol);
                 
-                // Random duration variation for more organic movement
-                const baseDuration = 0.4;
-                const randomDuration = Math.random() * 0.2; // Vary by ±100ms
-                const transitionDuration = baseDuration + randomDuration;
+                return Object.entries(currentGrid).map(([code, [row, col]]) => {
+                  const isHovered = hoveredState === code;
+                  const hasContent = !!currentData[code];
+                  const isSelected = selectedArtist?.code === code;
+                  const x = col * (cellSize + gap);
+                  const y = row * (cellSize + gap);
 
-                return (
-                  <div
-                    key={code}
-                    className="absolute"
-                  style={{
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    width: `${cellSize}px`,
-                    height: `${cellSize}px`,
-                    transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0)',
-                    zIndex: isHovered ? 10 : (isSelected ? 5 : 1),
-                    cursor: hasContent ? 'pointer' : 'default',
-                    transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
-                  }}
-                  onMouseEnter={() => {
-                    if (hasContent && !('ontouchstart' in window)) {
-                      setHoveredState(code);
-                    }
-                  }}
-                  onMouseLeave={() => setHoveredState(null)}
-                  onClick={() => handleItemClick(code)}
-                  onDoubleClick={() => handleItemDoubleClick(code)}
-                >
-                  {isHovered && (
+                  // Calculate staggered delay with randomization
+                  const distanceFromOrigin = Math.sqrt(row * row + col * col);
+                  const normalizedDistance = maxDistance > 0 ? distanceFromOrigin / maxDistance : 0;
+                  const baseDelay = normalizedDistance * 0.6;
+                  const randomDelay = Math.random() * 0.4;
+                  const staggerDelay = baseDelay + randomDelay;
+                  
+                  const baseDuration = 0.4;
+                  const randomDuration = Math.random() * 0.2;
+                  const transitionDuration = baseDuration + randomDuration;
+
+                  return (
                     <div
-                      className="absolute inset-0 bg-black/40 rounded-[14px] blur-xl"
-                      style={{ transform: 'translateY(8px)' }}
-                    />
-                  )}
-                  <div
-                    className={`w-full h-full rounded-[14px] border-2 overflow-hidden relative ${
-                      hasContent
-                        ? isSelected 
-                          ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
-                          : 'border-indigo-500/50 shadow-lg'
-                        : 'border-slate-700/30'
-                    } ${
-                      hasContent ? 'bg-gradient-to-br from-indigo-600 to-purple-600' : 'bg-slate-800/30'
-                    }`}
-                  >
-                    {/* Video or Poster Display */}
-                    {(() => {
-                      // Only try to display video if videoUrl exists and is valid
-                      const hasValidVideo = hasContent && currentData[code].videoUrl && 
-                                          currentData[code].videoUrl.trim().length > 0 &&
-                                          currentData[code].videoUrl !== '#N/A';
-                      
-                      if (hasValidVideo) {
-                        const videoInfo = getVideoEmbedInfo(currentData[code].videoUrl);
-                        if (videoInfo) {
-                          if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
+                      key={code}
+                      className="absolute"
+                      style={{
+                        left: `${x}px`,
+                        top: `${y}px`,
+                        width: `${cellSize}px`,
+                        height: `${cellSize}px`,
+                        transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0)',
+                        zIndex: isHovered ? 10 : (isSelected ? 5 : 1),
+                        cursor: hasContent ? 'pointer' : 'default',
+                        transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
+                      }}
+                      onMouseEnter={() => {
+                        if (hasContent && !('ontouchstart' in window)) {
+                          setHoveredState(code);
+                        }
+                      }}
+                      onMouseLeave={() => setHoveredState(null)}
+                      onClick={() => handleItemClick(code)}
+                      onDoubleClick={() => handleItemDoubleClick(code)}
+                    >
+                      {isHovered && (
+                        <div
+                          className="absolute inset-0 bg-black/40 rounded-[14px] blur-xl"
+                          style={{ transform: 'translateY(8px)' }}
+                        />
+                      )}
+                      <div
+                        className={`w-full h-full rounded-[14px] border-2 overflow-hidden relative ${
+                          hasContent
+                            ? isSelected 
+                              ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
+                              : 'border-indigo-500/50 shadow-lg'
+                            : 'border-slate-700/30'
+                        } ${
+                          hasContent ? 'bg-gradient-to-br from-indigo-600 to-purple-600' : 'bg-slate-800/30'
+                        }`}
+                      >
+                        {/* Video or Poster Display */}
+                        {(() => {
+                          const hasValidVideo = hasContent && currentData[code].videoUrl && 
+                                              currentData[code].videoUrl.trim().length > 0 &&
+                                              currentData[code].videoUrl !== '#N/A';
+                          
+                          if (hasValidVideo) {
+                            const videoInfo = getVideoEmbedInfo(currentData[code].videoUrl);
+                            if (videoInfo) {
+                              if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') {
+                                return (
+                                  <div className="absolute inset-0 overflow-hidden rounded-[14px]">
+                                    <iframe
+                                      src={videoInfo.embedUrl}
+                                      className="absolute"
+                                      style={{
+                                        left: '50%',
+                                        top: '50%',
+                                        width: '177.78%',
+                                        height: '177.78%',
+                                        transform: 'translate(-50%, -50%)',
+                                        pointerEvents: 'none'
+                                      }}
+                                      allow="autoplay; encrypted-media"
+                                    />
+                                  </div>
+                                );
+                              } else if (videoInfo.type === 'direct') {
+                                return (
+                                  <video
+                                    ref={el => videoRefs.current[code] = el}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    loop
+                                    muted
+                                    playsInline
+                                    poster={currentData[code].posterUrl || ''}
+                                  >
+                                    <source src={videoInfo.embedUrl} type="video/mp4" />
+                                  </video>
+                                );
+                              }
+                            }
+                          }
+                          
+                          const hasValidPoster = hasContent && currentData[code].posterUrl && 
+                                                currentData[code].posterUrl.trim().length > 0 &&
+                                                currentData[code].posterUrl !== '#N/A';
+                          
+                          if (hasValidPoster) {
                             return (
-                              <div className="absolute inset-0 overflow-hidden rounded-[14px]">
-                                <iframe
-                                  src={videoInfo.embedUrl}
-                                  className="absolute"
-                                  style={{
-                                    left: '50%',
-                                    top: '50%',
-                                    width: '177.78%', // 16/9 = 1.7778, so scale to fill square
-                                    height: '177.78%',
-                                    transform: 'translate(-50%, -50%)',
-                                    pointerEvents: 'none'
-                                  }}
-                                  allow="autoplay; encrypted-media"
-                                />
-                              </div>
-                            );
-                          } else if (videoInfo.type === 'direct') {
-                            return (
-                              <video
-                                ref={el => videoRefs.current[code] = el}
+                              <img 
+                                src={currentData[code].posterUrl} 
+                                alt={currentData[code].name}
                                 className="absolute inset-0 w-full h-full object-cover"
-                                loop
-                                muted
-                                playsInline
-                                poster={currentData[code].posterUrl || ''}
-                              >
-                                <source src={videoInfo.embedUrl} type="video/mp4" />
-                              </video>
+                              />
                             );
                           }
-                        }
-                      }
-                      
-                      // Show poster if available (and no valid video)
-                      const hasValidPoster = hasContent && currentData[code].posterUrl && 
-                                            currentData[code].posterUrl.trim().length > 0 &&
-                                            currentData[code].posterUrl !== '#N/A';
-                      
-                      if (hasValidPoster) {
-                        return (
-                          <img 
-                            src={currentData[code].posterUrl} 
-                            alt={currentData[code].name}
-                            className="absolute inset-0 w-full h-full object-cover"
-                          />
-                        );
-                      }
-                      
-                      // If no video or poster, just show gradient (already set as background)
-                      return null;
-                    })()}
-                    
-                    {!hasContent && zoomLevel === 'world' && (
-                      <div className="absolute bottom-2 right-2">
-                        <span className="text-xs font-bold text-white/30 drop-shadow-lg">
-                          {code.replace(/-\d+$/, '')}
-                        </span>
+                          
+                          return null;
+                        })()}
+                        
+                        {!hasContent && zoomLevel === 'world' && (
+                          <div className="absolute bottom-2 right-2">
+                            <span className="text-xs font-bold text-white/30 drop-shadow-lg">
+                              {code.replace(/-\d+$/, '')}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {zoomLevel === 'world' && isHovered && hasContent && (
+                          <div className="absolute bottom-2 right-2">
+                            <span className="text-xs font-bold text-white drop-shadow-lg">
+                              {code.replace(/-\d+$/, '')}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {isHovered && hasContent && (
+                          <div className="absolute top-1 right-1">
+                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                    
-                    {zoomLevel === 'world' && isHovered && hasContent && (
-                      <div className="absolute bottom-2 right-2">
-                        <span className="text-xs font-bold text-white drop-shadow-lg">
-                          {code.replace(/-\d+$/, '')}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {isHovered && hasContent && (
-                      <div className="absolute top-1 right-1">
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            });
-            })()}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+          
+          {/* Footer Credits */}
+          <div className="bg-slate-950/50 border-t border-slate-800 py-3 px-4">
+            <div className="max-w-7xl mx-auto flex justify-center items-center gap-4 text-xs text-slate-500">
+              <span>Designed by <a href="https://blueteamstudio.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">BlueTeam Studio</a></span>
+              <span>•</span>
+              <span>Sound by <span className="text-slate-400">The Chicken</span></span>
+            </div>
           </div>
         </div>
 
@@ -901,9 +926,8 @@ function App() {
 
               {/* Artist Content */}
               <div className="flex-1 overflow-y-auto animate-slideUp">
-                {/* Video/Poster - NO padding */}
+                {/* Video/Poster */}
                 {(() => {
-                  // Check for valid video URL
                   const hasValidVideo = selectedArtist.videoUrl && 
                                        selectedArtist.videoUrl.trim().length > 0 &&
                                        selectedArtist.videoUrl !== '#N/A';
@@ -954,7 +978,6 @@ function App() {
                     }
                   }
                   
-                  // Check for valid poster URL
                   const hasValidPoster = selectedArtist.posterUrl && 
                                         selectedArtist.posterUrl.trim().length > 0 &&
                                         selectedArtist.posterUrl !== '#N/A';
@@ -969,7 +992,6 @@ function App() {
                     );
                   }
                   
-                  // Fallback gradient
                   return (
                     <div className="w-full aspect-video bg-gradient-to-br from-indigo-600 to-purple-600 mb-4" />
                   );
@@ -977,83 +999,97 @@ function App() {
 
                 {/* Content with padding */}
                 <div className="px-6">
-                {/* Bio */}
-                {selectedArtist.bio && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-slate-400 uppercase mb-2">About</h3>
-                    <p className="text-slate-300 leading-relaxed">{selectedArtist.bio}</p>
-                  </div>
-                )}
-
-                {/* Links */}
-                <div className="flex gap-3 mb-4">
-                  {selectedArtist.website && (
-                    <a
-                      href={selectedArtist.website.startsWith('http') ? selectedArtist.website : `https://${selectedArtist.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-                    >
-                      <Globe />
-                      <span className="text-sm">Website</span>
-                    </a>
-                  )}
-                  {selectedArtist.instagram && (
-                    <a
-                      href={`https://instagram.com/${selectedArtist.instagram.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-500 hover:to-pink-500 transition-colors"
-                    >
-                      <Instagram />
-                      <span className="text-sm">Instagram</span>
-                    </a>
-                  )}
-                </div>
-
-                {/* Share Button */}
-                <button
-                  onClick={() => {
-                    try {
-                      if (typeof window !== 'undefined' && window.location) {
-                        const shareUrl = `${window.location.origin}${window.location.pathname}?artist=${selectedArtist.code}`;
-                        if (navigator.clipboard) {
-                          navigator.clipboard.writeText(shareUrl).then(() => {
-                            alert('Link copied! Share this URL to link directly to this artist.');
-                          });
-                        }
-                      }
-                    } catch (e) {
-                      console.error('Error sharing:', e);
-                    }
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors mb-6"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                  <span className="text-sm font-medium">Share Artist</span>
-                </button>
-
-                {/* Drill-down hint */}
-                {(() => {
-                  const countryMatch = selectedArtist.code?.match(/^(.+?)-\d+$/);
-                  const country = countryMatch ? countryMatch[1] : selectedArtist.code;
-                  const canDrillDown = (zoomLevel === 'world' && activeData.countries[country]);
-                  
-                  return canDrillDown && (
-                    <div className="mt-6 p-4 bg-indigo-600/20 border border-indigo-500/30 rounded-lg">
-                      <p className="text-sm text-indigo-300">
-                        💡 <strong>Tip:</strong> Double-click on the map to explore more artists from {country}
-                      </p>
+                  {/* Bio */}
+                  {selectedArtist.bio && (
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-slate-400 uppercase mb-2">About</h3>
+                      <p className="text-slate-300 leading-relaxed">{selectedArtist.bio}</p>
                     </div>
-                  );
-                })()}
+                  )}
+
+                  {/* Links */}
+                  <div className="flex gap-3 mb-4">
+                    {selectedArtist.website && (
+                      <a
+                        href={selectedArtist.website.startsWith('http') ? selectedArtist.website : `https://${selectedArtist.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                      >
+                        <Globe />
+                        <span className="text-sm">Website</span>
+                      </a>
+                    )}
+                    {selectedArtist.instagram && (
+                      <a
+                        href={`https://instagram.com/${selectedArtist.instagram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-500 hover:to-pink-500 transition-colors"
+                      >
+                        <Instagram />
+                        <span className="text-sm">Instagram</span>
+                      </a>
+                    )}
+                  </div>
+
+                  {/* View Artist Page Button */}
+                  {selectedArtist.name && (
+                    <Link
+                      to={`/artist/${generateSlug(selectedArtist.name)}`}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors mb-4"
+                    >
+                      <span className="text-sm font-medium">View Full Profile</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  )}
+
+                  {/* Share Button */}
+                  <button
+                    onClick={() => {
+                      try {
+                        if (typeof window !== 'undefined' && window.location && selectedArtist.name) {
+                          const slug = generateSlug(selectedArtist.name);
+                          const shareUrl = `${window.location.origin}/artist/${slug}`;
+                          if (navigator.clipboard) {
+                            navigator.clipboard.writeText(shareUrl).then(() => {
+                              alert('Link copied! Share this URL to link directly to this artist.');
+                            });
+                          }
+                        }
+                      } catch (e) {
+                        console.error('Error sharing:', e);
+                      }
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors mb-6"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span className="text-sm font-medium">Share Artist</span>
+                  </button>
+
+                  {/* Drill-down hint */}
+                  {(() => {
+                    const countryMatch = selectedArtist.code?.match(/^(.+?)-\d+$/);
+                    const country = countryMatch ? countryMatch[1] : selectedArtist.code;
+                    const canDrillDown = (zoomLevel === 'world' && activeData.countries[country]);
+                    
+                    return canDrillDown && (
+                      <div className="mt-6 p-4 bg-indigo-600/20 border border-indigo-500/30 rounded-lg">
+                        <p className="text-sm text-indigo-300">
+                          💡 <strong>Tip:</strong> Double-click on the map to explore more artists from {country}
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
           ) : (
-            /* Empty State */
+            /* Empty State */}
             <div className="flex-1 flex items-center justify-center p-8">
               <div className="text-center">
                 <div className="text-6xl mb-4">🎬</div>
@@ -1083,3 +1119,4 @@ function App() {
 }
 
 export default App;
+
