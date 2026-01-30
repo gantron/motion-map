@@ -30,7 +30,7 @@ function App() {
       .replace(/[^a-z0-9]+/g, '')
       .trim();
   };
-// v2
+
   // Clear hover state when view mode changes to prevent animation conflicts
   useEffect(() => {
     setHoveredState(null);
@@ -1089,7 +1089,6 @@ function App() {
               </div>
             </div>
           ) : (
-            {/* Empty State */}
             <div className="flex-1 flex items-center justify-center p-8">
               <div className="text-center">
                 <div className="text-6xl mb-4">🎬</div>
