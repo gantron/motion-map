@@ -755,8 +755,8 @@ function App() {
       <div className="flex-1 flex overflow-hidden">
         {/* Map Area */}
         <div className="flex-1 flex flex-col relative">
-          {/* Floating Map/Grid Toggle - Top Right of Map */}
-          <div className="absolute top-6 right-6 z-50 flex gap-1 bg-slate-700/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+          {/* Floating Map/Grid Toggle - Flush Top Right Corner */}
+          <div className="absolute top-0 right-0 z-50 flex gap-1 bg-slate-700/90 backdrop-blur-sm rounded-bl-lg p-1 shadow-lg">
             <button
               onClick={() => setViewMode('map')}
               className={`p-2 rounded transition-colors ${
