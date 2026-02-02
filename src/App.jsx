@@ -83,168 +83,62 @@ function App() {
     });
   }, []);
 
-  // World grid with multiple boxes per country (geographically accurate)
-  // Layout designed to visually resemble actual world map geography
+  // ========================================
+  // WORLD GRID - SIMPLE V1
+  // Philosophy: Fewer countries = larger tiles = better artist visibility
+  // 35 countries, ~8 rows × 12 columns (vs 90+ countries in complex version)
+  // ========================================
   const worldGridBase = {
-    // ========== NORTH AMERICA ==========
-    // Row 0: Northern Canada
-    'Canada-1': [0, 1], 
-    'Canada-2': [0, 2], 
-    'Canada-3': [0, 3], 
-    'Canada-4': [0, 4],
+    // NORTH AMERICA (3 countries, 8 tiles)
+    'Canada-1':[0,1], 'Canada-2':[0,2],
+    'USA-1':[1,0], 'USA-2':[1,1], 'USA-3':[1,2],
+    'USA-4':[2,1], 'USA-5':[2,2],
+    'Mexico-1':[3,1],
     
-    // Row 1: USA - Northern tier
-    'USA-1': [1, 1], 
-    'USA-2': [1, 2], 
-    'USA-3': [1, 3], 
-    'USA-4': [1, 4], 
-    'USA-5': [1, 5],
+    // CENTRAL/SOUTH AMERICA (5 countries, 6 tiles)
+    'Costa Rica-1':[4,1],
+    'Colombia-1':[5,1],
+    'Brazil-1':[6,2], 'Brazil-2':[6,3],
+    'Peru-1':[6,1],
+    'Argentina-1':[7,2],
     
-    // Row 2: USA - Southern tier, Mexico begins
-    'USA-6': [2, 2], 
-    'USA-7': [2, 3], 
-    'Mexico-1': [2, 4], 
-    'Mexico-2': [2, 5],
+    // EUROPE (6 countries, 6 tiles)
+    'UK-1':[1,5],
+    'France-1':[2,5],
+    'Germany-1':[2,6],
+    'Spain-1':[3,5],
+    'Italy-1':[3,6],
+    'Poland-1':[2,7],
     
-    // Row 3: Central America
-    'Costa Rica-1': [3, 4], 
-    'Panama-1': [3, 5],
+    // RUSSIA (1 country, 3 tiles - spans Europe to Asia)
+    'Russia-1':[0,8], 'Russia-2':[0,9], 'Russia-3':[0,10],
     
-    // ========== SOUTH AMERICA ==========
-    // Row 4: Northern South America
-    'Colombia-1': [4, 4], 
-    'Venezuela-1': [4, 5],
+    // AFRICA (5 countries, 5 tiles)
+    'Morocco-1':[4,5],
+    'Nigeria-1':[5,5],
+    'Kenya-1':[6,6],
+    'South Africa-1':[7,6],
+    'Egypt-1':[4,6],
     
-    // Row 5: Central-North South America
-    'Peru-1': [5, 4], 
-    'Brazil-1': [5, 5], 
-    'Brazil-2': [5, 6],
+    // MIDDLE EAST (3 countries, 3 tiles)
+    'Turkey-1':[3,7],
+    'Saudi Arabia-1':[4,7],
+    'Israel-1':[4,6],
     
-    // Row 6: Central-South South America
-    'Chile-1': [6, 4], 
-    'Argentina-1': [6, 5], 
-    'Brazil-3': [6, 6],
+    // ASIA (6 countries, 8 tiles)
+    'China-1':[2,8], 'China-2':[2,9],
+    'India-1':[4,8], 'India-2':[5,8],
+    'Japan-1':[2,11],
+    'Korea-1':[2,10],
     
-    // Row 7: Southern South America
-    'Chile-2': [7, 4], 
-    'Argentina-2': [7, 5],
+    // SOUTHEAST ASIA (3 countries, 3 tiles)
+    'Thailand-1':[4,9],
+    'Indonesia-1':[5,10],
+    'Vietnam-1':[4,10],
     
-    // ========== EUROPE ==========
-    // Row 0: Nordic Countries
-    'Iceland-1': [0, 7],
-    'Norway-1': [0, 8], 
-    'Sweden-1': [0, 9], 
-    'Finland-1': [0, 10],
-    'Denmark-1': [0, 11],
-    
-    // Row 1: British Isles & Eastern Europe
-    'Ireland-1': [1, 7], 
-    'UK-1': [1, 8], 
-    'UK-2': [1, 9],
-    'Poland-1': [1, 11],
-    
-    // Row 2: Western/Central Europe
-    'France-1': [2, 8], 
-    'France-2': [2, 9],
-    'Germany-1': [2, 10], 
-    'Germany-2': [2, 11],
-    'Czech-1': [2, 12],
-    
-    // Row 3: Southern Europe
-    'Spain-1': [3, 7], 
-    'Spain-2': [3, 8],
-    'Italy-1': [3, 9], 
-    'Italy-2': [3, 10],
-    'Greece-1': [3, 11],
-    
-    // ========== AFRICA ==========
-    // Row 3-4: North Africa
-    'Morocco-1': [3, 7],
-    'Algeria-1': [3, 8],
-    'Tunisia-1': [3, 12],
-    'Egypt-1': [3, 13], 
-    'Egypt-2': [4, 13],
-    
-    // Row 4: North-Central Africa
-    'Libya-1': [4, 7],
-    'Sudan-1': [4, 8],
-    
-    // Row 5: West/Central Africa
-    'Ghana-1': [5, 7],
-    'Nigeria-1': [5, 8], 
-    'Nigeria-2': [5, 9],
-    'Ethiopia-1': [5, 13],
-    
-    // Row 6: Central-East Africa
-    'Tanzania-1': [6, 12],
-    'Kenya-1': [6, 13],
-    
-    // Row 7: Southern Africa
-    'South Africa-1': [7, 11], 
-    'South Africa-2': [7, 12],
-    
-    // ========== MIDDLE EAST ==========
-    // Row 3-4: Levant & Turkey
-    'Turkey-1': [3, 14],
-    'Israel-1': [4, 14],
-    'Lebanon-1': [4, 15],
-    
-    // Row 5: Gulf Region
-    'Saudi Arabia-1': [5, 14],
-    'UAE-1': [5, 15],
-    'UAE-2': [5, 16],
-    
-    // ========== ASIA ==========
-    // Row 0: Northern Russia
-    'Russia-1': [0, 14], 
-    'Russia-2': [0, 15], 
-    'Russia-3': [0, 16], 
-    'Russia-4': [0, 17],
-    'Russia-5': [0, 18],
-    
-    // Row 2: Central Asia to China
-    'Kazakhstan-1': [2, 14],
-    'China-1': [2, 15], 
-    'China-2': [2, 16], 
-    'China-3': [2, 17],
-    
-    // Row 3: China expanded + Japan
-    'China-4': [3, 15], 
-    'China-5': [3, 16],
-    'Taiwan-1': [3, 17],
-    'Japan-1': [3, 18],
-    
-    // Row 4: Korea + Japan
-    'Korea-1': [4, 17], 
-    'Korea-2': [4, 18],
-    'Japan-2': [4, 19],
-    
-    // Row 5: South Asia
-    'Pakistan-1': [5, 17],
-    'India-1': [5, 18], 
-    'India-2': [5, 19],
-    'Bangladesh-1': [5, 20],
-    
-    // Row 6: Southeast Asia
-    'India-3': [6, 18],
-    'Thailand-1': [6, 19],
-    'Vietnam-1': [6, 20],
-    'Philippines-1': [6, 21],
-    
-    // Row 7: Maritime Southeast Asia
-    'Malaysia-1': [7, 19],
-    'Singapore-1': [7, 20],
-    'Indonesia-1': [7, 21],
-    'Indonesia-2': [7, 22],
-    
-    // ========== OCEANIA ==========
-    // Row 8: Australia
-    'Australia-1': [8, 20], 
-    'Australia-2': [8, 21], 
-    'Australia-3': [8, 22],
-    
-    // Row 9: New Zealand
-    'New Zealand-1': [9, 22]
+    // OCEANIA (2 countries, 3 tiles)
+    'Australia-1':[6,10], 'Australia-2':[6,11],
+    'New Zealand-1':[7,11]
   };
 
   const generateWorldGrid = () => worldGridBase;
@@ -616,9 +510,8 @@ function App() {
       maxCol = Math.max(maxCol, col);
     });
 
-    // Dynamic cell size based on zoom level and item count
-    // ONLY CHANGE: Increase world view base size slightly
-    let baseCellSize = zoomLevel === 'world' ? 150 : 140;
+    // SIMPLE V1: Larger base sizes for better artist visibility (20% bigger)
+    let baseCellSize = zoomLevel === 'world' ? 180 : 160;
     const itemCount = Object.keys(currentGrid).length;
     
     if (zoomLevel === 'state') {
@@ -941,7 +834,7 @@ function App() {
                         />
                       )}
                       <div
-                        className={`w-full h-full rounded-[14px] border-2 overflow-hidden relative ${
+                        className={`w-full h-full rounded-[14px] border-1 overflow-hidden relative ${
                           hasContent
                             ? isSelected 
                               ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
