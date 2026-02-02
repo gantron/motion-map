@@ -86,7 +86,7 @@ function App() {
   // ========================================
   // WORLD GRID - SIMPLE V1
   // Philosophy: Fewer countries = larger tiles = better artist visibility
-  // Grid shows 40 countries, ~8 rows × 12 columns
+  // Grid shows 44 countries, ~8 rows × 12 columns
   // ========================================
   const worldGridBase = {
     // NORTH AMERICA (3 countries, 9 tiles)
@@ -96,46 +96,52 @@ function App() {
     'Mexico-1':[2,0],  // NEW: up one, left one
     'Mexico-2':[3,1],  // Original Mexico position
     
-    // CENTRAL/SOUTH AMERICA (5 countries, 6 tiles) - STAGGERED
+    // CENTRAL/SOUTH AMERICA (6 countries, 7 tiles) - STAGGERED
     'Costa Rica-1':[4,2],  // Moved right from [4,1]
+    'Venezuela-1':[5,2],   // NEW: Above middle Brazil tile
     'Colombia-1':[5,3],    // Moved down-right from [5,1]
     'Brazil-1':[6,2], 'Brazil-2':[6,3],
     'Peru-1':[6,1],
     'Argentina-1':[7,2],
     
-    // EUROPE (6 countries, 6 tiles)
+    // EUROPE (7 countries, 7 tiles)
     'UK-1':[1,5],
     'France-1':[2,5],
-    'Germany-1':[2,6],
+    'Portugal-1':[3,4],    // NEW: Left of Spain
     'Spain-1':[3,5],
+    'Germany-1':[2,6],
     'Italy-1':[3,6],
     'Poland-1':[2,7],
     
-    // RUSSIA (1 country, 3 tiles - spans Europe to Asia)
+    // RUSSIA (1 country, 4 tiles - spans Europe to Asia)
     'Russia-1':[0,8], 'Russia-2':[0,9], 'Russia-3':[0,10],
+    'Russia-4':[1,9],      // NEW: Beneath middle Russia tile
     
     // AFRICA (6 countries, 6 tiles)
     'Morocco-1':[4,5],
     'Nigeria-1':[5,5],
-    'Ghana-1':[5,6],      // NEW: Most likely to have submissions after Nigeria
+    'Ghana-1':[5,6],
     'Kenya-1':[6,6],
     'South Africa-1':[7,6],
     'Egypt-1':[4,6],
     
     // MIDDLE EAST (3 countries, 3 tiles)
     'Turkey-1':[3,7],
-    'Israel-1':[4,7],      // SWAPPED: was Saudi Arabia
-    'Saudi Arabia-1':[5,7], // SWAPPED: was Israel, moved down to avoid overlap
-    'Nepal-1':[3,8],       // NEW: country above India
+    'Israel-1':[4,7],
+    'Saudi Arabia-1':[5,7],
+    
+    // ASIA (7 countries, 10 tiles)
+    'Nepal-1':[3,8],
     'China-1':[2,8], 'China-2':[2,9],
+    'China-3':[1,10],      // NEW: Beneath 3rd Russia tile
     'India-1':[4,8], 'India-2':[5,8],
     'Japan-1':[2,11],
     'Korea-1':[2,10],
     
     // SOUTHEAST ASIA (3 countries, 3 tiles) - MOVED UP
-    'Thailand-1':[3,9],    // Moved up from [4,9]
-    'Vietnam-1':[3,10],    // Moved up from [4,10]
-    'Indonesia-1':[4,10],  // Moved up from [5,10]
+    'Thailand-1':[3,9],
+    'Vietnam-1':[3,10],
+    'Indonesia-1':[4,10],
     
     // OCEANIA (2 countries, 3 tiles) - NOW AN ISLAND
     'Australia-1':[6,10], 'Australia-2':[6,11],
@@ -705,29 +711,7 @@ function App() {
               Submit Your Work
             </button>
             
-            {/* View Mode Toggle */}
-            <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('map')}
-                className={`p-2 rounded transition-colors ${
-                  viewMode === 'map' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                }`}
-                title="Map View"
-              >
-                <Map />
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded transition-colors ${
-                  viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                }`}
-                title="Grid View"
-              >
-                <Grid />
-              </button>
-            </div>
-            
-            {/* Archive Toggle (separate) */}
+            {/* Archive Toggle */}
             <button
               onClick={() => setViewMode('archive')}
               className={`p-2 rounded-lg transition-colors ${
@@ -770,7 +754,29 @@ function App() {
       {/* Main Content - Map + Sidebar */}
       <div className="flex-1 flex overflow-hidden">
         {/* Map Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col relative">
+          {/* Floating Map/Grid Toggle - Top Right of Map */}
+          <div className="absolute top-6 right-6 z-50 flex gap-1 bg-slate-700/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+            <button
+              onClick={() => setViewMode('map')}
+              className={`p-2 rounded transition-colors ${
+                viewMode === 'map' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+              title="Map View"
+            >
+              <Map />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded transition-colors ${
+                viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+              title="Grid View"
+            >
+              <Grid />
+            </button>
+          </div>
+          
           <div className="flex-1 flex items-start justify-start p-4 overflow-auto">
             <div 
               className="relative mx-auto" 
@@ -835,7 +841,7 @@ function App() {
                         />
                       )}
                       <div
-                        className={`w-full h-full rounded-[14px] border-1.5 overflow-hidden relative ${
+                        className={`w-full h-full rounded-[14px] border-2 overflow-hidden relative ${
                           hasContent
                             ? isSelected 
                               ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
