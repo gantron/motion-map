@@ -86,18 +86,19 @@ function App() {
   // ========================================
   // WORLD GRID - SIMPLE V1
   // Philosophy: Fewer countries = larger tiles = better artist visibility
-  // 35 countries, ~8 rows × 12 columns (vs 90+ countries in complex version)
+  // Grid shows 40 countries, ~8 rows × 12 columns
   // ========================================
   const worldGridBase = {
-    // NORTH AMERICA (3 countries, 8 tiles)
+    // NORTH AMERICA (3 countries, 9 tiles)
     'Canada-1':[0,1], 'Canada-2':[0,2],
     'USA-1':[1,0], 'USA-2':[1,1], 'USA-3':[1,2],
     'USA-4':[2,1], 'USA-5':[2,2],
-    'Mexico-1':[3,1],
+    'Mexico-1':[2,0],  // NEW: up one, left one
+    'Mexico-2':[3,1],  // Original Mexico position
     
-    // CENTRAL/SOUTH AMERICA (5 countries, 6 tiles)
-    'Costa Rica-1':[4,1],
-    'Colombia-1':[5,1],
+    // CENTRAL/SOUTH AMERICA (5 countries, 6 tiles) - STAGGERED
+    'Costa Rica-1':[4,2],  // Moved right from [4,1]
+    'Colombia-1':[5,3],    // Moved down-right from [5,1]
     'Brazil-1':[6,2], 'Brazil-2':[6,3],
     'Peru-1':[6,1],
     'Argentina-1':[7,2],
@@ -113,30 +114,30 @@ function App() {
     // RUSSIA (1 country, 3 tiles - spans Europe to Asia)
     'Russia-1':[0,8], 'Russia-2':[0,9], 'Russia-3':[0,10],
     
-    // AFRICA (5 countries, 5 tiles)
+    // AFRICA (6 countries, 6 tiles)
     'Morocco-1':[4,5],
     'Nigeria-1':[5,5],
+    'Ghana-1':[5,6],      // NEW: Most likely to have submissions after Nigeria
     'Kenya-1':[6,6],
     'South Africa-1':[7,6],
     'Egypt-1':[4,6],
     
     // MIDDLE EAST (3 countries, 3 tiles)
     'Turkey-1':[3,7],
-    'Saudi Arabia-1':[4,7],
-    'Israel-1':[4,6],
-    
-    // ASIA (6 countries, 8 tiles)
+    'Israel-1':[4,7],      // SWAPPED: was Saudi Arabia
+    'Saudi Arabia-1':[5,7], // SWAPPED: was Israel, moved down to avoid overlap
+    'Nepal-1':[3,8],       // NEW: country above India
     'China-1':[2,8], 'China-2':[2,9],
     'India-1':[4,8], 'India-2':[5,8],
     'Japan-1':[2,11],
     'Korea-1':[2,10],
     
-    // SOUTHEAST ASIA (3 countries, 3 tiles)
-    'Thailand-1':[4,9],
-    'Indonesia-1':[5,10],
-    'Vietnam-1':[4,10],
+    // SOUTHEAST ASIA (3 countries, 3 tiles) - MOVED UP
+    'Thailand-1':[3,9],    // Moved up from [4,9]
+    'Vietnam-1':[3,10],    // Moved up from [4,10]
+    'Indonesia-1':[4,10],  // Moved up from [5,10]
     
-    // OCEANIA (2 countries, 3 tiles)
+    // OCEANIA (2 countries, 3 tiles) - NOW AN ISLAND
     'Australia-1':[6,10], 'Australia-2':[6,11],
     'New Zealand-1':[7,11]
   };
@@ -834,7 +835,7 @@ function App() {
                         />
                       )}
                       <div
-                        className={`w-full h-full rounded-[14px] border-1 overflow-hidden relative ${
+                        className={`w-full h-full rounded-[14px] border-1.5 overflow-hidden relative ${
                           hasContent
                             ? isSelected 
                               ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
@@ -905,21 +906,8 @@ function App() {
                           return null;
                         })()}
                         
-                        {!hasContent && zoomLevel === 'world' && (
-                          <div className="absolute bottom-2 right-2">
-                            <span className="text-xs font-bold text-white/30 drop-shadow-lg">
-                              {code.replace(/-\d+$/, '')}
-                            </span>
-                          </div>
-                        )}
-                        
-                        {zoomLevel === 'world' && isHovered && hasContent && (
-                          <div className="absolute bottom-2 right-2">
-                            <span className="text-xs font-bold text-white drop-shadow-lg">
-                              {code.replace(/-\d+$/, '')}
-                            </span>
-                          </div>
-                        )}
+                        {/* Country names removed from world view for flexibility */}
+                        {/* Names still show on USA state view and city view below */}
                         
                         {isHovered && hasContent && (
                           <div className="absolute top-1 right-1">
