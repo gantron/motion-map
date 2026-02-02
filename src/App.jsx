@@ -22,6 +22,18 @@ function App() {
   const videoRefs = useRef({});
   const sidebarVideoRef = useRef(null);
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Generate slug from artist name
   const generateSlug = (name) => {
     if (!name) return '';
@@ -625,9 +637,171 @@ function App() {
                     strokeWidth="3" vectorEffect="non-scaling-stroke"/>
             </svg>
           </div>
-          <div className="text-white text-2xl font-bold mb-3">Motion-Map</div>
+          <div className="text-white text-2xl font-bold mb-3">MotionMap</div>
           <div className="text-slate-400 text-lg pulse-text">Loading artists...</div>
         </div>
+      </div>
+    );
+  }
+
+  // Mobile View - Simple scrollable list
+  if (isMobile) {
+    return (
+      <div className="w-full min-h-screen bg-gradient-to-br from-black via-slate-950 to-black flex flex-col">
+        {/* Mobile Header */}
+        <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4 sticky top-0 z-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+                <rect x="6" y="6" width="24" height="24" rx="4" 
+                      stroke="url(#gradient)" strokeWidth="2"/>
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#6366f1" />
+                    <stop offset="50%" stopColor="#a855f7" />
+                    <stop offset="100%" stopColor="#ec4899" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <h1 className="text-lg font-bold text-white">MotionMap</h1>
+            </div>
+            <button
+              onClick={() => setIsSubmissionFormOpen(true)}
+              className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg text-sm font-medium"
+            >
+              Submit
+            </button>
+          </div>
+          
+          {/* Month Navigation - Mobile */}
+          {viewMode !== 'archive' && (
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <button
+                onClick={() => navigateMonth(-1)}
+                disabled={currentMonthIndex === 0}
+                className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
+              >
+                <ChevronLeft />
+              </button>
+              <div className="flex items-center gap-2 px-3 py-2 bg-slate-700 text-white rounded-lg">
+                <Calendar />
+                <span className="text-sm font-medium">{displayMonth} {displayYear}</span>
+              </div>
+              <button
+                onClick={() => navigateMonth(1)}
+                disabled={currentMonthIndex === monthsArchive.length - 1}
+                className="p-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 text-white rounded-lg"
+              >
+                <ChevronRight />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Artist List */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {Object.keys(currentData).length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🎬</div>
+              <h3 className="text-xl font-bold text-white mb-2">No Artists This Month</h3>
+              <p className="text-slate-400">Check back soon or explore the archive!</p>
+            </div>
+          ) : (
+            <div className="space-y-4 max-w-2xl mx-auto">
+              {Object.entries(currentData).map(([code, artist]) => {
+                const videoInfo = artist.videoUrl ? getVideoEmbedInfo(artist.videoUrl) : null;
+                const hasValidPoster = artist.posterUrl && 
+                                      artist.posterUrl.trim().length > 0 &&
+                                      artist.posterUrl !== '#N/A';
+                
+                return (
+                  <div 
+                    key={code}
+                    className="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 hover:border-indigo-500 transition-colors"
+                  >
+                    {/* Thumbnail */}
+                    <div className="aspect-video bg-gradient-to-br from-indigo-600 to-purple-600 relative">
+                      {videoInfo && (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo') ? (
+                        <iframe
+                          src={videoInfo.embedUrl}
+                          className="absolute inset-0 w-full h-full"
+                          allow="autoplay; encrypted-media"
+                        />
+                      ) : hasValidPoster ? (
+                        <img 
+                          src={artist.posterUrl} 
+                          alt={artist.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : null}
+                    </div>
+                    
+                    {/* Artist Info */}
+                    <div className="p-4">
+                      <h3 className="text-lg font-bold text-white mb-1">{artist.name}</h3>
+                      {artist.country && (
+                        <p className="text-sm text-slate-400 mb-3">
+                          {[artist.city, artist.state, artist.country].filter(Boolean).join(', ')}
+                        </p>
+                      )}
+                      
+                      {artist.bio && (
+                        <p className="text-sm text-slate-300 mb-3 line-clamp-2">{artist.bio}</p>
+                      )}
+                      
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        {artist.videoUrl && (
+                          <a
+                            href={artist.videoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm text-center font-medium"
+                          >
+                            Watch Video
+                          </a>
+                        )}
+                        {artist.instagram && (
+                          <a
+                            href={`https://instagram.com/${artist.instagram.replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm"
+                          >
+                            <Instagram />
+                          </a>
+                        )}
+                        {artist.website && (
+                          <a
+                            href={artist.website.startsWith('http') ? artist.website : `https://${artist.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm"
+                          >
+                            <Globe />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Footer */}
+        <div className="bg-slate-950/90 border-t border-slate-800 py-3 px-4 text-center">
+          <p className="text-xs text-slate-500">
+            Best viewed on desktop • <Link to="/about" className="text-slate-400 hover:text-white">About</Link>
+          </p>
+        </div>
+
+        {/* Submission Form */}
+        <SubmissionForm 
+          isOpen={isSubmissionFormOpen} 
+          onClose={() => setIsSubmissionFormOpen(false)} 
+        />
       </div>
     );
   }
@@ -665,8 +839,8 @@ function App() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               {/* Logo */}
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <rect x="4" y="4" width="24" height="24" rx="4" 
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                <rect x="6" y="6" width="24" height="24" rx="4" 
                       stroke="url(#gradient)" strokeWidth="2" 
                       className="animate-pulse"/>
                 <defs>
@@ -678,7 +852,7 @@ function App() {
                 </defs>
               </svg>
               {/* Title */}
-              <h1 className="text-xl font-bold text-white">Motion-Map</h1>
+              <h1 className="text-xl font-bold text-white">MotionMap</h1>
             </div>
             
             {/* Breadcrumb for zoom levels */}
