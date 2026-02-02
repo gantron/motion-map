@@ -24,6 +24,7 @@ function App() {
 
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false);
+  const [mobileSortMode, setMobileSortMode] = useState('random'); // 'random', 'name', 'country'
   
   useEffect(() => {
     const checkMobile = () => {
@@ -33,6 +34,31 @@ function App() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Sort mobile artists
+  const sortMobileArtists = (artistsObj) => {
+    const entries = Object.entries(artistsObj);
+    
+    switch(mobileSortMode) {
+      case 'name':
+        return entries.sort(([, a], [, b]) => 
+          (a.name || '').localeCompare(b.name || '')
+        );
+      case 'country':
+        return entries.sort(([, a], [, b]) => {
+          const countryA = a.country || '';
+          const countryB = b.country || '';
+          if (countryA === countryB) {
+            return (a.name || '').localeCompare(b.name || '');
+          }
+          return countryA.localeCompare(countryB);
+        });
+      case 'random':
+      default:
+        // Shuffle array randomly but consistently per session
+        return entries.sort(() => Math.random() - 0.5);
+    }
+  };
 
   // Generate slug from artist name
   const generateSlug = (name) => {
@@ -675,7 +701,7 @@ function App() {
           
           {/* Month Navigation - Mobile */}
           {viewMode !== 'archive' && (
-            <div className="flex items-center justify-center gap-2 mt-3">
+            <div className="flex items-center justify-between gap-2 mt-3">
               <button
                 onClick={() => navigateMonth(-1)}
                 disabled={currentMonthIndex === 0}
@@ -696,6 +722,20 @@ function App() {
               </button>
             </div>
           )}
+          
+          {/* Sort Dropdown */}
+          <div className="mt-3 flex items-center justify-end gap-2">
+            <span className="text-xs text-slate-400">Sort:</span>
+            <select
+              value={mobileSortMode}
+              onChange={(e) => setMobileSortMode(e.target.value)}
+              className="text-xs bg-slate-700 text-white rounded-lg px-2 py-1 border border-slate-600 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="random">Random</option>
+              <option value="name">A-Z</option>
+              <option value="country">By Country</option>
+            </select>
+          </div>
         </div>
 
         {/* Mobile Artist List */}
@@ -708,7 +748,7 @@ function App() {
             </div>
           ) : (
             <div className="space-y-4 max-w-2xl mx-auto">
-              {Object.entries(currentData).map(([code, artist]) => {
+              {sortMobileArtists(currentData).map(([code, artist]) => {
                 const videoInfo = artist.videoUrl ? getVideoEmbedInfo(artist.videoUrl) : null;
                 const hasValidPoster = artist.posterUrl && 
                                       artist.posterUrl.trim().length > 0 &&
