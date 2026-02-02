@@ -673,7 +673,7 @@ function App() {
   // Mobile View - Simple scrollable list
   if (isMobile) {
     return (
-      <div className="w-full min-h-screen bg-gradient-to-br from-black via-slate-950 to-black flex flex-col">
+      <div className="w-full h-screen bg-gradient-to-br from-black via-slate-950 to-black flex flex-col overflow-hidden">
         {/* Mobile Header */}
         <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4 sticky top-0 z-50">
           <div className="flex items-center justify-between">
@@ -739,7 +739,7 @@ function App() {
         </div>
 
         {/* Mobile Artist List */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-scroll overscroll-contain p-4" style={{ WebkitOverflowScrolling: 'touch' }}>
           {Object.keys(currentData).length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🎬</div>
