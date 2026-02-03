@@ -791,16 +791,12 @@ function App() {
                       
                       {/* Action Buttons */}
                       <div className="flex gap-2">
-                        {artist.videoUrl && (
-                          <a
-                            href={artist.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm text-center font-medium"
-                          >
-                            Watch Video
-                          </a>
-                        )}
+                        <Link
+                          to={`/artist/${artist.name ? artist.name.toLowerCase().replace(/[^a-z0-9]+/g, '') : code}`}
+                          className="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm text-center font-medium"
+                        >
+                          View Profile
+                        </Link>
                         {artist.instagram && (
                           <a
                             href={`https://instagram.com/${artist.instagram.replace('@', '')}`}
