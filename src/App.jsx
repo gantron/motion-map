@@ -26,6 +26,7 @@ function App() {
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSortMode, setMobileSortMode] = useState('random'); // 'random', 'name', 'country'
+  const [audioEnabled, setAudioEnabled] = useState(true);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -918,18 +919,6 @@ function App() {
 
           {/* Right: Controls */}
           <div className="flex gap-3 items-center">
-            {/* Audio Toggle Button */}
-            <button
-              onClick={() => audioManager.toggle()}
-              className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-              title="Toggle Audio"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-              </svg>
-            </button>
-            
             {/* Submit Button */}
             <button
               onClick={() => setIsSubmissionFormOpen(true)}
@@ -1255,7 +1244,35 @@ function App() {
                 <span>•</span>
                 <span>Sound by <a href="https://www.thechicken.net/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">The Chicken</a></span>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-4 items-center">
+                {/* Audio Toggle */}
+                <button
+                  onClick={() => {
+                    const enabled = audioManager.toggle();
+                    setAudioEnabled(enabled);
+                  }}
+                  className="text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+                  title={audioEnabled ? "Mute Audio" : "Unmute Audio"}
+                >
+                  {audioEnabled ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                      </svg>
+                      <span>Audio On</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                              d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                      </svg>
+                      <span>Audio Off</span>
+                    </>
+                  )}
+                </button>
+                
                 <Link to="/about" className="text-slate-400 hover:text-white transition-colors">
                   About
                 </Link>
