@@ -125,12 +125,17 @@ class AudioManager {
     }
     this.lastHoverTime = now;
     
-    // Play the next sound in the sequence
-    const soundName = this.hoverSounds[this.hoverSequenceIndex];
-    this.play(soundName);
-    
-    // Move to next sound in sequence (loop back to start)
-    this.hoverSequenceIndex = (this.hoverSequenceIndex + 1) % this.hoverSounds.length;
+    // Add slight delay for more tactile feel
+    setTimeout(() => {
+      if (!this.enabled) return; // Check if still enabled after delay
+      
+      // Play the next sound in the sequence
+      const soundName = this.hoverSounds[this.hoverSequenceIndex];
+      this.play(soundName);
+      
+      // Move to next sound in sequence (loop back to start)
+      this.hoverSequenceIndex = (this.hoverSequenceIndex + 1) % this.hoverSounds.length;
+    }, 25);
   }
 
   playClick() {
