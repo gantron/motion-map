@@ -390,6 +390,17 @@ function App() {
       console.error('Error loading from URL:', e);
     }
   }, [sheetData]);
+
+  // Start ambient music when app loads
+  useEffect(() => {
+    if (!isLoading && sheetData) {
+      audioManager.playAmbient();
+    }
+    
+    return () => {
+      audioManager.stopAmbient();
+    };
+  }, [isLoading, sheetData]);
   
   // Ensure currentMonthIndex is valid
   const safeIndex = monthsArchive.length > 0 ? Math.max(0, Math.min(currentMonthIndex, monthsArchive.length - 1)) : 0;
@@ -508,6 +519,8 @@ function App() {
   };
 
   const handleItemDoubleClick = (code) => {
+    audioManager.playDrilldown();
+    
     if (zoomLevel === 'world') {
       // Drilling from World to Country (USA)
       const countryMatch = code.match(/^(.+?)-\d+$/);
@@ -534,6 +547,8 @@ function App() {
   };
 
   const handleZoomOut = () => {
+    audioManager.playBack();
+    
     if (zoomLevel === 'state') {
       // Zoom out from State to Country
       setZoomLevel('country');
@@ -903,6 +918,18 @@ function App() {
 
           {/* Right: Controls */}
           <div className="flex gap-3 items-center">
+            {/* Audio Toggle Button */}
+            <button
+              onClick={() => audioManager.toggle()}
+              className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              title="Toggle Audio"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
+            </button>
+            
             {/* Submit Button */}
             <button
               onClick={() => setIsSubmissionFormOpen(true)}
@@ -1020,7 +1047,10 @@ function App() {
           {/* Floating Map/Grid Toggle - Flush Top Right Corner */}
           <div className="absolute top-0 right-0 z-50 flex gap-1 bg-slate-700/90 backdrop-blur-sm rounded-bl-lg p-1 shadow-lg">
             <button
-              onClick={() => setViewMode('map')}
+              onClick={() => {
+                setViewMode('map');
+                audioManager.playTransition();
+              }}
               className={`p-2 rounded transition-colors ${
                 viewMode === 'map' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
               }`}
@@ -1029,7 +1059,10 @@ function App() {
               <Map />
             </button>
             <button
-              onClick={() => setViewMode('grid')}
+              onClick={() => {
+                setViewMode('grid');
+                audioManager.playTransition();
+              }}
               className={`p-2 rounded transition-colors ${
                 viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
               }`}
@@ -1041,7 +1074,7 @@ function App() {
           
           <div className="flex-1 flex items-start justify-start p-4 overflow-auto">
             <div 
-              className="relative mx-auto mt-16" 
+              className="relative mx-auto mt-8" 
               style={{ 
                 width: gridWidth, 
                 height: gridHeight,
@@ -1089,11 +1122,13 @@ function App() {
                       }}
                       onMouseEnter={() => {
                         if (!('ontouchstart' in window)) {
-                          setHoveredState(code); // Hover works on ALL boxes now
+                          setHoveredState(code);
+                          audioManager.playHover();
                         }
                       }}
                       onMouseLeave={() => setHoveredState(null)}
                       onClick={() => {
+                        audioManager.playClick();
                         if (hasContent) {
                           handleItemClick(code);
                         } else {
