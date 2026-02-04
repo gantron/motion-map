@@ -208,7 +208,7 @@ function ArtistPage() {
               {allSubmissions.map((submission, index) => (
                 <div
                   key={`${submission.month}-${index}`}
-                  className="aspect-square bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors cursor-pointer group"
+                  className="relative aspect-square bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors cursor-pointer group"
                 >
                   {submission.posterUrl ? (
                     <img 
@@ -221,7 +221,7 @@ function ArtistPage() {
                       <span className="text-white text-sm">{formatMonth(submission.month)}</span>
                     </div>
                   )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <p className="text-white text-sm font-medium">{formatMonth(submission.month)}</p>
                   </div>
                 </div>
