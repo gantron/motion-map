@@ -62,10 +62,8 @@ function AboutPage() {
       {/* Content */}
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {/* LEFT: Featured Artists Grid (2x3) */}
-          <div className="bg-slate-900/90 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Recent Artists</h2>
-            
+          {/* LEFT: Featured Artists Grid (2x3) - No Container */}
+          <div>
             {isLoading ? (
               <div className="h-96 flex items-center justify-center">
                 <div className="text-slate-400 text-center">
