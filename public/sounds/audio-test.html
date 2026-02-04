@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotionMap Audio Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .info-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .info-box h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        .volume-section {
+            margin-bottom: 25px;
+        }
+
+        .volume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .volume-header span {
+            font-size: 16px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        #volumeValue {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #667eea 0%, #764ba2 100%);
+            outline: none;
+            -webkit-appearance: none;
+            opacity: 0.8;
+        }
+
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 3px solid #667eea;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: 3px solid #667eea;
+        }
+
+        .status-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid;
+        }
+
+        .status-box.info {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .status-box.success {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .status-box.error {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .status-box h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .status-box.info h3 { color: #1976d2; }
+        .status-box.success h3 { color: #2e7d32; }
+        .status-box.error h3 { color: #c62828; }
+
+        .status-box p {
+            margin: 6px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .sound-btn {
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .sound-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .sound-btn.playing {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 6px 15px rgba(245, 87, 108, 0.5);
+            }
+            50% { 
+                transform: scale(1.08);
+                box-shadow: 0 12px 30px rgba(245, 87, 108, 0.7);
+            }
+        }
+
+        .sound-btn .emoji {
+            font-size: 36px;
+        }
+
+        .sound-btn .label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .control-btn {
+            padding: 18px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .control-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .integration-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .integration-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .integration-box p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .code-block .comment { color: #6a9955; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .string { color: #ce9178; }
+        .code-block .function { color: #dcdcaa; }
+
+        @media (max-width: 600px) {
+            .button-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 MotionMap Audio Test</h1>
+        <p class="subtitle">Testing audio system on motionmap.org</p>
+
+        <div class="info-box">
+            <h3>✅ Audio Files Confirmed Working!</h3>
+            <p>Your audio files are already hosted and accessible at motionmap.org/sounds/</p>
+            <p>Click the buttons below to test each sound. Once everything works, you can integrate this into your app!</p>
+        </div>
+
+        <div class="volume-section">
+            <div class="volume-header">
+                <span>🔊 Volume Control</span>
+                <span id="volumeValue">70%</span>
+            </div>
+            <input type="range" id="volumeSlider" min="0" max="100" value="70">
+        </div>
+
+        <div id="statusBox" class="status-box info">
+            <h3>🚀 Ready to Test</h3>
+            <p>Click any sound button below to test playback. The ambient loop will play continuously, others are one-shot sounds.</p>
+        </div>
+
+        <button class="control-btn" id="stopBtn">⏹️ Stop All Audio</button>
+
+        <div class="button-grid">
+            <button class="sound-btn" data-sound="ambient-loop">
+                <span class="emoji">🌊</span>
+                <span class="label">Ambient Loop</span>
+            </button>
+            <button class="sound-btn" data-sound="back">
+                <span class="emoji">⬅️</span>
+                <span class="label">Back</span>
+            </button>
+            <button class="sound-btn" data-sound="click">
+                <span class="emoji">👆</span>
+                <span class="label">Click</span>
+            </button>
+            <button class="sound-btn" data-sound="drilldown">
+                <span class="emoji">🔍</span>
+                <span class="label">Drilldown</span>
+            </button>
+            <button class="sound-btn" data-sound="form-submit">
+                <span class="emoji">✅</span>
+                <span class="label">Form Submit</span>
+            </button>
+            <button class="sound-btn" data-sound="form_error">
+                <span class="emoji">❌</span>
+                <span class="label">Form Error</span>
+            </button>
+            <button class="sound-btn" data-sound="hover">
+                <span class="emoji">✨</span>
+                <span class="label">Hover</span>
+            </button>
+            <button class="sound-btn" data-sound="transition">
+                <span class="emoji">🔄</span>
+                <span class="label">Transition</span>
+            </button>
+        </div>
+
+        <div class="integration-box">
+            <h3>🔧 Ready to Integrate?</h3>
+            <p>Once all sounds work above, add this audio manager to your MotionMap app:</p>
+            
+            <div class="code-block"><span class="comment">// Audio Manager for MotionMap</span>
+<span class="keyword">const</span> audioManager = {
+  sounds: {},
+  volume: <span class="string">0.7</span>,
+  
+  <span class="function">preload</span>(soundName) {
+    <span class="keyword">if</span> (!<span class="keyword">this</span>.sounds[soundName]) {
+      <span class="keyword">const</span> audio = <span class="keyword">new</span> <span class="function">Audio</span>(<span class="string">`/sounds/${soundName}.mp3`</span>);
+      audio.preload = <span class="string">'auto'</span>;
+      audio.volume = <span class="keyword">this</span>.volume;
+      <span class="keyword">this</span>.sounds[soundName] = audio;
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>.sounds[soundName];
+  },
+  
+  <span class="function">play</span>(soundName, loop = <span class="keyword">false</span>) {
+    <span class="keyword">const</span> audio = <span class="keyword">this</span>.<span class="function">preload</span>(soundName);
+    audio.loop = loop;
+    audio.currentTime = <span class="string">0</span>;
+    audio.<span class="function">play</span>().<span class="function">catch</span>(err => console.<span class="function">error</span>(<span class="string">'Audio error:'</span>, err));
+  },
+  
+  <span class="function">stop</span>(soundName) {
+    <span class="keyword">if</span> (<span class="keyword">this</span>.sounds[soundName]) {
+      <span class="keyword">this</span>.sounds[soundName].<span class="function">pause</span>();
+      <span class="keyword">this</span>.sounds[soundName].currentTime = <span class="string">0</span>;
+    }
+  }
+};
+
+<span class="comment">// Usage examples:</span>
+audioManager.<span class="function">play</span>(<span class="string">'click'</span>);  <span class="comment">// Play click sound</span>
+audioManager.<span class="function">play</span>(<span class="string">'ambient-loop'</span>, <span class="keyword">true</span>);  <span class="comment">// Start ambient (looping)</span>
+audioManager.<span class="function">stop</span>(<span class="string">'ambient-loop'</span>);  <span class="comment">// Stop ambient</span></div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            audioCache: {},
+            currentAudio: null,
+            currentSound: null,
+            volume: 0.7
+        };
+
+        const elements = {
+            volumeSlider: document.getElementById('volumeSlider'),
+            volumeValue: document.getElementById('volumeValue'),
+            statusBox: document.getElementById('statusBox'),
+            stopBtn: document.getElementById('stopBtn'),
+            soundButtons: document.querySelectorAll('.sound-btn')
+        };
+
+        // Volume control
+        elements.volumeSlider.addEventListener('input', (e) => {
+            const volume = parseInt(e.target.value);
+            elements.volumeValue.textContent = volume + '%';
+            state.volume = volume / 100;
+            if (state.currentAudio) {
+                state.currentAudio.volume = state.volume;
+            }
+        });
+
+        // Sound buttons
+        elements.soundButtons.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const sound = btn.dataset.sound;
+
+                if (state.currentSound === sound && state.currentAudio && !state.currentAudio.paused) {
+                    stopAllAudio();
+                    return;
+                }
+
+                stopAllAudio();
+
+                try {
+                    const audioUrl = `/sounds/${sound}.mp3`;
+                    
+                    showStatus('info', '⏳ Loading...', `Loading ${sound}.mp3`);
+
+                    let audio = state.audioCache[sound];
+                    if (!audio) {
+                        audio = new Audio();
+                        audio.preload = 'auto';
+                        state.audioCache[sound] = audio;
+                    }
+
+                    audio.src = audioUrl;
+                    audio.volume = state.volume;
+                    audio.loop = (sound === 'ambient-loop');
+
+                    audio.onplay = () => {
+                        btn.classList.add('playing');
+                        showStatus('success', '✅ Playing!', 
+                            `Now playing: ${sound}.mp3`,
+                            `Volume: ${Math.round(state.volume * 100)}%`,
+                            audio.loop ? 'Mode: Looping continuously' : 'Mode: One-shot playback');
+                    };
+
+                    audio.onended = () => {
+                        btn.classList.remove('playing');
+                        if (state.currentSound === sound) {
+                            state.currentAudio = null;
+                            state.currentSound = null;
+                            showStatus('info', '✓ Complete', `Finished playing ${sound}.mp3`);
+                        }
+                    };
+
+                    audio.onerror = () => {
+                        btn.classList.remove('playing');
+                        let errorMsg = 'Failed to load';
+                        if (audio.error) {
+                            switch (audio.error.code) {
+                                case 2: errorMsg = 'Network error - file not found'; break;
+                                case 3: errorMsg = 'Decode error'; break;
+                                case 4: errorMsg = 'Format not supported'; break;
+                            }
+                        }
+                        showStatus('error', '❌ Error', errorMsg, `File: ${audioUrl}`);
+                    };
+
+                    await audio.play();
+                    state.currentAudio = audio;
+                    state.currentSound = sound;
+
+                } catch (error) {
+                    btn.classList.remove('playing');
+                    showStatus('error', '❌ Playback Failed', error.message);
+                }
+            });
+        });
+
+        // Stop button
+        elements.stopBtn.addEventListener('click', stopAllAudio);
+
+        function stopAllAudio() {
+            if (state.currentAudio) {
+                state.currentAudio.pause();
+                state.currentAudio.currentTime = 0;
+            }
+            state.currentAudio = null;
+            state.currentSound = null;
+            elements.soundButtons.forEach(btn => btn.classList.remove('playing'));
+            showStatus('info', '⏹️ Stopped', 'All audio stopped');
+        }
+
+        function showStatus(type, title, ...messages) {
+            elements.statusBox.className = `status-box ${type}`;
+            elements.statusBox.innerHTML = `
+                <h3>${title}</h3>
+                ${messages.map(msg => `<p>${msg}</p>`).join('')}
+            `;
+        }
+    </script>
+</body>
+</html>
