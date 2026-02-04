@@ -6,6 +6,7 @@ import {
 } from './Icons';
 import { loadData, getAvailableMonths } from './dataLoader';
 import SubmissionForm from './SubmissionForm';
+import audioManager from './audioManager';
 
 function App() {
   const [hoveredState, setHoveredState] = useState(null);
