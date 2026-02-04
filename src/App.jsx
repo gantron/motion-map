@@ -27,6 +27,7 @@ function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSortMode, setMobileSortMode] = useState('random'); // 'random', 'name', 'country'
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [prefilledCountry, setPrefilledCountry] = useState(null);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -532,7 +533,8 @@ function App() {
         setZoomLevel('country');
         // Don't reset month - keep current month
         setHoveredState(null);
-        setSelectedArtist(null);
+        // Keep artist selected if there was one
+        // setSelectedArtist(null); // REMOVED - keep artist!
       }
     } else if (zoomLevel === 'country') {
       // Drilling from Country to State (NC, CA, FL, etc.)
@@ -542,7 +544,8 @@ function App() {
         setZoomLevel('state');
         // Don't reset month - keep current month
         setHoveredState(null);
-        setSelectedArtist(null);
+        // Keep artist selected if there was one
+        // setSelectedArtist(null); // REMOVED - keep artist!
       }
     }
   };
@@ -898,7 +901,18 @@ function App() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Left: Logo + Title */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (zoomLevel !== 'world') {
+                  audioManager.playBack();
+                  setZoomLevel('world');
+                  setSelectedRegion(null);
+                  setSelectedState(null);
+                  setSelectedArtist(null);
+                }
+              }}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+            >
               {/* Logo */}
               <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
                 <rect x="6" y="6" width="24" height="24" rx="4" 
@@ -914,7 +928,7 @@ function App() {
               </svg>
               {/* Title */}
               <h1 className="text-xl font-bold text-white">MotionMap</h1>
-            </div>
+            </button>
           </div>
 
           {/* Right: Controls */}
@@ -1123,8 +1137,8 @@ function App() {
                         } else {
                           // Empty box - open submission form with country pre-filled
                           const country = code.replace(/-\d+$/, '');
+                          setPrefilledCountry(country);
                           setIsSubmissionFormOpen(true);
-                          // TODO: Pass country to form to pre-fill
                         }
                       }}
                       onDoubleClick={() => handleItemDoubleClick(code)}
@@ -1211,12 +1225,12 @@ function App() {
                         
                         {/* Country name on hover - ALL boxes */}
                         {zoomLevel === 'world' && isHovered && (
-                          <div className="absolute bottom-2 right-2">
-                            <span className="text-xs font-bold text-white drop-shadow-lg">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-black/40 rounded-[14px]">
+                            <span className="text-sm font-bold text-white drop-shadow-lg whitespace-nowrap px-2 text-center">
                               {code.replace(/-\d+$/, '')}
                             </span>
                             {!hasContent && (
-                              <div className="text-[10px] text-white/60 mt-0.5">
+                              <div className="text-xs text-white/80 mt-1 whitespace-nowrap">
                                 Submit here
                               </div>
                             )}
@@ -1491,7 +1505,11 @@ function App() {
       {/* Submission Form Modal */}
       <SubmissionForm 
         isOpen={isSubmissionFormOpen} 
-        onClose={() => setIsSubmissionFormOpen(false)} 
+        onClose={() => {
+          setIsSubmissionFormOpen(false);
+          setPrefilledCountry(null); // Clear prefilled country
+        }}
+        prefilledCountry={prefilledCountry}
       />
     </div>
   );
