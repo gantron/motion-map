@@ -102,10 +102,10 @@ class AudioManager {
     if (!this.enabled) return;
     
     if (this.currentAmbient) {
-      // Already playing - just make sure it's actually playing
+      // Already exists - just make sure it's playing
       if (this.currentAmbient.paused) {
         this.currentAmbient.play().catch(err => {
-          console.warn('Ambient resume failed (may need user interaction):', err);
+          console.log('Ambient music waiting for user interaction');
         });
       }
       return;
@@ -122,12 +122,12 @@ class AudioManager {
       playPromise
         .then(() => {
           this.currentAmbient = audio;
-          console.log('Ambient music started');
+          console.log('🎵 Ambient music started');
         })
         .catch(err => {
-          console.warn('Ambient autoplay blocked - will start on first user interaction:', err);
-          // Store reference so it can be started on first interaction
-          this.currentAmbient = audio;
+          // Autoplay blocked - will start on first click
+          console.log('🔇 Ambient music will start on first interaction (browser autoplay policy)');
+          this.currentAmbient = audio; // Store reference for later
         });
     } else {
       this.currentAmbient = audio;
