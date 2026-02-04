@@ -1238,12 +1238,18 @@ function App() {
                         
                         {/* Country name on hover - ALL boxes */}
                         {zoomLevel === 'world' && isHovered && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-black/40 rounded-[14px]">
-                            <span className="text-sm font-bold text-white drop-shadow-lg whitespace-nowrap px-2 text-center">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-black/40 px-1" style={{ borderRadius: '14px' }}>
+                            <span 
+                              className="font-bold text-white drop-shadow-lg whitespace-nowrap text-center overflow-hidden text-ellipsis w-full"
+                              style={{ fontSize: `${Math.max(10, cellSize * 0.08)}px` }}
+                            >
                               {code.replace(/-\d+$/, '')}
                             </span>
                             {!hasContent && (
-                              <div className="text-xs text-white/80 mt-1 whitespace-nowrap">
+                              <div 
+                                className="text-white/80 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis w-full text-center"
+                                style={{ fontSize: `${Math.max(8, cellSize * 0.06)}px` }}
+                              >
                                 Submit here
                               </div>
                             )}
