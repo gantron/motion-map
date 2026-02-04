@@ -1,0 +1,134 @@
+// audioManager.js - Audio system for MotionMap
+
+class AudioManager {
+  constructor() {
+    this.sounds = {};
+    this.volume = 0.7;
+    this.enabled = true;
+    this.currentAmbient = null;
+    this.hoverSequenceIndex = 0;
+    this.hoverSounds = ['hover1', 'hover2', 'hover3', 'hover4'];
+    
+    // Preload all sounds
+    this.preloadAll();
+  }
+
+  preloadAll() {
+    const soundList = [
+      'ambient-loop',
+      'back',
+      'click',
+      'drilldown',
+      'form-submit',
+      'form_error',
+      'hover1',
+      'hover2',
+      'hover3',
+      'hover4',
+      'transition'
+    ];
+
+    soundList.forEach(name => {
+      this.preload(name);
+    });
+  }
+
+  preload(soundName) {
+    if (!this.sounds[soundName]) {
+      const audio = new Audio(`/sounds/${soundName}.mp3`);
+      audio.preload = 'auto';
+      audio.volume = this.volume;
+      this.sounds[soundName] = audio;
+    }
+    return this.sounds[soundName];
+  }
+
+  play(soundName, loop = false) {
+    if (!this.enabled) return;
+
+    const audio = this.preload(soundName);
+    audio.loop = loop;
+    audio.currentTime = 0;
+    audio.volume = this.volume;
+    
+    audio.play().catch(err => {
+      console.warn(`Audio play failed for ${soundName}:`, err);
+    });
+
+    return audio;
+  }
+
+  stop(soundName) {
+    if (this.sounds[soundName]) {
+      this.sounds[soundName].pause();
+      this.sounds[soundName].currentTime = 0;
+    }
+  }
+
+  // Specialized methods for MotionMap interactions
+
+  playAmbient() {
+    if (this.currentAmbient) return; // Already playing
+    this.currentAmbient = this.play('ambient-loop', true);
+  }
+
+  stopAmbient() {
+    if (this.currentAmbient) {
+      this.stop('ambient-loop');
+      this.currentAmbient = null;
+    }
+  }
+
+  playHover() {
+    // Play the next sound in the sequence
+    const soundName = this.hoverSounds[this.hoverSequenceIndex];
+    this.play(soundName);
+    
+    // Move to next sound in sequence (loop back to start)
+    this.hoverSequenceIndex = (this.hoverSequenceIndex + 1) % this.hoverSounds.length;
+  }
+
+  playClick() {
+    this.play('click');
+  }
+
+  playDrilldown() {
+    this.play('drilldown');
+  }
+
+  playBack() {
+    this.play('back');
+  }
+
+  playTransition() {
+    this.play('transition');
+  }
+
+  playFormSubmit() {
+    this.play('form-submit');
+  }
+
+  playFormError() {
+    this.play('form_error');
+  }
+
+  setVolume(newVolume) {
+    this.volume = Math.max(0, Math.min(1, newVolume));
+    Object.values(this.sounds).forEach(audio => {
+      audio.volume = this.volume;
+    });
+  }
+
+  toggle() {
+    this.enabled = !this.enabled;
+    if (!this.enabled) {
+      this.stopAmbient();
+    }
+    return this.enabled;
+  }
+}
+
+// Create singleton instance
+const audioManager = new AudioManager();
+
+export default audioManager;
