@@ -1040,16 +1040,25 @@ function App() {
                         height: `${cellSize}px`,
                         transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0)',
                         zIndex: isHovered ? 10 : (isSelected ? 5 : 1),
-                        cursor: hasContent ? 'pointer' : 'default',
+                        cursor: 'pointer', // All boxes are now clickable
                         transition: `left ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, top ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, width ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, height ${transitionDuration}s cubic-bezier(0.4, 0, 0.2, 1) ${staggerDelay}s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
                       }}
                       onMouseEnter={() => {
-                        if (hasContent && !('ontouchstart' in window)) {
-                          setHoveredState(code);
+                        if (!('ontouchstart' in window)) {
+                          setHoveredState(code); // Hover works on ALL boxes now
                         }
                       }}
                       onMouseLeave={() => setHoveredState(null)}
-                      onClick={() => handleItemClick(code)}
+                      onClick={() => {
+                        if (hasContent) {
+                          handleItemClick(code);
+                        } else {
+                          // Empty box - open submission form with country pre-filled
+                          const country = code.replace(/-\d+$/, '');
+                          setIsSubmissionFormOpen(true);
+                          // TODO: Pass country to form to pre-fill
+                        }
+                      }}
                       onDoubleClick={() => handleItemDoubleClick(code)}
                     >
                       {isHovered && (
@@ -1059,12 +1068,14 @@ function App() {
                         />
                       )}
                       <div
-                        className={`w-full h-full rounded-[14px] border-2 overflow-hidden relative ${
+                        className={`w-full h-full rounded-[14px] border-2 overflow-hidden relative transition-all duration-200 ${
                           hasContent
                             ? isSelected 
                               ? 'border-indigo-400 shadow-lg shadow-indigo-500/50'
                               : 'border-indigo-500/50 shadow-lg'
-                            : 'border-slate-700/30'
+                            : isHovered
+                              ? 'border-slate-600 bg-slate-800/50'
+                              : 'border-slate-700/30'
                         } ${
                           hasContent ? 'bg-gradient-to-br from-indigo-600 to-purple-600' : 'bg-slate-800/30'
                         }`}
@@ -1130,8 +1141,19 @@ function App() {
                           return null;
                         })()}
                         
-                        {/* Country names removed from world view for flexibility */}
-                        {/* Names still show on USA state view and city view below */}
+                        {/* Country name on hover - ALL boxes */}
+                        {zoomLevel === 'world' && isHovered && (
+                          <div className="absolute bottom-2 right-2">
+                            <span className="text-xs font-bold text-white drop-shadow-lg">
+                              {code.replace(/-\d+$/, '')}
+                            </span>
+                            {!hasContent && (
+                              <div className="text-[10px] text-white/60 mt-0.5">
+                                Submit here
+                              </div>
+                            )}
+                          </div>
+                        )}
                         
                         {isHovered && hasContent && (
                           <div className="absolute top-1 right-1">
