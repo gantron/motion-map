@@ -879,7 +879,7 @@ function App() {
       {/* Header */}
       <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Left: Logo + Title + Breadcrumb */}
+          {/* Left: Logo + Title + Zoom Level Toggle */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               {/* Logo */}
@@ -899,24 +899,60 @@ function App() {
               <h1 className="text-xl font-bold text-white">MotionMap</h1>
             </div>
             
-            {/* Breadcrumb for zoom levels */}
-            {(zoomLevel === 'country' || zoomLevel === 'state') && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-slate-600">/</span>
+            {/* Zoom Level Toggle */}
+            <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
+              <button
+                onClick={() => {
+                  if (zoomLevel !== 'world') {
+                    setZoomLevel('world');
+                    setSelectedRegion(null);
+                    setSelectedState(null);
+                    setSelectedArtist(null);
+                  }
+                }}
+                className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                  zoomLevel === 'world' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+                title="World View"
+              >
+                🌍 World
+              </button>
+              
+              {selectedRegion && (
                 <button
-                  onClick={handleZoomOut}
-                  className="text-slate-400 hover:text-white transition-colors"
+                  onClick={() => {
+                    if (zoomLevel !== 'country') {
+                      setZoomLevel('country');
+                      setSelectedState(null);
+                      setSelectedArtist(null);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                    zoomLevel === 'country' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Country View"
                 >
-                  {zoomLevel === 'state' ? selectedRegion : 'World'}
+                  🗺️ {selectedRegion}
                 </button>
-                {zoomLevel === 'state' && (
-                  <>
-                    <span className="text-slate-600">/</span>
-                    <span className="text-white">{selectedState}</span>
-                  </>
-                )}
-              </div>
-            )}
+              )}
+              
+              {selectedState && (
+                <button
+                  onClick={() => {
+                    if (zoomLevel !== 'state') {
+                      setZoomLevel('state');
+                      setSelectedArtist(null);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                    zoomLevel === 'state' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Local View"
+                >
+                  📍 {selectedState}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Right: Controls */}
