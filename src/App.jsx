@@ -27,6 +27,7 @@ function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSortMode, setMobileSortMode] = useState('random'); // 'random', 'name', 'country'
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [volume, setVolume] = useState(30); // 0-100
   const [prefilledCountry, setPrefilledCountry] = useState(null);
   
   useEffect(() => {
@@ -1238,7 +1239,7 @@ function App() {
                         
                         {/* Country name on hover - ALL boxes */}
                         {zoomLevel === 'world' && isHovered && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-black/40 px-1" style={{ borderRadius: '14px' }}>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-black/40 px-1">
                             <span 
                               className="font-bold text-white drop-shadow-lg whitespace-nowrap text-center overflow-hidden text-ellipsis w-full"
                               style={{ fontSize: `${Math.max(10, cellSize * 0.08)}px` }}
@@ -1305,6 +1306,28 @@ function App() {
                     </>
                   )}
                 </button>
+                
+                {/* Volume Slider */}
+                {audioEnabled && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={volume}
+                      onChange={(e) => {
+                        const newVolume = parseInt(e.target.value);
+                        setVolume(newVolume);
+                        audioManager.setVolume(newVolume / 100);
+                      }}
+                      className="w-20 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                      style={{
+                        background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${volume}%, #475569 ${volume}%, #475569 100%)`
+                      }}
+                    />
+                    <span className="text-xs text-slate-500 min-w-[32px]">{volume}%</span>
+                  </div>
+                )}
                 
                 <Link to="/about" className="text-slate-400 hover:text-white transition-colors">
                   About
