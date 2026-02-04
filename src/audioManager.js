@@ -8,11 +8,29 @@ class AudioManager {
     this.currentAmbient = null;
     this.hoverSequenceIndex = 0;
     this.hoverSounds = ['hover1', 'hover2', 'hover3', 'hover4', 'hover5', 'hover6', 'hover7', 'hover8'];
+    this.hoverPool = {}; // Pool of pre-loaded hover sound instances
     this.lastHoverTime = 0;
     this.hoverThrottle = 50; // Minimum ms between hover sounds - very responsive!
     
     // Preload all sounds
     this.preloadAll();
+    
+    // Create hover sound pool (2 instances per sound for smooth overlap)
+    this.createHoverPool();
+  }
+
+  createHoverPool() {
+    this.hoverSounds.forEach(soundName => {
+      this.hoverPool[soundName] = [
+        new Audio(`/sounds/${soundName}.mp3`),
+        new Audio(`/sounds/${soundName}.mp3`)
+      ];
+      // Set volume for all instances
+      this.hoverPool[soundName].forEach(audio => {
+        audio.volume = this.volume;
+        audio.preload = 'auto';
+      });
+    });
   }
 
   preloadAll() {
@@ -49,6 +67,12 @@ class AudioManager {
     if (!this.enabled) return;
 
     const audio = this.preload(soundName);
+    
+    // Stop any currently playing instance of this sound first
+    if (!audio.paused) {
+      audio.pause();
+    }
+    
     audio.loop = loop;
     audio.currentTime = 0;
     audio.volume = this.volume;
@@ -129,9 +153,19 @@ class AudioManager {
     setTimeout(() => {
       if (!this.enabled) return; // Check if still enabled after delay
       
-      // Play the next sound in the sequence
+      // Get the next sound name in the sequence
       const soundName = this.hoverSounds[this.hoverSequenceIndex];
-      this.play(soundName);
+      
+      // Get available instance from pool (use first available, or reuse)
+      const pool = this.hoverPool[soundName];
+      const audio = pool.find(a => a.paused) || pool[0];
+      
+      // Reset and play
+      audio.currentTime = 0;
+      audio.volume = this.volume;
+      audio.play().catch(err => {
+        console.warn(`Hover sound failed for ${soundName}:`, err);
+      });
       
       // Move to next sound in sequence (loop back to start)
       this.hoverSequenceIndex = (this.hoverSequenceIndex + 1) % this.hoverSounds.length;
@@ -171,8 +205,17 @@ class AudioManager {
 
   setVolume(newVolume) {
     this.volume = Math.max(0, Math.min(1, newVolume));
+    
+    // Update all preloaded sounds
     Object.values(this.sounds).forEach(audio => {
       audio.volume = this.volume;
+    });
+    
+    // Update all hover pool instances
+    Object.values(this.hoverPool).forEach(pool => {
+      pool.forEach(audio => {
+        audio.volume = this.volume;
+      });
     });
   }
 
