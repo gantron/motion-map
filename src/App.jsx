@@ -372,13 +372,21 @@ function App() {
     try {
       const params = new URLSearchParams(window.location.search);
       const artistParam = params.get('artist');
+      const openSubmitParam = params.get('openSubmit');
       
       if (artistParam && currentData[artistParam]) {
         setSelectedArtist({ ...currentData[artistParam], code: artistParam });
       }
+      
+      // Auto-open submission form if URL param present
+      if (openSubmitParam === 'true') {
+        setIsSubmissionFormOpen(true);
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
     } catch (e) {
       // Silently fail if anything goes wrong
-      console.error('Error loading artist from URL:', e);
+      console.error('Error loading from URL:', e);
     }
   }, [sheetData]);
   
