@@ -116,13 +116,26 @@ function ArtistPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-black via-slate-950 to-black">
+    <div className="w-full min-h-screen bg-gradient-to-br from-black via-slate-950 to-black overflow-y-auto">
       {/* Header Navigation */}
       <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 text-white hover:text-indigo-400 transition-colors">
-            <Home />
-            <span className="font-medium">Back to Map</span>
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            {/* Logo */}
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <rect x="6" y="6" width="24" height="24" rx="4" 
+                    stroke="url(#gradient)" strokeWidth="2" 
+                    className="animate-pulse"/>
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="50%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+              </defs>
+            </svg>
+            {/* Title */}
+            <span className="text-xl font-bold text-white">MotionMap</span>
           </Link>
           <div className="flex gap-4">
             <Link to="/about" className="text-slate-400 hover:text-white transition-colors">About</Link>
