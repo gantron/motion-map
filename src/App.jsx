@@ -879,7 +879,7 @@ function App() {
       {/* Header */}
       <div className="bg-slate-950/90 backdrop-blur-sm border-b border-slate-800 p-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Left: Logo + Title + Zoom Level Toggle */}
+          {/* Left: Logo + Title */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               {/* Logo */}
@@ -897,61 +897,6 @@ function App() {
               </svg>
               {/* Title */}
               <h1 className="text-xl font-bold text-white">MotionMap</h1>
-            </div>
-            
-            {/* Zoom Level Toggle */}
-            <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
-              <button
-                onClick={() => {
-                  if (zoomLevel !== 'world') {
-                    setZoomLevel('world');
-                    setSelectedRegion(null);
-                    setSelectedState(null);
-                    setSelectedArtist(null);
-                  }
-                }}
-                className={`px-3 py-1.5 rounded text-sm transition-colors ${
-                  zoomLevel === 'world' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                }`}
-                title="World View"
-              >
-                🌍 World
-              </button>
-              
-              {selectedRegion && (
-                <button
-                  onClick={() => {
-                    if (zoomLevel !== 'country') {
-                      setZoomLevel('country');
-                      setSelectedState(null);
-                      setSelectedArtist(null);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded text-sm transition-colors ${
-                    zoomLevel === 'country' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Country View"
-                >
-                  🗺️ {selectedRegion}
-                </button>
-              )}
-              
-              {selectedState && (
-                <button
-                  onClick={() => {
-                    if (zoomLevel !== 'state') {
-                      setZoomLevel('state');
-                      setSelectedArtist(null);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded text-sm transition-colors ${
-                    zoomLevel === 'state' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Local View"
-                >
-                  📍 {selectedState}
-                </button>
-              )}
             </div>
           </div>
 
@@ -1009,8 +954,74 @@ function App() {
       <div className="flex-1 flex overflow-hidden">
         {/* Map Area */}
         <div className="flex-1 flex flex-col relative">
-          {/* Floating Map/Grid Toggle - Flush Top Right Corner */}
+          {/* Floating Zoom + Map/Grid Toggle - Flush Top Right Corner */}
           <div className="absolute top-0 right-0 z-50 flex gap-1 bg-slate-700/90 backdrop-blur-sm rounded-bl-lg p-1 shadow-lg">
+            {/* Zoom Level Controls */}
+            <button
+              onClick={() => {
+                if (zoomLevel !== 'world') {
+                  setZoomLevel('world');
+                  setSelectedRegion(null);
+                  setSelectedState(null);
+                  setSelectedArtist(null);
+                }
+              }}
+              className={`p-2 rounded transition-colors ${
+                zoomLevel === 'world' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+              title="World View"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+            
+            {selectedRegion && (
+              <button
+                onClick={() => {
+                  if (zoomLevel !== 'country') {
+                    setZoomLevel('country');
+                    setSelectedState(null);
+                    setSelectedArtist(null);
+                  }
+                }}
+                className={`p-2 rounded transition-colors ${
+                  zoomLevel === 'country' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+                title={`${selectedRegion} View`}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+              </button>
+            )}
+            
+            {selectedState && (
+              <button
+                onClick={() => {
+                  if (zoomLevel !== 'state') {
+                    setZoomLevel('state');
+                    setSelectedArtist(null);
+                  }
+                }}
+                className={`p-2 rounded transition-colors ${
+                  zoomLevel === 'state' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+                title={`${selectedState} View`}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            )}
+            
+            {/* Divider */}
+            {(selectedRegion || selectedState) && (
+              <div className="w-px bg-slate-600 mx-1"></div>
+            )}
+            
+            {/* Map/Grid Toggle */}
             <button
               onClick={() => setViewMode('map')}
               className={`p-2 rounded transition-colors ${
