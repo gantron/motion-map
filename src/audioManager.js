@@ -3,7 +3,7 @@
 class AudioManager {
   constructor() {
     this.sounds = {};
-    this.volume = 0.7;
+    this.volume = 0.3; // Reduced from 0.7 - much quieter default
     this.enabled = true;
     this.currentAmbient = null;
     this.hoverSequenceIndex = 0;
@@ -51,9 +51,14 @@ class AudioManager {
     audio.currentTime = 0;
     audio.volume = this.volume;
     
-    audio.play().catch(err => {
-      console.warn(`Audio play failed for ${soundName}:`, err);
-    });
+    // Return promise for better error handling
+    const playPromise = audio.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.warn(`Audio play failed for ${soundName}:`, err);
+      });
+    }
 
     return audio;
   }
@@ -68,7 +73,17 @@ class AudioManager {
   // Specialized methods for MotionMap interactions
 
   playAmbient() {
-    if (this.currentAmbient) return; // Already playing
+    if (this.currentAmbient) {
+      // Already playing - just make sure it's actually playing
+      if (this.currentAmbient.paused) {
+        this.currentAmbient.play().catch(err => {
+          console.warn('Ambient resume failed:', err);
+        });
+      }
+      return;
+    }
+    
+    // Start fresh
     this.currentAmbient = this.play('ambient-loop', true);
   }
 
@@ -123,6 +138,9 @@ class AudioManager {
     this.enabled = !this.enabled;
     if (!this.enabled) {
       this.stopAmbient();
+    } else {
+      // When re-enabling, restart ambient
+      this.playAmbient();
     }
     return this.enabled;
   }
