@@ -397,11 +397,21 @@ function App() {
   useEffect(() => {
     if (!isLoading && sheetData) {
       audioManager.playAmbient();
+      
+      // Fallback: If autoplay blocked, start on first click anywhere
+      const startOnClick = () => {
+        audioManager.playAmbient();
+        document.removeEventListener('click', startOnClick);
+      };
+      
+      // Add listener that removes itself after first click
+      document.addEventListener('click', startOnClick);
+      
+      return () => {
+        audioManager.stopAmbient();
+        document.removeEventListener('click', startOnClick);
+      };
     }
-    
-    return () => {
-      audioManager.stopAmbient();
-    };
   }, [isLoading, sheetData]);
   
   // Ensure currentMonthIndex is valid
