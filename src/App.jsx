@@ -955,7 +955,7 @@ function App() {
         {/* Map Area */}
         <div className="flex-1 flex flex-col relative">
           {/* Floating Zoom Level Toggle - Flush Top LEFT Corner */}
-          <div className="absolute top-4 left-0 z-50 flex gap-1 bg-slate-700/90 backdrop-blur-sm rounded-br-lg p-1 shadow-lg">
+          <div className="absolute top-0 left-0 z-50 flex gap-1 bg-slate-700/90 backdrop-blur-sm rounded-br-lg p-1 shadow-lg">
             <button
               onClick={() => {
                 if (zoomLevel !== 'world') {
@@ -1040,7 +1040,7 @@ function App() {
           
           <div className="flex-1 flex items-start justify-start p-4 overflow-auto">
             <div 
-              className="relative mx-auto" 
+              className="relative mx-auto mt-16" 
               style={{ 
                 width: gridWidth, 
                 height: gridHeight,
