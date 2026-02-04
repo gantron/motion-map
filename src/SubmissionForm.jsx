@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { X } from './Icons';
 
-function SubmissionForm({ isOpen, onClose }) {
+function SubmissionForm({ isOpen, onClose, prefilledCountry }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    country: '',
+    country: prefilledCountry || '',
     state: '',
     city: '',
     bio: '',
@@ -21,27 +21,22 @@ function SubmissionForm({ isOpen, onClose }) {
   const [captchaToken, setCaptchaToken] = useState(null);
   const [rateLimitError, setRateLimitError] = useState(false);
 
+  // Update country when prefilledCountry changes
+  useEffect(() => {
+    if (prefilledCountry) {
+      setFormData(prev => ({ ...prev, country: prefilledCountry }));
+    }
+  }, [prefilledCountry]);
+
   // TODO: Replace this with your actual Google Apps Script Web App URL after deployment
-  const SUBMISSION_URL = 'https://script.google.com/macros/s/AKfycbzKevtc9aSAVW-7ArqgkXG7aGh_Cqn7FRMJM1zb-feNfxGZ34r4jdm03ZtlI1Als4icgw/exec';
+  const SUBMISSION_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
   
   // TODO: Replace with your Cloudflare Turnstile site key
-  const TURNSTILE_SITE_KEY = '0x4AAAAAACT9ClrKULRWVUBM';
-
-  // Set up global callback for Turnstile
-  useEffect(() => {
-    // Create global callback function
-    window.onTurnstileSuccess = (token) => {
-      setCaptchaToken(token);
-    };
-
-    return () => {
-      delete window.onTurnstileSuccess;
-    };
-  }, []);
+  const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY';
 
   // Load Cloudflare Turnstile
   useEffect(() => {
-    if (isOpen && !window.turnstile) {
+    if (typeof window !== 'undefined' && typeof document !== 'undefined' && isOpen && !window.turnstile) {
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
       script.async = true;
@@ -52,6 +47,8 @@ function SubmissionForm({ isOpen, onClose }) {
 
   // Check rate limit (client-side prevention)
   const checkRateLimit = () => {
+    if (typeof window === 'undefined' || !window.localStorage) return true;
+    
     const lastSubmission = localStorage.getItem('motionmap-last-submit');
     if (lastSubmission) {
       const timeSince = Date.now() - parseInt(lastSubmission);
@@ -122,7 +119,9 @@ function SubmissionForm({ isOpen, onClose }) {
       setSubmitStatus('success');
       
       // Store submission time
-      localStorage.setItem('motionmap-last-submit', Date.now().toString());
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('motionmap-last-submit', Date.now().toString());
+      }
       
       // Reset form after 2 seconds
       setTimeout(() => {
@@ -350,7 +349,7 @@ function SubmissionForm({ isOpen, onClose }) {
             <div 
               className="cf-turnstile" 
               data-sitekey={TURNSTILE_SITE_KEY}
-              data-callback="onTurnstileSuccess"
+              data-callback={(token) => setCaptchaToken(token)}
               data-theme="dark"
             ></div>
           </div>
@@ -386,7 +385,7 @@ function SubmissionForm({ isOpen, onClose }) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !captchaToken}
+              disabled={isSubmitting}
               className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Submitting...' : 'Submit'}
