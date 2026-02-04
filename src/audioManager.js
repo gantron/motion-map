@@ -7,7 +7,7 @@ class AudioManager {
     this.enabled = true;
     this.currentAmbient = null;
     this.hoverSequenceIndex = 0;
-    this.hoverSounds = ['hover1', 'hover2', 'hover3', 'hover4'];
+    this.hoverSounds = ['hover1', 'hover2', 'hover3', 'hover4', 'hover5', 'hover6', 'hover7', 'hover8'];
     this.lastHoverTime = 0;
     this.hoverThrottle = 50; // Minimum ms between hover sounds - very responsive!
     
