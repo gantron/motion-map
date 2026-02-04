@@ -7,6 +7,7 @@ import AboutPage from './AboutPage'
 import ContactPage from './ContactPage'
 import NotFound from './NotFound'
 import './index.css'
+import * as serviceWorkerRegistration from './serviceWorkerRegistration' // ADD THIS LINE
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -21,3 +22,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>,
 )
+
+// ADD THIS LINE
+serviceWorkerRegistration.register();
