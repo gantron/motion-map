@@ -7,10 +7,11 @@ class AudioManager {
     this.enabled = true;
     this.currentAmbient = null;
     this.hoverSequenceIndex = 0;
-    this.hoverSounds = ['hover1', 'hover2', 'hover3', 'hover4', 'hover5', 'hover6', 'hover7', 'hover8'];
+    this.hoverSounds = ['hover1', 'hover2', 'hover3', 'hover4', 'hover5', 'hover6', 'hover7']; // 7 sounds for musical progression
     this.hoverPool = {}; // Pool of pre-loaded hover sound instances
     this.lastHoverTime = 0;
     this.hoverThrottle = 50; // Minimum ms between hover sounds - very responsive!
+    this.audioStarted = false; // Track if audio context has been unlocked
     
     // Preload all sounds
     this.preloadAll();
@@ -142,6 +143,9 @@ class AudioManager {
   }
 
   playHover() {
+    // Mark that user has interacted (unlocks audio on some browsers)
+    this.audioStarted = true;
+    
     // Throttle hover sounds to prevent overlap
     const now = Date.now();
     if (now - this.lastHoverTime < this.hoverThrottle) {
@@ -166,6 +170,11 @@ class AudioManager {
       audio.play().catch(err => {
         console.warn(`Hover sound failed for ${soundName}:`, err);
       });
+      
+      // Also try to start ambient if it's paused (in case it was autoplay blocked)
+      if (this.currentAmbient && this.currentAmbient.paused) {
+        this.currentAmbient.play().catch(() => {});
+      }
       
       // Move to next sound in sequence (loop back to start)
       this.hoverSequenceIndex = (this.hoverSequenceIndex + 1) % this.hoverSounds.length;
