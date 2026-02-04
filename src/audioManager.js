@@ -8,6 +8,8 @@ class AudioManager {
     this.currentAmbient = null;
     this.hoverSequenceIndex = 0;
     this.hoverSounds = ['hover1', 'hover2', 'hover3', 'hover4'];
+    this.lastHoverTime = 0;
+    this.hoverThrottle = 150; // Minimum ms between hover sounds
     
     // Preload all sounds
     this.preloadAll();
@@ -73,18 +75,39 @@ class AudioManager {
   // Specialized methods for MotionMap interactions
 
   playAmbient() {
+    if (!this.enabled) return;
+    
     if (this.currentAmbient) {
       // Already playing - just make sure it's actually playing
       if (this.currentAmbient.paused) {
         this.currentAmbient.play().catch(err => {
-          console.warn('Ambient resume failed:', err);
+          console.warn('Ambient resume failed (may need user interaction):', err);
         });
       }
       return;
     }
     
     // Start fresh
-    this.currentAmbient = this.play('ambient-loop', true);
+    const audio = this.preload('ambient-loop');
+    audio.loop = true;
+    audio.volume = this.volume;
+    
+    const playPromise = audio.play();
+    
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          this.currentAmbient = audio;
+          console.log('Ambient music started');
+        })
+        .catch(err => {
+          console.warn('Ambient autoplay blocked - will start on first user interaction:', err);
+          // Store reference so it can be started on first interaction
+          this.currentAmbient = audio;
+        });
+    } else {
+      this.currentAmbient = audio;
+    }
   }
 
   stopAmbient() {
@@ -95,6 +118,13 @@ class AudioManager {
   }
 
   playHover() {
+    // Throttle hover sounds to prevent overlap
+    const now = Date.now();
+    if (now - this.lastHoverTime < this.hoverThrottle) {
+      return; // Too soon, skip this one
+    }
+    this.lastHoverTime = now;
+    
     // Play the next sound in the sequence
     const soundName = this.hoverSounds[this.hoverSequenceIndex];
     this.play(soundName);
@@ -105,6 +135,13 @@ class AudioManager {
 
   playClick() {
     this.play('click');
+    
+    // If ambient is loaded but paused (due to autoplay block), start it now
+    if (this.currentAmbient && this.currentAmbient.paused) {
+      this.currentAmbient.play().catch(err => {
+        console.warn('Could not start ambient on click:', err);
+      });
+    }
   }
 
   playDrilldown() {
