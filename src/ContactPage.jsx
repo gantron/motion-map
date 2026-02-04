@@ -45,9 +45,9 @@ function ContactPage() {
           <img 
             src={featuredArtist.posterUrl} 
             alt=""
-            className="w-full h-full object-cover opacity-10 blur-sm scale-110"
+            className="w-full h-full object-cover opacity-30 scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/90 to-black"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-black/90"></div>
         </div>
       )}
 
