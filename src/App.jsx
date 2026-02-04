@@ -398,18 +398,21 @@ function App() {
     if (!isLoading && sheetData) {
       audioManager.playAmbient();
       
-      // Fallback: If autoplay blocked, start on first click anywhere
-      const startOnClick = () => {
+      // Fallback: If autoplay blocked, start on ANY interaction (hover, click, etc)
+      const startOnInteraction = () => {
         audioManager.playAmbient();
-        document.removeEventListener('click', startOnClick);
+        document.removeEventListener('mousemove', startOnInteraction);
+        document.removeEventListener('click', startOnInteraction);
       };
       
-      // Add listener that removes itself after first click
-      document.addEventListener('click', startOnClick);
+      // Add listeners that remove themselves after first interaction
+      document.addEventListener('mousemove', startOnInteraction, { once: true });
+      document.addEventListener('click', startOnInteraction, { once: true });
       
       return () => {
         audioManager.stopAmbient();
-        document.removeEventListener('click', startOnClick);
+        document.removeEventListener('mousemove', startOnInteraction);
+        document.removeEventListener('click', startOnInteraction);
       };
     }
   }, [isLoading, sheetData]);
