@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X } from './Icons';
 
-function SubmissionForm({ isOpen, onClose, prefilledCountry }) {
+function SubmissionForm({ isOpen, onClose, prefilledCountry, claimedTileCode }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,7 +13,8 @@ function SubmissionForm({ isOpen, onClose, prefilledCountry }) {
     instagram: '',
     videoUrl: '',
     posterUrl: '',
-    preferredMonth: ''
+    preferredMonth: '',
+    claimedTile: claimedTileCode || '' // Track which tile they want
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,12 +22,15 @@ function SubmissionForm({ isOpen, onClose, prefilledCountry }) {
   const [captchaToken, setCaptchaToken] = useState(null);
   const [rateLimitError, setRateLimitError] = useState(false);
 
-  // Update country when prefilledCountry changes
+  // Update country and claimedTile when props change
   useEffect(() => {
     if (prefilledCountry) {
       setFormData(prev => ({ ...prev, country: prefilledCountry }));
     }
-  }, [prefilledCountry]);
+    if (claimedTileCode) {
+      setFormData(prev => ({ ...prev, claimedTile: claimedTileCode }));
+    }
+  }, [prefilledCountry, claimedTileCode]);
 
   // TODO: Replace this with your actual Google Apps Script Web App URL after deployment
   const SUBMISSION_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
