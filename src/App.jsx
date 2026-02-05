@@ -29,6 +29,7 @@ function App() {
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [volume, setVolume] = useState(30); // 0-100
   const [prefilledCountry, setPrefilledCountry] = useState(null);
+  const [claimedTileCode, setClaimedTileCode] = useState(null); // Track which tile they clicked
   
   useEffect(() => {
     const checkMobile = () => {
@@ -1149,9 +1150,10 @@ function App() {
                         if (hasContent) {
                           handleItemClick(code);
                         } else {
-                          // Empty box - open submission form with country pre-filled
+                          // Empty box - open submission form with country and tile code
                           const country = code.replace(/-\d+$/, '');
                           setPrefilledCountry(country);
+                          setClaimedTileCode(code); // Store the full tile code (e.g., "France-2")
                           setIsSubmissionFormOpen(true);
                         }
                       }}
@@ -1549,9 +1551,11 @@ function App() {
         isOpen={isSubmissionFormOpen} 
         onClose={() => {
           setIsSubmissionFormOpen(false);
-          setPrefilledCountry(null); // Clear prefilled country
+          setPrefilledCountry(null);
+          setClaimedTileCode(null); // Clear claimed tile
         }}
         prefilledCountry={prefilledCountry}
+        claimedTileCode={claimedTileCode}
       />
     </div>
   );
