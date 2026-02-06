@@ -13,6 +13,10 @@ class AudioManager {
     this.hoverThrottle = 50; // Minimum ms between hover sounds - very responsive!
     this.audioStarted = false; // Track if audio context has been unlocked
     
+    // Volume multipliers - EASY TO ADJUST!
+    this.AMBIENT_MULTIPLIER = 0.05;  // Background music VERY quiet (5% of slider)
+    this.UI_SOUND_MULTIPLIER = 0.4;  // UI sounds moderately quiet (40% of slider)
+    
     // Preload all sounds
     this.preloadAll();
     
@@ -28,7 +32,7 @@ class AudioManager {
       ];
       // Set volume for all instances
       this.hoverPool[soundName].forEach(audio => {
-        audio.volume = this.volume;
+        audio.volume = this.volume * this.UI_SOUND_MULTIPLIER;
         audio.preload = 'auto';
       });
     });
@@ -59,11 +63,11 @@ class AudioManager {
       const audio = new Audio(`/sounds/${soundName}.mp3`);
       audio.preload = 'auto';
       
-      // CRITICAL CHANGE: Ambient loop gets special quieter volume
+      // Apply appropriate volume multiplier
       if (soundName === 'ambient-loop') {
-        audio.volume = this.volume * 0.1; // 10% of slider value for ambient!
+        audio.volume = this.volume * this.AMBIENT_MULTIPLIER; // Very quiet background
       } else {
-        audio.volume = this.volume; // Normal volume for UI sounds
+        audio.volume = this.volume * this.UI_SOUND_MULTIPLIER; // Moderate UI sounds
       }
       
       this.sounds[soundName] = audio;
@@ -84,11 +88,11 @@ class AudioManager {
     audio.loop = loop;
     audio.currentTime = 0;
     
-    // CRITICAL CHANGE: Apply quieter volume to ambient
+    // Apply appropriate volume multiplier
     if (soundName === 'ambient-loop') {
-      audio.volume = this.volume * 0.1; // 10% multiplier for ambient
+      audio.volume = this.volume * this.AMBIENT_MULTIPLIER;
     } else {
-      audio.volume = this.volume;
+      audio.volume = this.volume * this.UI_SOUND_MULTIPLIER;
     }
     
     // Return promise for better error handling
@@ -128,7 +132,7 @@ class AudioManager {
     // Start fresh
     const audio = this.preload('ambient-loop');
     audio.loop = true;
-    audio.volume = this.volume * 0.1; // CRITICAL CHANGE: 10% multiplier for ambient!
+    audio.volume = this.volume * this.AMBIENT_MULTIPLIER; // Very quiet background
     
     const playPromise = audio.play();
     
@@ -179,7 +183,7 @@ class AudioManager {
       
       // Reset and play
       audio.currentTime = 0;
-      audio.volume = this.volume; // Normal volume for hover sounds
+      audio.volume = this.volume * this.UI_SOUND_MULTIPLIER; // Moderate volume for hover
       audio.play().catch(err => {
         console.warn(`Hover sound failed for ${soundName}:`, err);
       });
@@ -228,22 +232,21 @@ class AudioManager {
   setVolume(newVolume) {
     this.volume = Math.max(0, Math.min(1, newVolume));
     
-    // Update all preloaded sounds
+    // Update all preloaded sounds with appropriate multipliers
     Object.keys(this.sounds).forEach(key => {
       const audio = this.sounds[key];
       
-      // CRITICAL CHANGE: Ambient gets special treatment
       if (key === 'ambient-loop') {
-        audio.volume = this.volume * 0.1; // Keep it at 10% of slider
+        audio.volume = this.volume * this.AMBIENT_MULTIPLIER; // Very quiet
       } else {
-        audio.volume = this.volume; // Normal volume for UI sounds
+        audio.volume = this.volume * this.UI_SOUND_MULTIPLIER; // Moderate
       }
     });
     
-    // Update all hover pool instances (normal volume)
+    // Update all hover pool instances
     Object.values(this.hoverPool).forEach(pool => {
       pool.forEach(audio => {
-        audio.volume = this.volume;
+        audio.volume = this.volume * this.UI_SOUND_MULTIPLIER;
       });
     });
   }
