@@ -14,7 +14,7 @@ class AudioManager {
     this.audioStarted = false; // Track if audio context has been unlocked
     
     // Volume multipliers - EASY TO ADJUST!
-    this.AMBIENT_MULTIPLIER = 0.05;  // Background music VERY quiet (5% of slider)
+    this.AMBIENT_MULTIPLIER = 0.02;  // Background music VERY quiet (5% of slider)
     this.UI_SOUND_MULTIPLIER = 0.4;  // UI sounds moderately quiet (40% of slider)
     
     // Preload all sounds
