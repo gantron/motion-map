@@ -7,6 +7,7 @@ import {
 import { loadData, getAvailableMonths } from './dataLoader';
 import SubmissionForm from './SubmissionForm';
 import audioManager from './audioManager';
+import { worldGridBase, usStatesMapGrid, indiaStateGrid } from './grids';
 
 function App() {
   const [hoveredState, setHoveredState] = useState(null);
@@ -126,84 +127,7 @@ function App() {
     });
   }, []);
 
-  // ========================================
-  // WORLD GRID - SIMPLE V1
-  // Philosophy: Fewer countries = larger tiles = better artist visibility
-  // Grid shows 44 countries, ~8 rows × 12 columns
-  // ========================================
-  const worldGridBase = {
-    // NORTH AMERICA (3 countries, 9 tiles)
-    'Canada-1':[0,1], 'Canada-2':[0,2],
-    'USA-1':[1,0], 'USA-2':[1,1], 'USA-3':[1,2],
-    'USA-4':[2,1], 'USA-5':[2,2],
-    'Mexico-1':[2,0],  // NEW: up one, left one
-    'Mexico-2':[3,1],  // Original Mexico position
-    
-    // CENTRAL/SOUTH AMERICA (6 countries, 7 tiles) - STAGGERED
-    'Costa Rica-1':[4,2],  // Moved right from [4,1]
-    'Venezuela-1':[5,2],   // NEW: Above middle Brazil tile
-    'Colombia-1':[5,3],    // Moved down-right from [5,1]
-    'Brazil-1':[6,2], 'Brazil-2':[6,3],
-    'Peru-1':[6,1],
-    'Argentina-1':[7,2],
-    
-    // EUROPE (7 countries, 7 tiles)
-    'UK-1':[1,5],
-    'France-1':[2,5],
-    'Portugal-1':[3,4],    // NEW: Left of Spain
-    'Spain-1':[3,5],
-    'Germany-1':[2,6],
-    'Italy-1':[3,6],
-    'Poland-1':[2,7],
-    
-    // RUSSIA (1 country, 4 tiles - spans Europe to Asia)
-    'Russia-1':[0,8], 'Russia-2':[0,9], 'Russia-3':[0,10],
-    'Russia-4':[1,9],      // NEW: Beneath middle Russia tile
-    
-    // AFRICA (6 countries, 6 tiles)
-    'Morocco-1':[4,5],
-    'Nigeria-1':[5,5],
-    'Ghana-1':[5,6],
-    'Kenya-1':[6,6],
-    'South Africa-1':[7,6],
-    'Egypt-1':[4,6],
-    
-    // MIDDLE EAST (3 countries, 3 tiles)
-    'Turkey-1':[3,7],
-    'Israel-1':[4,7],
-    'Saudi Arabia-1':[5,7],
-    
-    // ASIA (7 countries, 10 tiles)
-    'Nepal-1':[3,8],
-    'China-1':[2,8], 'China-2':[2,9],
-    'China-3':[1,10],      // NEW: Beneath 3rd Russia tile
-    'India-1':[4,8], 'India-2':[5,8],
-    'Japan-1':[2,11],
-    'Korea-1':[2,10],
-    
-    // SOUTHEAST ASIA (3 countries, 3 tiles) - MOVED UP
-    'Thailand-1':[3,9],
-    'Vietnam-1':[3,10],
-    'Indonesia-1':[4,10],
-    
-    // OCEANIA (2 countries, 3 tiles) - NOW AN ISLAND
-    'Australia-1':[6,10], 'Australia-2':[6,11],
-    'New Zealand-1':[7,11]
-  };
-
   const generateWorldGrid = () => worldGridBase;
-
-  // US States map grid (geographically accurate)
-  const usStatesMapGrid = {
-    'WA': [0, 0], 'ME': [0, 11],
-    'OR': [1, 0], 'ID': [1, 1], 'MT': [1, 2], 'ND': [1, 3], 'MN': [1, 4], 'WI': [1, 5], 'MI': [1, 6], 'VT': [1, 9], 'NH': [1, 10],
-    'CA': [2, 0], 'NV': [2, 1], 'WY': [2, 2], 'SD': [2, 3], 'IA': [2, 4], 'IL': [2, 5], 'IN': [2, 6], 'OH': [2, 7], 'PA': [2, 8], 'NY': [2, 9], 'MA': [2, 10], 'CT': [2, 11], 'RI': [2, 12],
-    'UT': [3, 1], 'CO': [3, 2], 'NE': [3, 3], 'MO': [3, 4], 'KY': [3, 5], 'WV': [3, 6], 'VA': [3, 7], 'MD': [3, 8], 'DE': [3, 9], 'NJ': [3, 10],
-    'AZ': [4, 3], 'NM': [4, 4], 'KS': [4, 5], 'AR': [4, 6], 'TN': [4, 7], 'NC': [4, 8],
-    'OK': [5, 3], 'LA': [5, 4], 'MS': [5, 5], 'AL': [5, 6], 'GA': [5, 7], 'SC': [5, 8],
-    'TX': [6, 4], 'FL': [6, 9],
-    'AK': [8, 0], 'HI': [8, 1]
-  };
 
   // City coordinates database (lat, long) - expand this as needed
   const cityCoordinates = {
@@ -463,6 +387,8 @@ function App() {
       return viewMode === 'grid' ? generateGridLayout(Object.keys(generateWorldGrid())) : generateWorldGrid();
     } else if (zoomLevel === 'country' && selectedRegion === 'USA') {
       return viewMode === 'grid' ? generateGridLayout(Object.keys(usStatesMapGrid)) : usStatesMapGrid;
+    } else if (zoomLevel === 'country' && selectedRegion === 'India') {
+      return viewMode === 'grid' ? generateGridLayout(Object.keys(indiaStateGrid)) : indiaStateGrid;
     } else if (zoomLevel === 'state') {
       // Get cities from current state data
       const cities = Object.keys(rawData);
@@ -539,7 +465,7 @@ function App() {
     audioManager.playDrilldown();
     
     if (zoomLevel === 'world') {
-      // Drilling from World to Country (USA)
+      // Drilling from World to Country (USA, India, etc.)
       const countryMatch = code.match(/^(.+?)-\d+$/);
       const country = countryMatch ? countryMatch[1] : code;
       
